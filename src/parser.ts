@@ -15,6 +15,7 @@ let tokenStream = new CommonTokenStream(lexer);
 let parser = new CWScriptParser(tokenStream);
 let tree = parser.sourceFile();
 let visitor = new CWScriptASTVisitor();
-let ast = visitor.visit(tree);
+let ast = visitor.visitSourceFile(tree);
 
 console.log(inspect(ast, { showHidden: false, depth: null, colors: true }));
+console.log(ast.__children);

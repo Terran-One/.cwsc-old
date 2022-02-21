@@ -76,41 +76,106 @@ import {
 } from './grammar/CWScriptParser';
 import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
+import { Parser, ParserRuleContext } from 'antlr4ts';
 
-export class AST {}
+export class Node {
+  public position: Position;
 
-export class CWSpec extends AST {
-  constructor(public text: string) {
-    super();
+  constructor(
+    public ctx: ParserRuleContext,
+    public parent: Node | null = null,
+    position?: Position
+  ) {}
+}
+
+// function NodeX<T extends typeof AST>(constructor: T): T {
+//   return class X extends AST {
+//     constructor(...args: any[]) {
+//       super(...args);
+//       Object.getOwnPropertyNames(this).forEach(name => {
+//         if (name.startsWith('__')) {
+//           return;
+//         }
+
+//         const child = (this as any)[name];
+//         if (child instanceof AST) {
+//           (child as any).__parent = this;
+//           (this as any).__children.push(child);
+//         }
+//       });
+
+//       if (this instanceof List) {
+//         (this as List<AST>).elements.forEach(element => {
+//           if (element instanceof AST) {
+//             (element as any).__parent = this;
+//           }
+//         });
+//         (this as any).__children = (this as any).elements;
+//       }
+//     }
+//   };
+// }
+
+export abstract class AST {
+  public position: Position;
+
+  constructor(
+    public __ctx: ParserRuleContext,
+    position?: Position,
+    public parent?: AST | null
+  ) {
+    if (position === undefined) {
+      this.position = {
+        start: {
+          line: __ctx.start.line,
+          column: __ctx.start.col,
+        },
+      };
+    }
   }
 }
 
+@Node()
+export class CWSpec extends AST {
+  constructor(public text: string) {
+    super(__ctx);
+  }
+}
+
+@Node()
 export class Ident extends AST {
   constructor(public text: string) {
     super();
   }
 }
 
+@Node()
 export class List<T extends AST> extends AST {
   constructor(public elements: T[]) {
     super();
   }
 }
 
+@Node()
 export class SourceFile extends AST {
-  constructor(public spec?: any, public stmts?: List<TopLevelStmt>) {
+  constructor(
+    public spec: CWSpec | undefined,
+    public stmts: List<TopLevelStmt>
+  ) {
     super();
   }
 }
 
 type TopLevelStmt = InterfaceDefn | ContractDefn | ImportStmt;
 
+@Node()
 export class InterfaceVal extends AST {
   constructor(public name: Ident, public mixins?: List<Ident>) {
     super();
   }
 }
 
+@Node()
 export class ImportStmt extends AST {
   constructor(
     public fileName: string,
@@ -121,22 +186,31 @@ export class ImportStmt extends AST {
   }
 }
 
+@Node()
 export class GroupedImportSymbol extends List<ImportSymbol> {}
+
+@Node()
 export class TypePathImportSymbol extends AST {
   constructor(public path: TypePath) {
     super();
   }
 }
+
+@Node()
 export class DestructureImportSymbol extends AST {
   constructor(public path: TypePath, public symbols: List<ImportSymbol>) {
     super();
   }
 }
+
+@Node()
 export class AllImportSymbol extends AST {
   constructor(public path: TypePath) {
     super();
   }
 }
+
+@Node()
 export class RenamedImportSymbol extends AST {
   constructor(public symbol: ImportSymbol, public name: Ident) {
     super();
@@ -153,6 +227,7 @@ type ImportSymbol =
   | AllImportSymbol
   | RenamedImportSymbol;
 
+@Node()
 export class InterfaceDefn extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -165,6 +240,7 @@ export class InterfaceDefn extends AST {
   }
 }
 
+@Node()
 export class ContractDefn extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -179,6 +255,7 @@ export class ContractDefn extends AST {
 
 export type ContractItem = ErrorDefn;
 
+@Node()
 export class ErrorDefn extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -188,6 +265,7 @@ export class ErrorDefn extends AST {
   }
 }
 
+@Node()
 export class EventDefn extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -199,6 +277,7 @@ export class EventDefn extends AST {
 
 export type StateDefn = ItemDefn | MapDefn;
 
+@Node()
 export class ItemDefn extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -209,6 +288,7 @@ export class ItemDefn extends AST {
   }
 }
 
+@Node()
 export class MapDefn extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -220,12 +300,14 @@ export class MapDefn extends AST {
   }
 }
 
+@Node()
 export class MapDefnKey extends AST {
   constructor(public name: Ident, public type: TypeExpr) {
     super();
   }
 }
 
+@Node()
 export class FnDefn extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -238,10 +320,16 @@ export class FnDefn extends AST {
   }
 }
 
+@Node()
 export class InstantiateDefn extends FnDefn {}
+
+@Node()
 export class ExecDefn extends FnDefn {}
+
+@Node()
 export class QueryDefn extends FnDefn {}
 
+@Node()
 export class FnArg extends AST {
   constructor(
     public name: Ident,
@@ -255,6 +343,7 @@ export class FnArg extends AST {
 //TODO: change
 type Stmt = any;
 
+@Node()
 export class LetStmt extends AST {
   constructor(public lhs: LetLHS, public rhs: Expr) {
     super();
@@ -263,30 +352,35 @@ export class LetStmt extends AST {
 
 export type LetLHS = IdentLHS | StructUnpackLHS | TupleUnpackLHS;
 
+@Node()
 export class IdentLHS extends AST {
   constructor(public name: Ident, public type?: TypeExpr) {
     super();
   }
 }
 
+@Node()
 export class StructUnpackLHS extends AST {
   constructor(public names: List<Ident>) {
     super();
   }
 }
 
+@Node()
 export class TupleUnpackLHS extends AST {
   constructor(public front?: List<Ident>, public back?: List<Ident>) {
     super();
   }
 }
 
+@Node()
 export class AssignStmt extends AST {
   constructor(public lhs: Expr, public assignOp: string, public rhs: Expr) {
     super();
   }
 }
 
+@Node()
 export class IfExpr extends AST {
   constructor(
     public ifClause: IfClauseVariant,
@@ -299,18 +393,21 @@ export class IfExpr extends AST {
 
 type IfClauseVariant = IfClause | IfLetClause;
 
+@Node()
 export class IfClause extends AST {
   constructor(public predicate: Expr, public body: List<Stmt>) {
     super();
   }
 }
 
+@Node()
 export class IfLetClause extends AST {
   constructor(public letStmt: LetStmt, public body: List<Stmt>) {
     super();
   }
 }
 
+@Node()
 export class ForInStmt extends AST {
   constructor(
     public lhs: LetLHS,
@@ -321,30 +418,35 @@ export class ForInStmt extends AST {
   }
 }
 
+@Node()
 export class ForTimesStmt extends AST {
   constructor(public expr: Expr, public body: List<Stmt>) {
     super();
   }
 }
 
+@Node()
 export class ExecStmt extends AST {
   constructor(public expr: Expr) {
     super();
   }
 }
 
+@Node()
 export class EmitStmt extends AST {
   constructor(public expr: Expr) {
     super();
   }
 }
 
+@Node()
 export class ReturnStmt extends AST {
   constructor(public expr: Expr) {
     super();
   }
 }
 
+@Node()
 export class FailStmt extends AST {
   constructor(public expr: Expr) {
     super();
@@ -354,126 +456,147 @@ export class FailStmt extends AST {
 // TODO: change
 export type Expr = any;
 
+@Node()
 export class MemberAccessExpr extends AST {
   constructor(public lhs: Expr, public member: Ident) {
     super();
   }
 }
 
+@Node()
 export class TableLookupExpr extends AST {
   constructor(public lhs: Expr, public key: Expr) {
     super();
   }
 }
 
+@Node()
 export class PosArgsFnCallExpr extends AST {
   constructor(public fn: Expr, public args: List<Expr>) {
     super();
   }
 }
 
+@Node()
 export class NamedArgsFnCallExpr extends AST {
   constructor(public fn: Expr, public args: List<NamedExpr>) {
     super();
   }
 }
 
+@Node()
 export class UnaryExpr extends AST {
   constructor(public op: string, public expr: Expr) {
     super();
   }
 }
 
+@Node()
 export class ExpExpr extends AST {
   constructor(public lhs: Expr, public rhs: Expr) {
     super();
   }
 }
 
+@Node()
 export class ArithmeticOpExpr extends AST {
   constructor(public lhs: Expr, public op: string, public rhs: Expr) {
     super();
   }
 }
 
+@Node()
 export class CompOpExpr extends AST {
   constructor(public lhs: Expr, public op: string, public rhs: Expr) {
     super();
   }
 }
 
+@Node()
 export class AndExpr extends AST {
   constructor(public lhs: Expr, public rhs: Expr) {
     super();
   }
 }
 
+@Node()
 export class OrExpr extends AST {
   constructor(public lhs: Expr, public rhs: Expr) {
     super();
   }
 }
 
+@Node()
 export class QueryExpr extends AST {
   constructor(public expr: Expr) {
     super();
   }
 }
 
+@Node()
 export class UnitVal extends AST {
   constructor() {
     super();
   }
 }
 
+@Node()
 export class StructVal extends AST {
   constructor(public type: TypePath, public members: List<StructValMember>) {
     super();
   }
 }
 
+@Node()
 export class StructValMember extends AST {
   constructor(public name: Ident, public value: Expr) {
     super();
   }
 }
 
+@Node()
 export class NamedExpr extends AST {
   constructor(public name: Ident, public value: Expr) {
     super();
   }
 }
 
+@Node()
 export class TupleVal extends AST {
   constructor(public type: TypePath, public members: List<Expr>) {
     super();
   }
 }
 
+@Node()
 export class VecVal extends AST {
   constructor(public elements: List<Expr>) {
     super();
   }
 }
 
+@Node()
 export class StringVal extends AST {
   constructor(public value: string) {
     super();
   }
 }
 
+@Node()
 export class IntegerVal extends AST {
   constructor(public value: string) {
     super();
   }
 }
 
+@Node()
 export class DecimalVal extends AST {
   constructor(public value: string) {
     super();
   }
 }
 
+@Node()
 export class BoolVal extends AST {
   constructor(public value: boolean) {
     super();
@@ -482,24 +605,28 @@ export class BoolVal extends AST {
 
 type EnumVariant = EnumVariantStruct | EnumVariantTuple | EnumVariantUnit;
 
+@Node()
 export class EnumVariantStruct extends AST {
   constructor(public name: Ident, public members: List<StructMember>) {
     super();
   }
 }
 
+@Node()
 export class EnumVariantTuple extends AST {
   constructor(public name: Ident, public members: List<TypeExpr>) {
     super();
   }
 }
 
+@Node()
 export class EnumVariantUnit extends AST {
   constructor(public name: Ident) {
     super();
   }
 }
 
+@Node()
 export class StructMember extends AST {
   constructor(
     public spec: CWSpec | undefined,
@@ -521,11 +648,10 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   }
 
   visitSourceFile(ctx: SourceFileContext): SourceFile {
+    let stmts = ctx.topLevelStmt() || [];
     return new SourceFile(
-      ctx._spec,
-      ctx.children?.map(child => this.visit(child)) as
-        | List<TopLevelStmt>
-        | undefined
+      ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
+      new List(stmts.map(stmt => this.visit(stmt)) as Stmt[])
     );
   }
 
