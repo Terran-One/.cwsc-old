@@ -77,143 +77,174 @@ import {
 import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { Parser, ParserRuleContext } from 'antlr4ts';
+import * as _ from 'lodash';
+const omitDeep = require('omit-deep-lodash');
 
-export class Node {
-  public position: Position;
 
-  constructor(
-    public ctx: ParserRuleContext,
-    public parent: Node | null = null,
-    position?: Position
-  ) {}
+export interface Position {
+  a?: number;
+  b?: number;
+  length?: number;
+  start: {
+    line?: number;
+    column?: number;
+  };
+  stop: {
+    line?: number;
+    column?: number;
+  };
 }
-
-// function NodeX<T extends typeof AST>(constructor: T): T {
-//   return class X extends AST {
-//     constructor(...args: any[]) {
-//       super(...args);
-//       Object.getOwnPropertyNames(this).forEach(name => {
-//         if (name.startsWith('__')) {
-//           return;
-//         }
-
-//         const child = (this as any)[name];
-//         if (child instanceof AST) {
-//           (child as any).__parent = this;
-//           (this as any).__children.push(child);
-//         }
-//       });
-
-//       if (this instanceof List) {
-//         (this as List<AST>).elements.forEach(element => {
-//           if (element instanceof AST) {
-//             (element as any).__parent = this;
-//           }
-//         });
-//         (this as any).__children = (this as any).elements;
-//       }
-//     }
-//   };
-// }
-
 export abstract class AST {
-  public position: Position;
+  private __position?: Position;
 
   constructor(
-    public __ctx: ParserRuleContext,
-    position?: Position,
-    public parent?: AST | null
+    __ctx?: ParserRuleContext,
+    private __parent?: AST,
+    __position?: Position
   ) {
-    if (position === undefined) {
-      this.position = {
+    if (__position === undefined) {
+      let a = __ctx?.start?.startIndex;
+      let b = __ctx?.stop?.stopIndex;
+      let length = !!a && !!b ? b - a + 1 : undefined;
+      __position = {
+        a,
+        b,
+        length,
         start: {
-          line: __ctx.start.line,
-          column: __ctx.start.col,
+          line: __ctx?.start?.line,
+          column: __ctx?.start?.charPositionInLine,
+        },
+        stop: {
+          line: __ctx?.stop?.line,
+          column: __ctx?.stop?.charPositionInLine,
         },
       };
     }
+    this.__position = __position || undefined;
+  }
+
+  public get position(): Position | undefined {
+    return this.__position;
+  }
+
+  public get parent(): AST | undefined {
+    return this.__parent;
+  }
+
+  public set parent(p: AST | undefined) {
+    this.__parent = p;
+  }
+
+  public get children(): AST[] {
+    let { __position, __parent, ...rest } = this;
+    return Object.values(rest).filter(x => x instanceof AST);
+  }
+
+  public setParentForChildren() {
+    let { __position, __parent, ...rest } = this;
+    Object.values(this.children).forEach(child => (child.__parent = this));
   }
 }
 
-@Node()
 export class CWSpec extends AST {
-  constructor(public text: string) {
-    super(__ctx);
+  constructor(ctx: any, public text: string) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
 export class Ident extends AST {
-  constructor(public text: string) {
-    super();
+  constructor(ctx: any, public text: string) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
 export class List<T extends AST> extends AST {
-  constructor(public elements: T[]) {
-    super();
+  constructor(ctx: any, public elements: T[]) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public override setParentForChildren(): void {
+    this.elements.forEach(x => x.parent = this);
+  }
+
+  public override get children(): T[] {
+    return this.elements;
   }
 }
 
-@Node()
 export class SourceFile extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public stmts: List<TopLevelStmt>
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 type TopLevelStmt = InterfaceDefn | ContractDefn | ImportStmt;
 
-@Node()
+//@Node()
 export class InterfaceVal extends AST {
-  constructor(public name: Ident, public mixins?: List<Ident>) {
-    super();
+  constructor(ctx: any, public name: Ident, public mixins?: List<Ident>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ImportStmt extends AST {
   constructor(
+    ctx: any,
     public fileName: string,
     public symbols?: List<ImportSymbol>,
     public star?: boolean
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class GroupedImportSymbol extends List<ImportSymbol> {}
 
-@Node()
+//@Node()
 export class TypePathImportSymbol extends AST {
-  constructor(public path: TypePath) {
-    super();
+  constructor(ctx: any, public path: TypePath) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class DestructureImportSymbol extends AST {
-  constructor(public path: TypePath, public symbols: List<ImportSymbol>) {
-    super();
+  constructor(
+    ctx: any,
+    public path: TypePath,
+    public symbols: List<ImportSymbol>
+  ) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class AllImportSymbol extends AST {
-  constructor(public path: TypePath) {
-    super();
+  constructor(ctx: any, public path: TypePath) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class RenamedImportSymbol extends AST {
-  constructor(public symbol: ImportSymbol, public name: Ident) {
-    super();
+  constructor(ctx: any, public symbol: ImportSymbol, public name: Ident) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
@@ -227,459 +258,545 @@ type ImportSymbol =
   | AllImportSymbol
   | RenamedImportSymbol;
 
-@Node()
+//@Node()
 export class InterfaceDefn extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public body: any,
     public parents?: List<InterfaceVal>,
     public mixinName?: Ident
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ContractDefn extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public body: List<ContractItem>,
     public parents?: List<Ident>,
     public interfaces?: List<InterfaceVal>
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 export type ContractItem = ErrorDefn;
 
-@Node()
+//@Node()
 export class ErrorDefn extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public enumVariant: EnumVariant
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class EventDefn extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public enumVariant: EnumVariant
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 export type StateDefn = ItemDefn | MapDefn;
 
-@Node()
+//@Node()
 export class ItemDefn extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public key: Ident,
     public type: TypeExpr
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class MapDefn extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public key: Ident,
     public mapKeys: List<MapDefnKey>,
     public type: List<TypeExpr>
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class MapDefnKey extends AST {
-  constructor(public name: Ident, public type: TypeExpr) {
-    super();
+  constructor(ctx: any, public name: Ident, public type: TypeExpr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class FnDefn extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident | undefined,
     public args: List<FnArg>,
     public returnType: TypeExpr | undefined,
     public body: List<Stmt>
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class InstantiateDefn extends FnDefn {}
 
-@Node()
+//@Node()
 export class ExecDefn extends FnDefn {}
 
-@Node()
+//@Node()
 export class QueryDefn extends FnDefn {}
 
-@Node()
+//@Node()
 export class FnArg extends AST {
   constructor(
+    ctx: any,
     public name: Ident,
     public option: boolean,
     public type: TypeExpr
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 //TODO: change
 type Stmt = any;
 
-@Node()
+//@Node()
 export class LetStmt extends AST {
-  constructor(public lhs: LetLHS, public rhs: Expr) {
-    super();
+  constructor(ctx: any, public lhs: LetLHS, public rhs: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 export type LetLHS = IdentLHS | StructUnpackLHS | TupleUnpackLHS;
 
-@Node()
+//@Node()
 export class IdentLHS extends AST {
-  constructor(public name: Ident, public type?: TypeExpr) {
-    super();
+  constructor(ctx: any, public name: Ident, public type?: TypeExpr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class StructUnpackLHS extends AST {
-  constructor(public names: List<Ident>) {
-    super();
+  constructor(ctx: any, public names: List<Ident>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class TupleUnpackLHS extends AST {
-  constructor(public front?: List<Ident>, public back?: List<Ident>) {
-    super();
+  constructor(ctx: any, public front?: List<Ident>, public back?: List<Ident>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class AssignStmt extends AST {
-  constructor(public lhs: Expr, public assignOp: string, public rhs: Expr) {
-    super();
+  constructor(
+    ctx: any,
+    public lhs: Expr,
+    public assignOp: string,
+    public rhs: Expr
+  ) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class IfExpr extends AST {
   constructor(
+    ctx: any,
     public ifClause: IfClauseVariant,
     public elseIfClauses: List<IfClauseVariant>,
     public elseClause: List<Stmt>
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 type IfClauseVariant = IfClause | IfLetClause;
 
-@Node()
+//@Node()
 export class IfClause extends AST {
-  constructor(public predicate: Expr, public body: List<Stmt>) {
-    super();
+  constructor(ctx: any, public predicate: Expr, public body: List<Stmt>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class IfLetClause extends AST {
-  constructor(public letStmt: LetStmt, public body: List<Stmt>) {
-    super();
+  constructor(ctx: any, public letStmt: LetStmt, public body: List<Stmt>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ForInStmt extends AST {
   constructor(
+    ctx: any,
     public lhs: LetLHS,
     public iterable: Expr,
     public body: List<Stmt>
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ForTimesStmt extends AST {
-  constructor(public expr: Expr, public body: List<Stmt>) {
-    super();
+  constructor(ctx: any, public expr: Expr, public body: List<Stmt>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ExecStmt extends AST {
-  constructor(public expr: Expr) {
-    super();
+  constructor(ctx: any, public expr: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class EmitStmt extends AST {
-  constructor(public expr: Expr) {
-    super();
+  constructor(ctx: any, public expr: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ReturnStmt extends AST {
-  constructor(public expr: Expr) {
-    super();
+  constructor(ctx: any, public expr: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class FailStmt extends AST {
-  constructor(public expr: Expr) {
-    super();
+  constructor(ctx: any, public expr: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 // TODO: change
 export type Expr = any;
 
-@Node()
+//@Node()
 export class MemberAccessExpr extends AST {
-  constructor(public lhs: Expr, public member: Ident) {
-    super();
+  constructor(ctx: any, public lhs: Expr, public member: Ident) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class TableLookupExpr extends AST {
-  constructor(public lhs: Expr, public key: Expr) {
-    super();
+  constructor(ctx: any, public lhs: Expr, public key: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class PosArgsFnCallExpr extends AST {
-  constructor(public fn: Expr, public args: List<Expr>) {
-    super();
+  constructor(ctx: any, public fn: Expr, public args: List<Expr>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class NamedArgsFnCallExpr extends AST {
-  constructor(public fn: Expr, public args: List<NamedExpr>) {
-    super();
+  constructor(ctx: any, public fn: Expr, public args: List<NamedExpr>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class UnaryExpr extends AST {
-  constructor(public op: string, public expr: Expr) {
-    super();
+  constructor(ctx: any, public op: string, public expr: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ExpExpr extends AST {
-  constructor(public lhs: Expr, public rhs: Expr) {
-    super();
+  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class ArithmeticOpExpr extends AST {
-  constructor(public lhs: Expr, public op: string, public rhs: Expr) {
-    super();
+  constructor(ctx: any, public lhs: Expr, public op: string, public rhs: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class CompOpExpr extends AST {
-  constructor(public lhs: Expr, public op: string, public rhs: Expr) {
-    super();
+  constructor(ctx: any, public lhs: Expr, public op: string, public rhs: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class AndExpr extends AST {
-  constructor(public lhs: Expr, public rhs: Expr) {
-    super();
+  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class OrExpr extends AST {
-  constructor(public lhs: Expr, public rhs: Expr) {
-    super();
+  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class QueryExpr extends AST {
-  constructor(public expr: Expr) {
-    super();
+  constructor(ctx: any, public expr: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class UnitVal extends AST {
-  constructor() {
-    super();
+  constructor(ctx: any) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class StructVal extends AST {
-  constructor(public type: TypePath, public members: List<StructValMember>) {
-    super();
+  constructor(
+    ctx: any,
+    public type: TypePath,
+    public members: List<StructValMember>
+  ) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class StructValMember extends AST {
-  constructor(public name: Ident, public value: Expr) {
-    super();
+  constructor(ctx: any, public name: Ident, public value: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class NamedExpr extends AST {
-  constructor(public name: Ident, public value: Expr) {
-    super();
+  constructor(ctx: any, public name: Ident, public value: Expr) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class TupleVal extends AST {
-  constructor(public type: TypePath, public members: List<Expr>) {
-    super();
+  constructor(ctx: any, public type: TypePath, public members: List<Expr>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class VecVal extends AST {
-  constructor(public elements: List<Expr>) {
-    super();
+  constructor(ctx: any, public elements: List<Expr>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class StringVal extends AST {
-  constructor(public value: string) {
-    super();
+  constructor(ctx: any, public value: string) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class IntegerVal extends AST {
-  constructor(public value: string) {
-    super();
+  constructor(ctx: any, public value: string) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class DecimalVal extends AST {
-  constructor(public value: string) {
-    super();
+  constructor(ctx: any, public value: string) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class BoolVal extends AST {
-  constructor(public value: boolean) {
-    super();
+  constructor(ctx: any, public value: boolean) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 type EnumVariant = EnumVariantStruct | EnumVariantTuple | EnumVariantUnit;
 
-@Node()
+//@Node()
 export class EnumVariantStruct extends AST {
-  constructor(public name: Ident, public members: List<StructMember>) {
-    super();
+  constructor(
+    ctx: any,
+    public name: Ident,
+    public members: List<StructMember>
+  ) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class EnumVariantTuple extends AST {
-  constructor(public name: Ident, public members: List<TypeExpr>) {
-    super();
+  constructor(ctx: any, public name: Ident, public members: List<TypeExpr>) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class EnumVariantUnit extends AST {
-  constructor(public name: Ident) {
-    super();
+  constructor(ctx: any, public name: Ident) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
-@Node()
+//@Node()
 export class StructMember extends AST {
   constructor(
+    ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public option: boolean,
     public type: TypeExpr
   ) {
-    super();
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
 // TODO: change
 type TypeExpr = any;
 
+export class EmptyAST extends AST{};
+
 export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   implements CWScriptParserVisitor<AST> {
   protected defaultResult(): AST {
-    return new AST();
+    return new EmptyAST();
   }
 
   visitSourceFile(ctx: SourceFileContext): SourceFile {
     let stmts = ctx.topLevelStmt() || [];
     return new SourceFile(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
-      new List(stmts.map(stmt => this.visit(stmt)) as Stmt[])
+      new List(
+        ctx.topLevelStmt(),
+        stmts.map(stmt => this.visit(stmt)) as Stmt[]
+      )
     );
   }
 
   visitIdent(ctx: IdentContext): Ident {
-    return new Ident(ctx.text);
+    return new Ident(ctx, ctx.text);
   }
 
   visitIdentList(ctx: IdentListContext): List<Ident> {
-    return new List(ctx._symbols.map(x => this.visitIdent(x)));
+    return new List(
+      ctx,
+      ctx._symbols.map(x => this.visitIdent(x))
+    );
   }
 
   visitInterfaceList(ctx: InterfaceListContext): List<InterfaceVal> {
-    return new List(ctx.interfaceVal().map(x => this.visitInterfaceVal(x)));
+    return new List(
+      ctx,
+      ctx.interfaceVal().map(x => this.visitInterfaceVal(x))
+    );
   }
 
   visitInterfaceVal(ctx: InterfaceValContext): InterfaceVal {
     return new InterfaceVal(
+      ctx,
       this.visitIdent(ctx._interfaceName),
       ctx._mixins ? this.visitIdentList(ctx._mixins) : undefined
     );
   }
 
   visitCwspec(ctx: CwspecContext): CWSpec {
-    return new CWSpec(ctx.text);
+    return new CWSpec(ctx, ctx.text);
   }
 
   visitInterfaceDefn(ctx: InterfaceDefnContext): InterfaceDefn {
     return new InterfaceDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(ctx._name),
       this.visit(ctx.interfaceBody()),
@@ -690,11 +807,12 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitContractBody(ctx: ContractBodyContext): List<ContractItem> {
     let items = ctx.contractItem() || [];
-    return new List(items.map(x => this.visit(x)) as ContractItem[]);
+    return new List(ctx, items.map(x => this.visit(x)) as ContractItem[]);
   }
 
   visitContractDefn(ctx: ContractDefnContext): ContractDefn {
     return new ContractDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(ctx._name),
       this.visitContractBody(ctx.contractBody()),
@@ -705,6 +823,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitStructMember(ctx: StructMemberContext): StructMember {
     return new StructMember(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(ctx._name),
       ctx._option ? true : false,
@@ -718,15 +837,19 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
     if (parenStructMembers !== undefined) {
       return new EnumVariantStruct(
+        ctx,
         this.visitIdent(ctx._name),
         new List(
+          parenStructMembers,
           parenStructMembers.structMember().map(x => this.visitStructMember(x))
         )
       );
     } else if (curlyStructMembers !== undefined) {
       return new EnumVariantStruct(
+        ctx,
         this.visitIdent(ctx._name),
         new List(
+          curlyStructMembers,
           curlyStructMembers.structMember().map(x => this.visitStructMember(x))
         )
       );
@@ -737,8 +860,10 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitEnumVariant_tuple(ctx: EnumVariant_tupleContext): EnumVariantTuple {
     return new EnumVariantTuple(
+      ctx,
       this.visitIdent(ctx._name),
       new List(
+        ctx.tupleMembers(),
         ctx
           .tupleMembers()
           .typeExpr()
@@ -748,11 +873,12 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   }
 
   visitEnumVariant_unit(ctx: EnumVariant_unitContext): EnumVariantUnit {
-    return new EnumVariantUnit(this.visitIdent(ctx._name));
+    return new EnumVariantUnit(ctx, this.visitIdent(ctx._name));
   }
 
   visitErrorDefn(ctx: ErrorDefnContext): ErrorDefn {
     return new ErrorDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visit(ctx.enumVariant()) as EnumVariant
     );
@@ -760,6 +886,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitEventDefn(ctx: EventDefnContext): EventDefn {
     return new EventDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visit(ctx.enumVariant()) as EnumVariant
     );
@@ -767,17 +894,24 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitErrorDefnBlock(ctx: ErrorDefnBlockContext): List<ErrorDefn> {
     let defns = ctx.errorDefnBlock_item() || [];
-    return new List(defns.map(x => this.visitErrorDefn(x as ErrorDefnContext)));
+    return new List(
+      ctx,
+      defns.map(x => this.visitErrorDefn(x as ErrorDefnContext))
+    );
   }
 
   visitEventDefnBlock(ctx: EventDefnBlockContext): List<EventDefn> {
     let defns = ctx.eventDefnBlock_item() || [];
-    return new List(defns.map(x => this.visitEventDefn(x as EventDefnContext)));
+    return new List(
+      ctx,
+      defns.map(x => this.visitEventDefn(x as EventDefnContext))
+    );
   }
 
   visitStateItemDefn(ctx: StateItemDefnContext): ItemDefn {
     let item = ctx._item;
     return new ItemDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(item._key),
       this.visit(item._valueType) as TypeExpr
@@ -788,9 +922,13 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     let map = ctx._map;
     let mapKeys = ctx._map._mapKeys.mapDefnKey() || [];
     return new MapDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(map._key),
-      new List(mapKeys.map(x => this.visitMapDefnKey(x))),
+      new List(
+        ctx._map._mapKeys,
+        mapKeys.map(x => this.visitMapDefnKey(x))
+      ),
       this.visit(map._valueType) as TypeExpr
     );
   }
@@ -798,6 +936,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   visitStateDefnBlock(ctx: StateDefnBlockContext): List<StateDefn> {
     let items = ctx.stateDefnBlock_item() || [];
     return new List(
+      ctx,
       items.map(x => {
         if (x instanceof StateBlockItemDefnContext) {
           return this.visitStateItemDefn(x as StateItemDefnContext);
@@ -810,6 +949,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitMapDefnKey(ctx: MapDefnKeyContext): MapDefnKey {
     return new MapDefnKey(
+      ctx,
       this.visitIdent(ctx._keyName),
       this.visit(ctx._keyType) as TypeExpr
     );
@@ -817,11 +957,15 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitFnArgs(ctx: FnArgsContext): List<FnArg> {
     let fnArgs = ctx.fnArgList()?.fnArg() || [];
-    return new List(fnArgs.map(x => this.visitFnArg(x)));
+    return new List(
+      ctx,
+      fnArgs.map(x => this.visitFnArg(x))
+    );
   }
 
   visitFnArg(ctx: FnArgContext): FnArg {
     return new FnArg(
+      ctx,
       this.visitIdent(ctx._argName),
       ctx._option ? true : false,
       this.visit(ctx._argType) as TypeExpr
@@ -830,17 +974,20 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitNormalFnBody(ctx: NormalFnBodyContext): List<Stmt> {
     let stmts = ctx.stmt() || [];
-    return new List(stmts.map(x => this.visit(x)) as Stmt[]);
+    return new List(ctx, stmts.map(x => this.visit(x)) as Stmt[]);
   }
 
   visitArrowFnBody(ctx: ArrowFnBodyContext): List<Stmt> {
     let stmt = ctx.stmt();
-    return stmt ? new List([this.visit(stmt)]) : new List<Stmt>([]);
+    return stmt
+      ? new List(ctx, [this.visit(stmt)])
+      : new List<Stmt>(ctx.stmt(), []);
   }
 
   visitInstantiateDefn(ctx: InstantiateDefnContext): InstantiateDefn {
     let fnType = ctx.fnType();
     return new InstantiateDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       undefined,
       this.visitFnArgs(ctx.fnArgs()),
@@ -853,6 +1000,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     let fn = ctx.namedFnDefn();
     let fnType = fn.fnType();
     return new ExecDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
       this.visitFnArgs(fn.fnArgs()),
@@ -863,13 +1011,17 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitExecDefnBlock(ctx: ExecDefnBlockContext): List<ExecDefn> {
     let defns = ctx.execDefnBlock_item() || [];
-    return new List(defns.map(x => this.visitExecDefn(x as ExecDefnContext)));
+    return new List(
+      ctx,
+      defns.map(x => this.visitExecDefn(x as ExecDefnContext))
+    );
   }
 
   visitQueryDefn(ctx: QueryDefnContext): QueryDefn {
     let fn = ctx.namedFnDefn();
     let fnType = fn.fnType();
     return new QueryDefn(
+      ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
       this.visitFnArgs(fn.fnArgs()),
@@ -880,42 +1032,58 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitQueryDefnBlock(ctx: QueryDefnBlockContext): List<QueryDefn> {
     let defns = ctx.queryDefnBlock_item() || [];
-    return new List(defns.map(x => this.visitQueryDefn(x as QueryDefnContext)));
+    return new List(
+      ctx,
+      defns.map(x => this.visitQueryDefn(x as QueryDefnContext))
+    );
   }
 
   visitUnitVal(ctx: UnitValContext): UnitVal {
-    return new UnitVal();
+    return new UnitVal(ctx);
   }
 
   visitTrueVal(ctx: TrueValContext): BoolVal {
-    return new BoolVal(true);
+    return new BoolVal(ctx, true);
   }
 
   visitFalseVal(ctx: FalseValContext): BoolVal {
-    return new BoolVal(false);
+    return new BoolVal(ctx, false);
   }
 
   visitIntegerVal(ctx: IntegerValContext): IntegerVal {
-    return new IntegerVal(ctx.text);
+    return new IntegerVal(ctx, ctx.text);
   }
 
   visitDecimalVal(ctx: DecimalValContext): DecimalVal {
-    return new DecimalVal(ctx.text);
+    return new DecimalVal(ctx, ctx.text);
   }
 
   visitStringVal(ctx: StringValContext): StringVal {
-    return new StringVal(ctx.text);
+    return new StringVal(ctx, ctx.text);
   }
 
   visitTupleVal(ctx: TupleValContext): TupleVal {
     let type = this.visit(ctx._tupleType) as TypeExpr;
     let items = ctx.exprList().expr() || [];
-    return new TupleVal(type, new List(items.map(x => this.visit(x))));
+    return new TupleVal(
+      ctx,
+      type,
+      new List(
+        ctx.exprList(),
+        items.map(x => this.visit(x))
+      )
+    );
   }
 
   visitVecVal(ctx: VecValContext): VecVal {
     let items = ctx.exprList().expr() || [];
-    return new VecVal(new List(items.map(x => this.visit(x) as Expr)));
+    return new VecVal(
+      ctx,
+      new List(
+        ctx.exprList(),
+        items.map(x => this.visit(x) as Expr)
+      )
+    );
   }
 
   visitStructVal(ctx: StructValContext): StructVal {
@@ -923,73 +1091,85 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     let type = this.visit(structVal._structType) as TypeExpr;
     let members = structVal.structValMembers()?.structValMember() || [];
     return new StructVal(
+      ctx,
       type,
-      new List(members.map(x => this.visitStructValMember(x)))
+      new List(
+        structVal.structValMembers(),
+        members.map(x => this.visitStructValMember(x))
+      )
     );
   }
 
   visitStructValMember(ctx: StructValMemberContext): StructValMember {
     return new StructValMember(
+      ctx,
       this.visitIdent(ctx._name),
       this.visit(ctx._value) as Expr
     );
   }
 
   visitQueryExpr(ctx: QueryExprContext): QueryExpr {
-    return new QueryExpr(this.visit(ctx.expr()));
+    return new QueryExpr(ctx, this.visit(ctx.expr()));
   }
 
   visitOrExpr(ctx: OrExprContext): OrExpr {
     let lhs = this.visit(ctx.expr(0));
     let rhs = this.visit(ctx.expr(1));
-    return new OrExpr(lhs, rhs);
+    return new OrExpr(ctx, lhs, rhs);
   }
 
   visitAndExpr(ctx: AndExprContext): AndExpr {
     let lhs = this.visit(ctx.expr(0));
     let rhs = this.visit(ctx.expr(1));
-    return new AndExpr(lhs, rhs);
+    return new AndExpr(ctx, lhs, rhs);
   }
 
   visitEqExpr(ctx: EqExprContext): CompOpExpr {
     let lhs = this.visit(ctx.expr(0));
     let rhs = this.visit(ctx.expr(1));
-    return new CompOpExpr(lhs, ctx._op.text as string, rhs);
+    return new CompOpExpr(ctx, lhs, ctx._op.text as string, rhs);
   }
 
   visitCompExpr(ctx: CompExprContext): CompOpExpr {
     let lhs = this.visit(ctx.expr(0));
     let rhs = this.visit(ctx.expr(1));
-    return new CompOpExpr(lhs, ctx._op.text as string, rhs);
+    return new CompOpExpr(ctx, lhs, ctx._op.text as string, rhs);
   }
 
   visitAddSubExpr(ctx: AddSubExprContext): ArithmeticOpExpr {
     let lhs = this.visit(ctx.expr(0));
     let rhs = this.visit(ctx.expr(1));
-    return new ArithmeticOpExpr(lhs, ctx._op.text as string, rhs);
+    return new ArithmeticOpExpr(ctx, lhs, ctx._op.text as string, rhs);
   }
 
   visitMultDivModExpr(ctx: MultDivModExprContext): ArithmeticOpExpr {
     let lhs = this.visit(ctx.expr(0));
     let rhs = this.visit(ctx.expr(1));
-    return new ArithmeticOpExpr(lhs, ctx._op.text as string, rhs);
+    return new ArithmeticOpExpr(ctx, lhs, ctx._op.text as string, rhs);
   }
 
   visitExprExpr(ctx: ExpExprContext): ExpExpr {
     let lhs = this.visit(ctx.expr(0));
     let rhs = this.visit(ctx.expr(1));
-    return new ExpExpr(lhs, rhs);
+    return new ExpExpr(ctx, lhs, rhs);
   }
 
   visitUnaryExpr(ctx: UnaryExprContext): UnaryExpr {
     let expr = this.visit(ctx.expr());
-    return new UnaryExpr(ctx._op.text as string, expr);
+    return new UnaryExpr(ctx, ctx._op.text as string, expr);
   }
 
   visitPosArgsFnCallExpr(ctx: PosArgsFnCallExprContext): PosArgsFnCallExpr {
     let fn = this.visit(ctx.expr());
     let args = ctx.exprList()?.expr() || [];
-    return new PosArgsFnCallExpr(fn, new List(args.map(x => this.visit(x))));
+    return new PosArgsFnCallExpr(
+      ctx,
+      fn,
+      new List(
+        ctx.exprList(),
+        args.map(x => this.visit(x))
+      )
+    );
   }
 
   visitNamedArgsFnCallExpr(
@@ -998,25 +1178,33 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     let fn = this.visit(ctx.expr());
     let args = ctx.namedExprList()?.namedExpr() || [];
     return new NamedArgsFnCallExpr(
+      ctx,
       fn,
-      new List(args.map(x => this.visitNamedExpr(x)))
+      new List(
+        ctx.namedExprList(),
+        args.map(x => this.visitNamedExpr(x))
+      )
     );
   }
 
   visitNamedExpr(ctx: NamedExprContext): NamedExpr {
-    return new NamedExpr(this.visitIdent(ctx._name), this.visit(ctx._value));
+    return new NamedExpr(
+      ctx,
+      this.visitIdent(ctx._name),
+      this.visit(ctx._value)
+    );
   }
 
   visitTableLookupExpr(ctx: TableLookupExprContext): TableLookupExpr {
     let table = this.visit(ctx.expr(0));
     let key = this.visit(ctx.expr(1));
-    return new TableLookupExpr(table, key);
+    return new TableLookupExpr(ctx, table, key);
   }
 
   visitMemberAccessExpr(ctx: MemberAccessExprContext): MemberAccessExpr {
     let obj = this.visit(ctx.expr());
     let member = this.visitIdent(ctx.ident());
-    return new MemberAccessExpr(obj, member);
+    return new MemberAccessExpr(ctx, obj, member);
   }
 
   visitIfExpr_(ctx: IfExpr_Context): IfExpr {
@@ -1028,14 +1216,18 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
         .map(x => this.visit(x) as IfClauseVariant) || [];
     let elseClause = ctx.elseClause()?.fnBody();
     return new IfExpr(
+      ctx,
       ifClause,
-      new List(elseIfClauses),
-      elseClause ? (this.visit(elseClause) as List<Stmt>) : new List<Stmt>([])
+      new List(ctx.elseIfClauses(), elseIfClauses),
+      elseClause
+        ? (this.visit(elseClause) as List<Stmt>)
+        : new List<Stmt>(ctx.elseClause(), [])
     );
   }
 
   visitIfClause(ctx: IfClauseContext): IfClause {
     return new IfClause(
+      ctx,
       this.visit(ctx._predicate),
       this.visit(ctx.fnBody()) as List<Stmt>
     );
@@ -1043,30 +1235,32 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitIfLetClause(ctx: IfLetClauseContext): IfLetClause {
     return new IfLetClause(
+      ctx,
       this.visit(ctx.letStmt_()) as LetStmt,
       this.visit(ctx.fnBody()) as List<Stmt>
     );
   }
 
   visitExecStmt(ctx: ExecStmtContext): ExecStmt {
-    return new ExecStmt(this.visit(ctx.expr()));
+    return new ExecStmt(ctx, this.visit(ctx.expr()));
   }
 
   visitReturnStmt(ctx: ReturnStmtContext): ReturnStmt {
-    return new ReturnStmt(this.visit(ctx.expr()));
+    return new ReturnStmt(ctx, this.visit(ctx.expr()));
   }
 
   visitEmitStmt(ctx: EmitStmtContext): EmitStmt {
-    return new EmitStmt(this.visit(ctx.expr()));
+    return new EmitStmt(ctx, this.visit(ctx.expr()));
   }
 
   visitFailStmt(ctx: FailStmtContext): FailStmt {
-    return new FailStmt(this.visit(ctx.expr()));
+    return new FailStmt(ctx, this.visit(ctx.expr()));
   }
 
   visitAssignStmt(ctx: AssignStmtContext): AssignStmt {
     let assignOp = ctx._assignOp.text as string;
     return new AssignStmt(
+      ctx,
       this.visit(ctx.expr(0)) as Expr,
       assignOp,
       this.visit(ctx.expr(1)) as Expr
@@ -1075,6 +1269,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitLetStmt_(ctx: LetStmt_Context): LetStmt {
     return new LetStmt(
+      ctx,
       this.visit(ctx.letLHS()) as LetLHS,
       this.visit(ctx.expr()) as Expr
     );
@@ -1083,13 +1278,14 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   visitIdentLHS(ctx: IdentLHSContext): IdentLHS {
     let typeExpr = ctx.typeExpr();
     return new IdentLHS(
+      ctx,
       this.visitIdent(ctx.ident()),
       typeExpr ? this.visit(typeExpr) : undefined
     );
   }
 
   visitStructUnpackLHS(ctx: StructUnpackLHSContext): StructUnpackLHS {
-    return new StructUnpackLHS(this.visit(ctx.identList()) as List<Ident>);
+    return new StructUnpackLHS(ctx, this.visit(ctx.identList()) as List<Ident>);
   }
 
   visitTupleUnpackLHSFrontBack(
@@ -1097,12 +1293,17 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   ): TupleUnpackLHS {
     let back = ctx._back;
     return new TupleUnpackLHS(
+      ctx,
       this.visit(ctx._front) as List<Ident>,
       back ? (this.visit(back) as List<Ident>) : undefined
     );
   }
 
   visitTupleUnpackLHSBack(ctx: TupleUnpackLHSBackContext): TupleUnpackLHS {
-    return new TupleUnpackLHS(undefined, this.visit(ctx._back) as List<Ident>);
+    return new TupleUnpackLHS(
+      ctx,
+      undefined,
+      this.visit(ctx._back) as List<Ident>
+    );
   }
 }

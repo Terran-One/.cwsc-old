@@ -17,5 +17,7 @@ let tree = parser.sourceFile();
 let visitor = new CWScriptASTVisitor();
 let ast = visitor.visitSourceFile(tree);
 
-console.log(inspect(ast, { showHidden: false, depth: null, colors: true }));
-console.log(ast.__children);
+console.log(
+  inspect(ast.children, { showHidden: false, depth: null, colors: true })
+);
+// console.log(ast.toData());
