@@ -13,7 +13,7 @@ import { StateItemDefnContext } from "./CWScriptParser";
 import { StateMapDefnContext } from "./CWScriptParser";
 import { UnitValContext } from "./CWScriptParser";
 import { StructValContext } from "./CWScriptParser";
-import { TupleStructValContext } from "./CWScriptParser";
+import { TupleValContext } from "./CWScriptParser";
 import { VecValContext } from "./CWScriptParser";
 import { StringValContext } from "./CWScriptParser";
 import { IntegerValContext } from "./CWScriptParser";
@@ -28,6 +28,10 @@ import { TypePathImportSymbolContext } from "./CWScriptParser";
 import { DestructureImportSymbolContext } from "./CWScriptParser";
 import { AllImportSymbolContext } from "./CWScriptParser";
 import { RenamedImportSymbolContext } from "./CWScriptParser";
+import { IdentLHSContext } from "./CWScriptParser";
+import { StructUnpackLHSContext } from "./CWScriptParser";
+import { TupleUnpackLHSFrontBackContext } from "./CWScriptParser";
+import { TupleUnpackLHSBackContext } from "./CWScriptParser";
 import { GroupedExprContext } from "./CWScriptParser";
 import { MemberAccessExprContext } from "./CWScriptParser";
 import { TableLookupExprContext } from "./CWScriptParser";
@@ -287,17 +291,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitStructVal?: (ctx: StructValContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `TupleStructVal`
+	 * Enter a parse tree produced by the `TupleVal`
 	 * labeled alternative in `CWScriptParser.val`.
 	 * @param ctx the parse tree
 	 */
-	enterTupleStructVal?: (ctx: TupleStructValContext) => void;
+	enterTupleVal?: (ctx: TupleValContext) => void;
 	/**
-	 * Exit a parse tree produced by the `TupleStructVal`
+	 * Exit a parse tree produced by the `TupleVal`
 	 * labeled alternative in `CWScriptParser.val`.
 	 * @param ctx the parse tree
 	 */
-	exitTupleStructVal?: (ctx: TupleStructValContext) => void;
+	exitTupleVal?: (ctx: TupleValContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `VecVal`
@@ -480,6 +484,58 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRenamedImportSymbol?: (ctx: RenamedImportSymbolContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `IdentLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterIdentLHS?: (ctx: IdentLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by the `IdentLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitIdentLHS?: (ctx: IdentLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `StructUnpackLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterStructUnpackLHS?: (ctx: StructUnpackLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by the `StructUnpackLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitStructUnpackLHS?: (ctx: StructUnpackLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `TupleUnpackLHSFrontBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterTupleUnpackLHSFrontBack?: (ctx: TupleUnpackLHSFrontBackContext) => void;
+	/**
+	 * Exit a parse tree produced by the `TupleUnpackLHSFrontBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitTupleUnpackLHSFrontBack?: (ctx: TupleUnpackLHSFrontBackContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `TupleUnpackLHSBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterTupleUnpackLHSBack?: (ctx: TupleUnpackLHSBackContext) => void;
+	/**
+	 * Exit a parse tree produced by the `TupleUnpackLHSBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitTupleUnpackLHSBack?: (ctx: TupleUnpackLHSBackContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `GroupedExpr`
