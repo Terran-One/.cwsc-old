@@ -37,8 +37,7 @@ import { MemberAccessExprContext } from "./CWScriptParser";
 import { TableLookupExprContext } from "./CWScriptParser";
 import { PosArgsFnCallExprContext } from "./CWScriptParser";
 import { NamedArgsFnCallExprContext } from "./CWScriptParser";
-import { UnarySignExprContext } from "./CWScriptParser";
-import { UnaryNotExprContext } from "./CWScriptParser";
+import { UnaryExprContext } from "./CWScriptParser";
 import { ExpExprContext } from "./CWScriptParser";
 import { MultDivModExprContext } from "./CWScriptParser";
 import { AddSubExprContext } from "./CWScriptParser";
@@ -145,7 +144,6 @@ import { IfClause_Context } from "./CWScriptParser";
 import { ElseIfClausesContext } from "./CWScriptParser";
 import { ElseClauseContext } from "./CWScriptParser";
 import { ForStmt_Context } from "./CWScriptParser";
-import { ForItemContext } from "./CWScriptParser";
 import { IdentListContext } from "./CWScriptParser";
 import { ExprListContext } from "./CWScriptParser";
 import { NamedExprListContext } from "./CWScriptParser";
@@ -603,30 +601,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitNamedArgsFnCallExpr?: (ctx: NamedArgsFnCallExprContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `UnarySignExpr`
+	 * Enter a parse tree produced by the `UnaryExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 */
-	enterUnarySignExpr?: (ctx: UnarySignExprContext) => void;
+	enterUnaryExpr?: (ctx: UnaryExprContext) => void;
 	/**
-	 * Exit a parse tree produced by the `UnarySignExpr`
+	 * Exit a parse tree produced by the `UnaryExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 */
-	exitUnarySignExpr?: (ctx: UnarySignExprContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `UnaryNotExpr`
-	 * labeled alternative in `CWScriptParser.expr`.
-	 * @param ctx the parse tree
-	 */
-	enterUnaryNotExpr?: (ctx: UnaryNotExprContext) => void;
-	/**
-	 * Exit a parse tree produced by the `UnaryNotExpr`
-	 * labeled alternative in `CWScriptParser.expr`.
-	 * @param ctx the parse tree
-	 */
-	exitUnaryNotExpr?: (ctx: UnaryNotExprContext) => void;
+	exitUnaryExpr?: (ctx: UnaryExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `ExpExpr`
@@ -1847,17 +1832,6 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitForStmt_?: (ctx: ForStmt_Context) => void;
-
-	/**
-	 * Enter a parse tree produced by `CWScriptParser.forItem`.
-	 * @param ctx the parse tree
-	 */
-	enterForItem?: (ctx: ForItemContext) => void;
-	/**
-	 * Exit a parse tree produced by `CWScriptParser.forItem`.
-	 * @param ctx the parse tree
-	 */
-	exitForItem?: (ctx: ForItemContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CWScriptParser.identList`.

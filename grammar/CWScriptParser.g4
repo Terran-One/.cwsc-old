@@ -230,8 +230,7 @@ expr:
 	| expr LBRACK expr RBRACK					# TableLookupExpr
 	| expr LPAREN (exprList)? RPAREN			# PosArgsFnCallExpr
 	| expr LPAREN (namedExprList)? RPAREN		# NamedArgsFnCallExpr
-	| sign = (PLUS | MINUS) expr				# UnarySignExpr
-	| EXCLAM expr								# UnaryNotExpr
+	| op = (PLUS | MINUS | EXCLAM) expr			# UnaryExpr
 	| expr POW expr								# ExpExpr
 	| expr op = (MUL | DIV | MOD) expr			# MultDivModExpr
 	| expr op = (PLUS | MINUS) expr				# AddSubExpr

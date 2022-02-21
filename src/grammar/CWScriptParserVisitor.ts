@@ -37,8 +37,7 @@ import { MemberAccessExprContext } from "./CWScriptParser";
 import { TableLookupExprContext } from "./CWScriptParser";
 import { PosArgsFnCallExprContext } from "./CWScriptParser";
 import { NamedArgsFnCallExprContext } from "./CWScriptParser";
-import { UnarySignExprContext } from "./CWScriptParser";
-import { UnaryNotExprContext } from "./CWScriptParser";
+import { UnaryExprContext } from "./CWScriptParser";
 import { ExpExprContext } from "./CWScriptParser";
 import { MultDivModExprContext } from "./CWScriptParser";
 import { AddSubExprContext } from "./CWScriptParser";
@@ -145,7 +144,6 @@ import { IfClause_Context } from "./CWScriptParser";
 import { ElseIfClausesContext } from "./CWScriptParser";
 import { ElseClauseContext } from "./CWScriptParser";
 import { ForStmt_Context } from "./CWScriptParser";
-import { ForItemContext } from "./CWScriptParser";
 import { IdentListContext } from "./CWScriptParser";
 import { ExprListContext } from "./CWScriptParser";
 import { NamedExprListContext } from "./CWScriptParser";
@@ -436,20 +434,12 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitNamedArgsFnCallExpr?: (ctx: NamedArgsFnCallExprContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `UnarySignExpr`
+	 * Visit a parse tree produced by the `UnaryExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitUnarySignExpr?: (ctx: UnarySignExprContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `UnaryNotExpr`
-	 * labeled alternative in `CWScriptParser.expr`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitUnaryNotExpr?: (ctx: UnaryNotExprContext) => Result;
+	visitUnaryExpr?: (ctx: UnaryExprContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `ExpExpr`
@@ -1219,13 +1209,6 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitForStmt_?: (ctx: ForStmt_Context) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CWScriptParser.forItem`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitForItem?: (ctx: ForItemContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CWScriptParser.identList`.

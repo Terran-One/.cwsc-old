@@ -2,6 +2,11 @@ import {
   CWScriptParser,
   CwspecContext,
   IdentContext,
+  LetStmt_Context,
+  IdentLHSContext,
+  StructUnpackLHSContext,
+  TupleUnpackLHSBackContext,
+  TupleUnpackLHSFrontBackContext,
   InterfaceDefnContext,
   InterfaceItemContext,
   IdentListContext,
@@ -10,6 +15,11 @@ import {
   InterfaceValContext,
   ContractDefnContext,
   ImportSymbolContext,
+  AssignStmtContext,
+  FailStmtContext,
+  ReturnStmtContext,
+  EmitStmtContext,
+  ExecStmtContext,
   EnumVariant_structContext,
   StructMemberContext,
   EnumVariant_tupleContext,
@@ -42,6 +52,27 @@ import {
   DecimalValContext,
   StringValContext,
   TupleValContext,
+  VecValContext,
+  StructValContext,
+  StructValMemberContext,
+  QueryExprContext,
+  OrExprContext,
+  AndExprContext,
+  EqExprContext,
+  CompExprContext,
+  AddSubExprContext,
+  MultDivModExprContext,
+  ExpExprContext,
+  PosArgsFnCallExprContext,
+  NamedArgsFnCallExprContext,
+  NamedExprContext,
+  TableLookupExprContext,
+  MemberAccessExprContext,
+  UnaryExprContext,
+  IfLetClauseContext,
+  IfExpr_Context,
+  IfClauseContext,
+  ForStmt_Context,
 } from './grammar/CWScriptParser';
 import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
@@ -258,10 +289,24 @@ export class AssignStmt extends AST {
 
 export class IfExpr extends AST {
   constructor(
-    public cond: Expr,
-    public thenStmt: List<Stmt>,
-    public elseStmt?: List<Stmt>
+    public ifClause: IfClauseVariant,
+    public elseIfClauses: List<IfClauseVariant>,
+    public elseClause: List<Stmt>
   ) {
+    super();
+  }
+}
+
+type IfClauseVariant = IfClause | IfLetClause;
+
+export class IfClause extends AST {
+  constructor(public predicate: Expr, public body: List<Stmt>) {
+    super();
+  }
+}
+
+export class IfLetClause extends AST {
+  constructor(public letStmt: LetStmt, public body: List<Stmt>) {
     super();
   }
 }
@@ -300,6 +345,12 @@ export class ReturnStmt extends AST {
   }
 }
 
+export class FailStmt extends AST {
+  constructor(public expr: Expr) {
+    super();
+  }
+}
+
 // TODO: change
 export type Expr = any;
 
@@ -327,20 +378,14 @@ export class NamedArgsFnCallExpr extends AST {
   }
 }
 
-export class UnarySignExpr extends AST {
-  constructor(public sign: string, public expr: Expr) {
-    super();
-  }
-}
-
-export class UnaryNotExpr extends AST {
-  constructor(public expr: Expr) {
+export class UnaryExpr extends AST {
+  constructor(public op: string, public expr: Expr) {
     super();
   }
 }
 
 export class ExpExpr extends AST {
-  constructor(public expr: Expr) {
+  constructor(public lhs: Expr, public rhs: Expr) {
     super();
   }
 }
@@ -406,7 +451,7 @@ export class TupleVal extends AST {
 }
 
 export class VecVal extends AST {
-  constructor(public type: TypePath, public elements: List<Expr>) {
+  constructor(public elements: List<Expr>) {
     super();
   }
 }
@@ -740,5 +785,198 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     let type = this.visit(ctx._tupleType) as TypeExpr;
     let items = ctx.exprList().expr() || [];
     return new TupleVal(type, new List(items.map(x => this.visit(x))));
+  }
+
+  visitVecVal(ctx: VecValContext): VecVal {
+    let items = ctx.exprList().expr() || [];
+    return new VecVal(new List(items.map(x => this.visit(x) as Expr)));
+  }
+
+  visitStructVal(ctx: StructValContext): StructVal {
+    let structVal = ctx.structVal_();
+    let type = this.visit(structVal._structType) as TypeExpr;
+    let members = structVal.structValMembers()?.structValMember() || [];
+    return new StructVal(
+      type,
+      new List(members.map(x => this.visitStructValMember(x)))
+    );
+  }
+
+  visitStructValMember(ctx: StructValMemberContext): StructValMember {
+    return new StructValMember(
+      this.visitIdent(ctx._name),
+      this.visit(ctx._value) as Expr
+    );
+  }
+
+  visitQueryExpr(ctx: QueryExprContext): QueryExpr {
+    return new QueryExpr(this.visit(ctx.expr()));
+  }
+
+  visitOrExpr(ctx: OrExprContext): OrExpr {
+    let lhs = this.visit(ctx.expr(0));
+    let rhs = this.visit(ctx.expr(1));
+    return new OrExpr(lhs, rhs);
+  }
+
+  visitAndExpr(ctx: AndExprContext): AndExpr {
+    let lhs = this.visit(ctx.expr(0));
+    let rhs = this.visit(ctx.expr(1));
+    return new AndExpr(lhs, rhs);
+  }
+
+  visitEqExpr(ctx: EqExprContext): CompOpExpr {
+    let lhs = this.visit(ctx.expr(0));
+    let rhs = this.visit(ctx.expr(1));
+    return new CompOpExpr(lhs, ctx._op.text as string, rhs);
+  }
+
+  visitCompExpr(ctx: CompExprContext): CompOpExpr {
+    let lhs = this.visit(ctx.expr(0));
+    let rhs = this.visit(ctx.expr(1));
+    return new CompOpExpr(lhs, ctx._op.text as string, rhs);
+  }
+
+  visitAddSubExpr(ctx: AddSubExprContext): ArithmeticOpExpr {
+    let lhs = this.visit(ctx.expr(0));
+    let rhs = this.visit(ctx.expr(1));
+    return new ArithmeticOpExpr(lhs, ctx._op.text as string, rhs);
+  }
+
+  visitMultDivModExpr(ctx: MultDivModExprContext): ArithmeticOpExpr {
+    let lhs = this.visit(ctx.expr(0));
+    let rhs = this.visit(ctx.expr(1));
+    return new ArithmeticOpExpr(lhs, ctx._op.text as string, rhs);
+  }
+
+  visitExprExpr(ctx: ExpExprContext): ExpExpr {
+    let lhs = this.visit(ctx.expr(0));
+    let rhs = this.visit(ctx.expr(1));
+    return new ExpExpr(lhs, rhs);
+  }
+
+  visitUnaryExpr(ctx: UnaryExprContext): UnaryExpr {
+    let expr = this.visit(ctx.expr());
+    return new UnaryExpr(ctx._op.text as string, expr);
+  }
+
+  visitPosArgsFnCallExpr(ctx: PosArgsFnCallExprContext): PosArgsFnCallExpr {
+    let fn = this.visit(ctx.expr());
+    let args = ctx.exprList()?.expr() || [];
+    return new PosArgsFnCallExpr(fn, new List(args.map(x => this.visit(x))));
+  }
+
+  visitNamedArgsFnCallExpr(
+    ctx: NamedArgsFnCallExprContext
+  ): NamedArgsFnCallExpr {
+    let fn = this.visit(ctx.expr());
+    let args = ctx.namedExprList()?.namedExpr() || [];
+    return new NamedArgsFnCallExpr(
+      fn,
+      new List(args.map(x => this.visitNamedExpr(x)))
+    );
+  }
+
+  visitNamedExpr(ctx: NamedExprContext): NamedExpr {
+    return new NamedExpr(this.visitIdent(ctx._name), this.visit(ctx._value));
+  }
+
+  visitTableLookupExpr(ctx: TableLookupExprContext): TableLookupExpr {
+    let table = this.visit(ctx.expr(0));
+    let key = this.visit(ctx.expr(1));
+    return new TableLookupExpr(table, key);
+  }
+
+  visitMemberAccessExpr(ctx: MemberAccessExprContext): MemberAccessExpr {
+    let obj = this.visit(ctx.expr());
+    let member = this.visitIdent(ctx.ident());
+    return new MemberAccessExpr(obj, member);
+  }
+
+  visitIfExpr_(ctx: IfExpr_Context): IfExpr {
+    let ifClause = this.visit(ctx.ifClause_()) as IfClauseVariant;
+    let elseIfClauses =
+      ctx
+        .elseIfClauses()
+        ?.ifClause_()
+        .map(x => this.visit(x) as IfClauseVariant) || [];
+    let elseClause = ctx.elseClause()?.fnBody();
+    return new IfExpr(
+      ifClause,
+      new List(elseIfClauses),
+      elseClause ? (this.visit(elseClause) as List<Stmt>) : new List<Stmt>([])
+    );
+  }
+
+  visitIfClause(ctx: IfClauseContext): IfClause {
+    return new IfClause(
+      this.visit(ctx._predicate),
+      this.visit(ctx.fnBody()) as List<Stmt>
+    );
+  }
+
+  visitIfLetClause(ctx: IfLetClauseContext): IfLetClause {
+    return new IfLetClause(
+      this.visit(ctx.letStmt_()) as LetStmt,
+      this.visit(ctx.fnBody()) as List<Stmt>
+    );
+  }
+
+  visitExecStmt(ctx: ExecStmtContext): ExecStmt {
+    return new ExecStmt(this.visit(ctx.expr()));
+  }
+
+  visitReturnStmt(ctx: ReturnStmtContext): ReturnStmt {
+    return new ReturnStmt(this.visit(ctx.expr()));
+  }
+
+  visitEmitStmt(ctx: EmitStmtContext): EmitStmt {
+    return new EmitStmt(this.visit(ctx.expr()));
+  }
+
+  visitFailStmt(ctx: FailStmtContext): FailStmt {
+    return new FailStmt(this.visit(ctx.expr()));
+  }
+
+  visitAssignStmt(ctx: AssignStmtContext): AssignStmt {
+    let assignOp = ctx._assignOp.text as string;
+    return new AssignStmt(
+      this.visit(ctx.expr(0)) as Expr,
+      assignOp,
+      this.visit(ctx.expr(1)) as Expr
+    );
+  }
+
+  visitLetStmt_(ctx: LetStmt_Context): LetStmt {
+    return new LetStmt(
+      this.visit(ctx.letLHS()) as LetLHS,
+      this.visit(ctx.expr()) as Expr
+    );
+  }
+
+  visitIdentLHS(ctx: IdentLHSContext): IdentLHS {
+    let typeExpr = ctx.typeExpr();
+    return new IdentLHS(
+      this.visitIdent(ctx.ident()),
+      typeExpr ? this.visit(typeExpr) : undefined
+    );
+  }
+
+  visitStructUnpackLHS(ctx: StructUnpackLHSContext): StructUnpackLHS {
+    return new StructUnpackLHS(this.visit(ctx.identList()) as List<Ident>);
+  }
+
+  visitTupleUnpackLHSFrontBack(
+    ctx: TupleUnpackLHSFrontBackContext
+  ): TupleUnpackLHS {
+    let back = ctx._back;
+    return new TupleUnpackLHS(
+      this.visit(ctx._front) as List<Ident>,
+      back ? (this.visit(back) as List<Ident>) : undefined
+    );
+  }
+
+  visitTupleUnpackLHSBack(ctx: TupleUnpackLHSBackContext): TupleUnpackLHS {
+    return new TupleUnpackLHS(undefined, this.visit(ctx._back) as List<Ident>);
   }
 }
