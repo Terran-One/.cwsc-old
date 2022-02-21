@@ -160,9 +160,37 @@ export abstract class AST {
     return Object.values(rest).filter(x => x instanceof AST);
   }
 
+  public get properties(): { [key: string]: any } {
+    let { __position, __parent, ...rest } = this;
+    return _.pickBy(rest, (v, k) => !(v instanceof AST) && typeof v !== 'function');
+  }
+
+  public *walkAncestors(): IterableIterator<AST> {
+    let parent = this.parent;
+    while (parent) {
+      yield parent;
+      parent = parent.parent;
+    }
+  }
+
+  public *walkDescendants(): IterableIterator<AST> {
+    yield* this.children;
+    for (const child of this.children) {
+      yield* child.walkDescendants();
+    }
+  }
+
   public setParentForChildren() {
     let { __position, __parent, ...rest } = this;
     Object.values(this.children).forEach(child => (child.__parent = this));
+  }
+
+  public toData(): any {
+    return {
+      "$type": this.constructor.name,
+      "children": this.children.map(x => x.toData()),
+      "properties": this.properties
+    }
   }
 }
 
@@ -191,7 +219,11 @@ export class List<T extends AST> extends AST {
   }
 
   public override get children(): T[] {
-    return this.elements;
+    return Object.values(this.elements);
+  }
+
+  public override get properties(): { [key: string]: any } {
+    return {};
   }
 }
 

@@ -5,6 +5,7 @@
     "module": "commonjs",
     "target": "esnext",
     "lib": ["dom", "esnext"],
+    "downlevelIteration": true,
     "importHelpers": true,
     // output .d.ts declaration files for consumers
     "declaration": true,

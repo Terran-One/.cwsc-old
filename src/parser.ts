@@ -2,22 +2,29 @@ import { CWScriptParser, SourceFileContext } from './grammar/CWScriptParser';
 import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { CWScriptLexer } from './grammar/CWScriptLexer';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
-import { CWScriptASTVisitor } from './ast';
+import * as AST from './ast';
 import { inspect } from 'util';
 
 import * as fs from 'fs';
+import { filter } from 'lodash';
 
-let inputStream = CharStreams.fromString(
-  fs.readFileSync('./examples/cws-cw20/src/cw20-base.cws').toString()
-);
-let lexer = new CWScriptLexer(inputStream);
-let tokenStream = new CommonTokenStream(lexer);
-let parser = new CWScriptParser(tokenStream);
-let tree = parser.sourceFile();
-let visitor = new CWScriptASTVisitor();
-let ast = visitor.visitSourceFile(tree);
+export function parseCWScript(source: string): AST.SourceFile {
+  let inputStream = CharStreams.fromString(source);
+  let lexer = new CWScriptLexer(inputStream);
+  let tokenStream = new CommonTokenStream(lexer);
+  let parser = new CWScriptParser(tokenStream);
+  let tree = parser.sourceFile();
+  let visitor = new AST.CWScriptASTVisitor();
+  return visitor.visitSourceFile(tree);
+}
 
-console.log(
-  inspect(ast.children, { showHidden: false, depth: null, colors: true })
-);
-// console.log(ast.toData());
+let source = fs
+  .readFileSync('./examples/cws-cw20/src/cw20-base.cws')
+  .toString();
+let ast = parseCWScript(source);
+
+let x = 0;
+for (let node of ast.walkDescendants()) {
+  console.log(inspect(node.toData(), { depth: null }));
+  x += 1;
+}
