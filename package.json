@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "parse": "ts-node src/parser.ts",
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "antlr-lexer": "antlr4ts ./grammar/CWScriptLexer.g4 -o ./src",
+    "antlr-parser": "antlr4ts -visitor ./grammar/CWScriptParser.g4 -o ./src -lib ./src/grammar",
+    "antlr": "npm run antlr-lexer && npm run antlr-parser"
+  },
+  "peerDependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "name": "cwsc",
+  "author": "William Chen",
+  "module": "dist/cwsc.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/cwsc.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/cwsc.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^7.0.8",
+    "antlr4ts-cli": "^0.5.0-alpha.4",
+    "husky": "^7.0.4",
+    "size-limit": "^7.0.8",
+    "ts-node": "^10.5.0",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4",
+    "commander": "^9.0.0"
+  }
+}

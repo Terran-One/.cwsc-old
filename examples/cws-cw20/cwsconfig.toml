@@ -1,0 +1,52 @@
+[project]
+name = "cws-cw20"
+descripton = "Example CWScript translation of CW20"
+version = "0.1.0"
+authors = "William Chen <william@terran.one>"
+readme = "README.md"
+
+[cwsc]
+source_files = ["src/*.cws"]
+output_dir = "build"
+
+[cwsc.gen.cwspec]
+output_dir = "gen/cwspec"
+include = "*"
+format = ["html"]
+
+[cwsc.gen.client_sdk]
+output_dir = "gen/sdks"
+include = "*"
+
+[[cwsc.gen.client_sdk.typescript]]
+npm-package = "@terran-one/cws-cw20"
+
+[[cwsc.gen.client_sdk.python3]]
+pypi-package = "cws-cw20"
+
+[[cwsc.build.target]]
+type = "interface"
+source = "cw20-interface.cws"
+name = "CW20"
+extensions = [
+    "Allowances",
+    "Mintable",
+    "Marketing",
+    "Enumerable",
+    "AllowancesEnumerable",
+]
+package = true
+
+[[cwsc.build.target]]
+type = "contract"
+source = "cw20-base.cws"
+name = "CW20Base"
+crate_name = "cw20-base"
+package = true
+
+[[cwsc.build.target]]
+type = "contract"
+source = "my-custom-token.cws"
+name = "MyCustomToken"
+crate_name = "my-custom-token"
+package = true

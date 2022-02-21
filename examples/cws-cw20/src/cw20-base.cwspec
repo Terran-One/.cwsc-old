@@ -1,0 +1,22 @@
+/// Transfer is a base message to move tokens to another account without triggering actions
+/// @param recipient Address to transfer to
+/// @param amount Number of tokens to transfer
+
+/// Send is a base message to transfer tokens to a contract and trigger an action
+/// on the receiving contract. `sdfsd`
+/// ```rust
+///     This is just some sample code.
+/// ```
+/// @param contract Address of contract to call
+/// @param \
+///   amount \
+///   Number of tokens to send
+/// @param msg encoded ExecuteMsg to trigger
+/// @note Hello there \
+///     There's so much to do \
+///     @ref : `hello`
+/// @key this is a\ \
+  /// description
+/// @key:william hello there @:ref`welc \
+/// o!!!{powerp[= sdf]}m`
+

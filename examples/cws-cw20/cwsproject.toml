@@ -1,0 +1,16 @@
+[project]
+name = "cws-cw20"
+descripton = "Example CWScript translation of CW20"
+version = "0.1.0"
+authors = "William Chen <william@terran.one>"
+readme = "README.md"
+
+[cwsc]
+output_dir = "output"
+
+[cwsc.tool.gen-docs]
+format = ["html"]
+
+[cwsc.tool.gen-client-lib]
+typescript = { npm-package = "@terran-one/cws-cw20" }
+python3 = { pypi-package = "cws-cw20" }

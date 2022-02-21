@@ -1,0 +1,53 @@
+interface HasSomething {
+
+    state something: struct Something {
+        the_thing: Uint128
+    }
+
+    query getSomething() -> struct _ {
+        something: Something
+    }
+}
+
+interface HasOwner {
+    state owner: String
+    query getOwner() -> struct _ {
+        owner: String
+    }
+}
+
+/// Extending an interface with multiple inheritance
+interface HasSomethingAndOwner extends HasSomething, HasOwner {}
+
+contract EmptyContract {}
+contract ImplHasSomething implements HasSomething {
+    query get_something() => _ {
+        something: state.something
+    }
+}
+
+contract ImplHasOwner implements HasOwner {
+    query get_owner() => _ {
+        owner: state.owner
+    }
+}
+
+contract ImplHasSomethingAndOwner extends ImplHasSomething, ImplHasOwner {}
+
+contract KitchenSink extends EmptyContract, ImplHasSomething, ImplHasOwner {
+
+    /// A contract can only have 1 instantiate message
+    /// @param arg1 A number
+    /// @param arg2 A string
+    /// @param arg3 Optional string
+    instantiate(
+        arg1: Uint128,
+        arg2: String,
+        arg3?: String,
+    ) {
+    }
+
+    query {
+
+    }
+}

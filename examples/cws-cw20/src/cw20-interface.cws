@@ -1,0 +1,153 @@
+interface CW20 {
+    exec {
+        /// Transfer is a base message to move tokens to another account without triggering actions
+        /// @param recipient Address to transfer to
+        /// @param amount Number of tokens to transfer
+        transfer(recipient: Addr, amount: Uint128)
+
+        /// Burn is a base message to destroy tokens forever
+        /// @param amount Number of tokens to burn
+        burn(amount: Uint128)
+
+        /// Send is a base message to transfer tokens to a contract and trigger an action
+        /// on the receiving contract.
+        /// @param contract Address of contract to call
+        /// @param amount Number of tokens to send
+        /// @param msg encoded ExecuteMsg to trigger
+        send(contract: Addr, amount: Addr, msg: Binary)
+    }
+
+    query {
+        /// Returns the current balance of the given address, 0 if unset.
+        /// @res.field balance Current balance of tokens
+        balance(address: Addr) -> _ {
+            balance: Uint128
+        }
+
+        /// Returns metadata on the contract - name, decimals, supply, etc.
+        /// @res.field name Name of token
+        /// @res.field symbol Symbol of token
+        /// @res.field decimals Number of decimal places (eg: 6 => 1,000,000 tokens = 1 unit)
+        /// @res.field total_supply Number of total tokens in supply
+        token_info() -> _ {
+            name: String,
+            symbol: String,
+            decimals: u8,
+            total_supply: Uint128
+        }
+
+    }
+}
+
+namespace CW20 {
+    interface mixin Mintable {
+        exec {
+            /// If authorized, creates amount new tokens
+            /// and adds to the recipient balance.
+            /// @param recipient Address to which the newly minted tokens will be sent
+            /// @param amount Number of new tokens to mint
+            mint(recipient: Addr, amount: Uint128)
+        }
+
+        query {
+            /// Returns who can mint and the hard cap on maximum tokens after minting.
+            /// @res.field minter Address with permissions to mint tokens
+            /// @res.field cap Maximum amount of tokens they can mint
+            minter() -> _ {
+                minter: Addr,
+                cap?: Uint128
+            }?
+        }
+    }
+
+    interface mixin Allowances {
+        exec {
+            /// Allows spender to access an additional amount tokens
+            /// from the owner's (env.sender) account. If expires is Some(), overwrites current allowance
+            /// expiration with this one.
+            increase_allowance(spender: Addr, amount: Uint128, expires?: Expiration)
+
+            /// Lowers the spender's access of tokens
+            /// from the owner's (env.sender) account by amount. If expires is Some(), overwrites current
+            /// allowance expiration with this one.
+            decrease_allowance(spender: Addr, amount: Uint128, expires?: Expiration)
+
+            /// Transfers amount tokens from owner -> recipient
+            /// if `env.sender` has sufficient pre-approval.
+            transfer_from(owner: Addr, recipient: Addr, amount: Uint128)
+
+            /// Sends amount tokens from owner -> contract
+            /// if `env.sender` has sufficient pre-approval.
+            send_from(owner: Addr, contract: Addr, amount: Uint128, msg: Binary)
+
+            /// Destroys tokens forever
+            burn_from(owner: Addr, amount: Uint128)
+        }
+
+        query {
+            /// Returns how much spender can use from owner account, 0 if unset.
+            /// @res.field owner address of token owner
+            /// @res.field spender address of authorized spender
+            allowance(owner: String, spender: String) -> _ {
+                owner: Addr,
+                spender: Addr
+            }
+        }
+    }
+
+    interface mixin Enumerable {
+        query {
+            /// Returns all accounts that have balances. Supports pagination. 
+            /// @param start_after Account index to start from
+            /// @param limit Pagination limit
+            all_accounts(start_after?: Addr, limit?: u32) -> _ {
+                accounts: Addr[]
+            }
+        }
+    }
+
+    interface mixin Enumerable[Allowances] {
+        /// Returns all allowances this owner has approved. Supports pagination.
+        /// @param owner Address of token owner
+        /// @param start_after Account index to start from
+        /// @param limit Pagination limit
+        query all_allowances(owner: Addr, start_after?: Addr, limit?: u32) -> _ {
+            allowances: AllowanceInfo[]
+        }
+    }
+
+    interface mixin Marketing {
+        exec {
+            /// Setting None/null for any of these will leave it unchanged.
+            /// Setting Some("") will clear this field on the contract storage
+            /// @param project A URL pointing to the project behind this token.
+            /// @param description A longer description of the token and it's utility. Designed for tooltips or such
+            /// @param marketing The address (if any) who can update this data structure
+            update_marketing(project?: String, description?: String, marketing?: String)
+        }
+
+        query {
+            /// Returns more metadata on the contract to display in the client:
+            /// - description, logo, project url, etc.
+            /// @res.field project A URL pointing to the project behind this token
+            /// @res.field description A longer description of the token and it's utility. Designed for tooltips or such
+            /// @res.field logo A link to the logo, or a comment there is an on-chain logo stored
+            /// @res.field marketing The address (if any) who can update this data structure
+            marketing_info() -> _ {
+                project?: String,
+                description?: String,
+                logo?: LogoInfo,
+                marketing?: Addr
+            }
+
+            /// Downloads the embedded logo data (if stored on chain). Errors if no logo data stored for
+            /// this contract.
+            /// @res.field mime_type MIME type of logo data
+            /// @res.field data Encoded logo in binary format
+            download_logo() -> _ {
+                mime_type: String,
+                data: Binary
+            }
+        }
+    }
+}

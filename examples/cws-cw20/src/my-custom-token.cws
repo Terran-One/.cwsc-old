@@ -1,0 +1,3 @@
+import CW20Base from "./cw20-base.cws"
+
+contract MyCustomToken extends CW20Base {}
