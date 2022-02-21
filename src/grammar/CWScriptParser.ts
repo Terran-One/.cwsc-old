@@ -645,7 +645,7 @@ export class CWScriptParser extends Parser {
 			{
 			this.state = 243;
 			_localctx._importSymbol = this.importSymbol(0);
-			_localctx._importItem.push(_localctx._importSymbol);
+			_localctx._importItems.push(_localctx._importSymbol);
 			}
 			this.state = 248;
 			this._errHandler.sync(this);
@@ -658,7 +658,7 @@ export class CWScriptParser extends Parser {
 				{
 				this.state = 245;
 				_localctx._importSymbol = this.importSymbol(0);
-				_localctx._importItem.push(_localctx._importSymbol);
+				_localctx._importItems.push(_localctx._importSymbol);
 				}
 				}
 				}
@@ -5931,7 +5931,7 @@ export class ImportStmtContext extends ParserRuleContext {
 
 export class ImportSymbolListContext extends ParserRuleContext {
 	public _importSymbol!: ImportSymbolContext;
-	public _importItem: ImportSymbolContext[] = [];
+	public _importItems: ImportSymbolContext[] = [];
 	public importSymbol(): ImportSymbolContext[];
 	public importSymbol(i: number): ImportSymbolContext;
 	public importSymbol(i?: number): ImportSymbolContext | ImportSymbolContext[] {

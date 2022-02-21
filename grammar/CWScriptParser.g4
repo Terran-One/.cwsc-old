@@ -33,8 +33,8 @@ importStmt:
 		fileName = StringLiteral
 	);
 
-importSymbolList: (importItem += importSymbol) (
-		COMMA (importItem += importSymbol)
+importSymbolList: (importItems += importSymbol) (
+		COMMA (importItems += importSymbol)
 	)*;
 importSymbol:
 	LPAREN importSymbolList RPAREN						# GroupedImportSymbol

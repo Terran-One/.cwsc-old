@@ -1544,7 +1544,7 @@ function ImportSymbolListContext(parser, parent, invokingState) {
     this.parser = parser;
     this.ruleIndex = CWScriptParser.RULE_importSymbolList;
     this._importSymbol = null; // ImportSymbolContext
-    this.importItem = []; // of ImportSymbolContexts
+    this.importItems = []; // of ImportSymbolContexts
     return this;
 }
 
@@ -1588,7 +1588,7 @@ CWScriptParser.prototype.importSymbolList = function() {
         this.enterOuterAlt(localctx, 1);
         this.state = 243;
         localctx._importSymbol = this.importSymbol(0);
-        localctx.importItem.push(localctx._importSymbol);
+        localctx.importItems.push(localctx._importSymbol);
         this.state = 248;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
@@ -1598,7 +1598,7 @@ CWScriptParser.prototype.importSymbolList = function() {
 
             this.state = 245;
             localctx._importSymbol = this.importSymbol(0);
-            localctx.importItem.push(localctx._importSymbol);
+            localctx.importItems.push(localctx._importSymbol);
             this.state = 250;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
