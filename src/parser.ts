@@ -23,8 +23,8 @@ let source = fs
   .toString();
 let ast = parseCWScript(source);
 
-let x = 0;
-for (let node of ast.walkDescendants()) {
-  console.log(inspect(node.toData(), { depth: null }));
-  x += 1;
-}
+let instantiate: AST.InstantiateDefn = ast.descendants.filter(
+  x => x instanceof AST.InstantiateDefn
+)[0] as any;
+
+instantiate.args.elements.forEach((arg: any) => console.log(arg.name.text));

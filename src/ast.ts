@@ -100,7 +100,6 @@ import { Parser, ParserRuleContext, Token } from 'antlr4ts';
 import * as _ from 'lodash';
 const omitDeep = require('omit-deep-lodash');
 
-
 export interface Position {
   a?: number;
   b?: number;
@@ -165,7 +164,7 @@ export abstract class AST {
     return _.pickBy(rest, (v, k) => !(v instanceof AST) && typeof v !== 'function');
   }
 
-  public *walkAncestors(): IterableIterator<AST> {
+  public *walkAncestors(includeSelf: boolean = false): IterableIterator<AST> {
     let parent = this.parent;
     while (parent) {
       yield parent;
@@ -173,11 +172,36 @@ export abstract class AST {
     }
   }
 
-  public *walkDescendants(): IterableIterator<AST> {
-    yield* this.children;
+
+  /// Breadth-first traversal of descendant nodes.
+  public* walkDescendantsBFS(includeSelf: boolean = false): IterableIterator<AST> {
+      if (includeSelf) { yield this; }
+      yield* this.children;
+      for (const child of this.children) {
+        yield* child.walkDescendantsBFS();
+      }
+  }
+
+  /// Depth-first traversal of descendant nodes.
+  public* walkDescendants(includeSelf: boolean = false): IterableIterator<AST> {
+    if (includeSelf) { yield this; }
     for (const child of this.children) {
+      yield child;
       yield* child.walkDescendants();
     }
+  }
+
+  // Leaves-first traversal of descendant nodes.
+  public* walkDescendantsLF(includeSelf: boolean = false): IterableIterator<AST> {
+    for (const child of this.children) {
+      yield* child.walkDescendantsLF();
+    }
+    yield* this.children;
+    if (includeSelf) { yield this; }
+  }
+
+  public get descendants(): AST[] {
+    return Array.from(this.walkDescendants());
   }
 
   public setParentForChildren() {
@@ -188,7 +212,7 @@ export abstract class AST {
   public toData(): any {
     return {
       "$type": this.constructor.name,
-      "children": this.children.map(x => x.toData()),
+      // "children": this.children.map(x => x.toData()),
       "properties": this.properties
     }
   }
