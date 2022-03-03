@@ -1,0 +1,3917 @@
+yarn run v1.13.0
+$ ts-node src/parser.ts
+$type: List
+properties: {}
+
+$type: ImportStmt
+properties:
+  fileName: '"./cw20.cws"'
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: TypePathImportSymbol
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: DestructureImportSymbol
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: TypePathImportSymbol
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Mintable
+
+$type: TypePathImportSymbol
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Allowances
+
+$type: TypePathImportSymbol
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Enumerable
+
+$type: TypePathImportSymbol
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Marketing
+
+$type: AllImportSymbol
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: InterfaceDefn
+properties:
+  ? spec
+  ? parents
+  ? mixinName
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: >
+    /// Transfer is a base message to move tokens to another account without
+    triggering actions
+
+    /// @param recipient Address to transfer to
+
+    /// @param amount Number of tokens to transfer
+
+$type: Ident
+properties:
+  text: transfer
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: |
+    /// Burn is a base message to destroy tokens forever
+    /// @param amount Number of tokens to burn
+
+$type: Ident
+properties:
+  text: burn
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: >
+    /// Send is a base message to transfer tokens to a contract and trigger an
+    action
+
+    /// on the receiving contract.
+
+    /// @param contract Address of contract to call
+
+    /// @param amount Number of tokens to send
+
+    /// @param msg encoded ExecuteMsg to trigger
+
+$type: Ident
+properties:
+  text: send
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: contract
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: msg
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Binary
+
+$type: List
+properties: {}
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Returns the current balance of the given address, 0 if unset.
+    /// @res.field balance Current balance of tokens
+
+$type: Ident
+properties:
+  text: balance
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: address
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: balance
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: >
+    /// Returns metadata on the contract - name, decimals, supply, etc.
+
+    /// @res.field name Name of token
+
+    /// @res.field symbol Symbol of token
+
+    /// @res.field decimals Number of decimal places (eg: 6 => 1,000,000 tokens = 1 unit)
+
+    /// @res.field total_supply Number of total tokens in supply
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: List
+properties: {}
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: name
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: symbol
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: decimals
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: u8
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: total_supply
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: InterfaceDefn
+properties:
+  ? spec
+  ? parents
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: |
+    /// If authorized, creates amount new tokens
+    /// and adds to the recipient balance.
+    /// @param recipient Address to which the newly minted tokens will be sent
+    /// @param amount Number of new tokens to mint
+
+$type: Ident
+properties:
+  text: mint
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Returns who can mint and the hard cap on maximum tokens after minting.
+    /// @res.field minter Address with permissions to mint tokens
+    /// @res.field cap Maximum amount of tokens they can mint
+
+$type: Ident
+properties:
+  text: minter
+
+$type: List
+properties: {}
+
+$type: ShortOptionTypeExpr
+properties: {}
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: minter
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: true
+
+$type: Ident
+properties:
+  text: cap
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: Ident
+properties:
+  text: Mintable
+
+$type: InterfaceDefn
+properties:
+  ? spec
+  ? parents
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: >
+    /// Allows spender to access an additional amount tokens
+
+    /// from the owner's (env.sender) account. If expires is Some(), overwrites current allowance
+
+    /// expiration with this one.
+
+$type: Ident
+properties:
+  text: increase_allowance
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: spender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: expires
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Expiration
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: >
+    /// Lowers the spender's access of tokens
+
+    /// from the owner's (env.sender) account by amount. If expires is Some(), overwrites current
+
+    /// allowance expiration with this one.
+
+$type: Ident
+properties:
+  text: decrease_allowance
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: spender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: expires
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Expiration
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: |
+    /// Transfers amount tokens from owner -> recipient
+    /// if `env.sender` has sufficient pre-approval.
+
+$type: Ident
+properties:
+  text: transfer_from
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: owner
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: |
+    /// Sends amount tokens from owner -> contract
+    /// if `env.sender` has sufficient pre-approval.
+
+$type: Ident
+properties:
+  text: send_from
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: owner
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: contract
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: msg
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Binary
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: |
+    /// Destroys tokens forever
+
+$type: Ident
+properties:
+  text: burn_from
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: owner
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Returns how much spender can use from owner account, 0 if unset.
+    /// @res.field owner address of token owner
+    /// @res.field spender address of authorized spender
+
+$type: Ident
+properties:
+  text: allowance
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: owner
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: spender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: owner
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: spender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: Ident
+properties:
+  text: Allowances
+
+$type: InterfaceDefn
+properties:
+  ? spec
+  ? parents
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Returns all accounts that have balances. Supports pagination. 
+    /// @param start_after Account index to start from
+    /// @param limit Pagination limit
+
+$type: Ident
+properties:
+  text: all_accounts
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: start_after
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: limit
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: u32
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: accounts
+
+$type: ShortVecTypeExpr
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: Ident
+properties:
+  text: Enumerable
+
+$type: InterfaceDefn
+properties:
+  ? spec
+  ? parents
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Returns all allowances this owner has approved. Supports pagination.
+    /// @param owner Address of token owner
+    /// @param start_after Account index to start from
+    /// @param limit Pagination limit
+
+$type: Ident
+properties:
+  text: all_allowances
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: owner
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: start_after
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: limit
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: u32
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: allowances
+
+$type: ShortVecTypeExpr
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: AllowanceInfo
+
+$type: Ident
+properties:
+  text: Enumerable
+
+$type: InterfaceDefn
+properties:
+  ? spec
+  ? parents
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: ExecDecl
+properties:
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: >
+    /// Setting None/null for any of these will leave it unchanged.
+
+    /// Setting Some("") will clear this field on the contract storage
+
+    /// @param project A URL pointing to the project behind this token.
+
+    /// @param description A longer description of the token and it's utility. Designed for tooltips or such
+
+    /// @param marketing The address (if any) who can update this data structure
+
+$type: Ident
+properties:
+  text: update_marketing
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: project
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: description
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: marketing
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: List
+properties: {}
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: >
+    /// Returns more metadata on the contract to display in the client:
+
+    /// - description, logo, project url, etc.
+
+    /// @res.field project A URL pointing to the project behind this token
+
+    /// @res.field description A longer description of the token and it's utility. Designed for tooltips or such
+
+    /// @res.field logo A link to the logo, or a comment there is an on-chain logo stored
+
+    /// @res.field marketing The address (if any) who can update this data structure
+
+$type: Ident
+properties:
+  text: marketing_info
+
+$type: List
+properties: {}
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: true
+
+$type: Ident
+properties:
+  text: project
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: StructMember
+properties:
+  spec: null
+  option: true
+
+$type: Ident
+properties:
+  text: description
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: StructMember
+properties:
+  spec: null
+  option: true
+
+$type: Ident
+properties:
+  text: logo
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: LogoInfo
+
+$type: StructMember
+properties:
+  spec: null
+  option: true
+
+$type: Ident
+properties:
+  text: marketing
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: QueryDecl
+properties: {}
+
+$type: CWSpec
+properties:
+  text: >
+    /// Downloads the embedded logo data (if stored on chain). Errors if no logo
+    data stored for
+
+    /// this contract.
+
+    /// @res.field mime_type MIME type of logo data
+
+    /// @res.field data Encoded logo in binary format
+
+$type: Ident
+properties:
+  text: download_logo
+
+$type: List
+properties: {}
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: mime_type
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: data
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Binary
+
+$type: Ident
+properties:
+  text: Marketing
+
+$type: ContractDefn
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Translation of CW20-base
+    /// @author William Chen <william@terran.one>
+
+$type: Ident
+properties:
+  text: CW20Base
+
+$type: List
+properties: {}
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Item
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: a
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: StructMember
+properties:
+  spec: null
+  option: true
+
+$type: Ident
+properties:
+  text: b
+
+$type: ParamzdTypeExpr
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: List
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sdfd
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsd
+
+$type: ErrorDefn
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// When 0 tokens is provided as amount
+    /// @note {sdfsdf} sdfsdf
+    /// @tip { sdfsd } sdfsdf
+
+$type: EnumVariantUnit
+properties: {}
+
+$type: Ident
+properties:
+  text: InvalidZeroAmount
+
+$type: ErrorDefn
+properties:
+  ? spec
+
+$type: EnumVariantTuple
+properties: {}
+
+$type: Ident
+properties:
+  text: TupleTest
+
+$type: List
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: ErrorDefn
+properties:
+  ? spec
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: StructTest
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: ParamzdTypeExpr
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: List
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfds
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: item
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: sdfsdf
+
+$type: EventDefn
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// @param sender Sending account
+    /// @param recipient Receiving account
+    /// @param amount Number of tokens transferred
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Transfer
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: EventDefn
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Emitted when tokens are burned.
+    /// @param sender Account from which tokens are burned
+    /// @param amount Number of tokens burned
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Burn
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: EventDefn
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Emitted when new tokens are minted.
+    /// @param minter Account initiating mint operation
+    /// @param recipient Account receiving the newly minted tokens
+    /// @param amount Number of newly minted tokens
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Mint
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: minter
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: EventDefn
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Emitted when tokens are transferred in a `exec:send` operation
+    /// @param sender Sending account
+    /// @param contract Address of contract called
+    /// @param amount Number of tokens sent 
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: contract
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: ErrorDefn
+properties:
+  ? spec
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sneder
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: ErrorDefn
+properties:
+  ? spec
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: ErrorDefn
+properties:
+  ? spec
+
+$type: EnumVariantUnit
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: EventDefn
+properties:
+  ? spec
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: EventDefn
+properties:
+  ? spec
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: sender
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: EventDefn
+properties:
+  ? spec
+
+$type: EnumVariantUnit
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: ItemDefn
+properties:
+  ? spec
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: MapDefn
+properties:
+  ? spec
+
+$type: Ident
+properties:
+  text: balances
+
+$type: List
+properties: {}
+
+$type: MapDefnKey
+properties: {}
+
+$type: Ident
+properties:
+  text: account
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: ParamzdTypeExpr
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: asd
+
+$type: MapDefn
+properties: {}
+
+$type: CWSpec
+properties:
+  text: |
+    /// Maps the account address to their corresponding balance.
+    /// @key:account Address of account
+    /// @value Number of tokens held by `account`
+
+$type: Ident
+properties:
+  text: balances
+
+$type: List
+properties: {}
+
+$type: MapDefnKey
+properties: {}
+
+$type: Ident
+properties:
+  text: account
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: InstantiateDefn
+properties:
+  ? name
+  ? returnType
+
+$type: CWSpec
+properties:
+  text: >
+    /// @param name Token name
+
+    /// @param symbol Token symbol
+
+    /// @param decimals Number of decimal places for one unit of token
+
+    /// @param initial_balances List of addresses and their initial token balances
+
+    /// @param mint Minter information
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: name
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: symbol
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: String
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: decimals
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: u8
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: initial_balances
+
+$type: ShortVecTypeExpr
+properties: {}
+
+$type: EnumVariantStruct
+properties: {}
+
+$type: Ident
+properties:
+  text: Cw20Coin
+
+$type: List
+properties: {}
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: address
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: StructMember
+properties:
+  spec: null
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: FnArg
+properties:
+  option: true
+
+$type: Ident
+properties:
+  text: mint
+
+$type: ReflectiveTypeExpr
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: Ident
+properties:
+  text: query
+
+$type: Ident
+properties:
+  text: mint
+
+$type: Ident
+properties:
+  text: response
+
+$type: List
+properties: {}
+
+$type: LetStmt
+properties: {}
+
+$type: IdentLHS
+properties: {}
+
+$type: Ident
+properties:
+  text: total_supply
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: TupleVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: IntegerVal
+properties:
+  value: "0"
+
+$type: List
+properties: {}
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: Ident
+properties:
+  text: address
+
+$type: AssignStmt
+properties:
+  assignOp: +=
+
+$type: Ident
+properties:
+  text: total_supply
+
+$type: Ident
+properties:
+  text: amount
+
+$type: AssignStmt
+properties:
+  assignOp: =
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: StructVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructValMember
+properties: {}
+
+$type: Ident
+properties:
+  text: name
+
+$type: Ident
+properties:
+  text: name
+
+$type: StructValMember
+properties: {}
+
+$type: Ident
+properties:
+  text: symbol
+
+$type: Ident
+properties:
+  text: symbol
+
+$type: StructValMember
+properties: {}
+
+$type: Ident
+properties:
+  text: decimals
+
+$type: Ident
+properties:
+  text: decimals
+
+$type: StructValMember
+properties: {}
+
+$type: Ident
+properties:
+  text: total_supply
+
+$type: Ident
+properties:
+  text: total_supply
+
+$type: ExecDefn
+properties:
+  ? spec
+  ? returnType
+
+$type: Ident
+properties:
+  text: transfer
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: AssignStmt
+properties:
+  assignOp: -=
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: Ident
+properties:
+  text: amount
+
+$type: AssignStmt
+properties:
+  assignOp: +=
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: Ident
+properties:
+  text: amount
+
+$type: EmitStmt
+properties: {}
+
+$type: TupleVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Transfer
+
+$type: List
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: Ident
+properties:
+  text: amount
+
+$type: ExecDefn
+properties:
+  ? spec
+  ? returnType
+
+$type: Ident
+properties:
+  text: burn
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: AssignStmt
+properties:
+  assignOp: -=
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: Ident
+properties:
+  text: amount
+
+$type: AssignStmt
+properties:
+  assignOp: -=
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: token_supply
+
+$type: Ident
+properties:
+  text: amount
+
+$type: EmitStmt
+properties: {}
+
+$type: TupleVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Burn
+
+$type: List
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: Ident
+properties:
+  text: amount
+
+$type: ExecDefn
+properties:
+  ? spec
+  ? returnType
+
+$type: Ident
+properties:
+  text: mint
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: AssignStmt
+properties:
+  assignOp: =
+
+$type: Ident
+properties:
+  text: config
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: IfExpr
+properties: {}
+
+$type: IfClause
+properties: {}
+
+$type: OrExpr
+properties: {}
+
+$type: CompOpExpr
+properties:
+  op: ==
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: config
+
+$type: Ident
+properties:
+  text: mint
+
+$type: Ident
+properties:
+  text: None
+
+$type: CompOpExpr
+properties:
+  op: "!="
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: config
+
+$type: Ident
+properties:
+  text: mint
+
+$type: Ident
+properties:
+  text: minter
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: List
+properties: {}
+
+$type: FailStmt
+properties: {}
+
+$type: Ident
+properties:
+  text: Unauthorized
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: AssignStmt
+properties:
+  assignOp: +=
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: config
+
+$type: Ident
+properties:
+  text: total_supply
+
+$type: Ident
+properties:
+  text: amount
+
+$type: IfExpr
+properties: {}
+
+$type: IfClause
+properties: {}
+
+$type: AndExpr
+properties: {}
+
+$type: PosArgsFnCallExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: config
+
+$type: Ident
+properties:
+  text: get_cap
+
+$type: List
+properties: {}
+
+$type: CompOpExpr
+properties:
+  op: ">"
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: config
+
+$type: Ident
+properties:
+  text: total_supply
+
+$type: Ident
+properties:
+  text: limit
+
+$type: List
+properties: {}
+
+$type: FailStmt
+properties: {}
+
+$type: Ident
+properties:
+  text: CannotExceedCap
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: AssignStmt
+properties:
+  assignOp: =
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: Ident
+properties:
+  text: config
+
+$type: AssignStmt
+properties:
+  assignOp: +=
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: Ident
+properties:
+  text: amount
+
+$type: EmitStmt
+properties: {}
+
+$type: TupleVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Mint
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: minter
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: Ident
+properties:
+  text: amount
+
+$type: ExecDefn
+properties:
+  ? spec
+  ? returnType
+
+$type: Ident
+properties:
+  text: send
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: contract_addr
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: msg
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Binary
+
+$type: List
+properties: {}
+
+$type: AssignStmt
+properties:
+  assignOp: -=
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: Ident
+properties:
+  text: amount
+
+$type: AssignStmt
+properties:
+  assignOp: +=
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: Ident
+properties:
+  text: contract
+
+$type: Ident
+properties:
+  text: amount
+
+$type: EmitStmt
+properties: {}
+
+$type: TupleVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Send
+
+$type: List
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: Ident
+properties:
+  text: contract
+
+$type: Ident
+properties:
+  text: amount
+
+$type: ExecStmt
+properties: {}
+
+$type: NamedArgsFnCallExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: TupleVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: CW20Receiver
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: contract
+
+$type: Ident
+properties:
+  text: receive
+
+$type: List
+properties: {}
+
+$type: NamedExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: sender
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: msg
+
+$type: Ident
+properties:
+  text: sender
+
+$type: NamedExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: item
+
+$type: Ident
+properties:
+  text: amount
+
+$type: NamedExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: fire
+
+$type: Ident
+properties:
+  text: msg
+
+$type: QueryDefn
+properties:
+  ? spec
+  ? returnType
+
+$type: Ident
+properties:
+  text: balance
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: address
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: List
+properties: {}
+
+$type: StructVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructValMember
+properties: {}
+
+$type: Ident
+properties:
+  text: balance
+
+$type: OrExpr
+properties: {}
+
+$type: TableLookupExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: balances
+
+$type: Ident
+properties:
+  text: address
+
+$type: IntegerVal
+properties:
+  value: "0"
+
+$type: QueryDefn
+properties:
+  ? spec
+  ? returnType
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: List
+properties: {}
+
+$type: List
+properties: {}
+
+$type: StructVal
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: StructValMember
+properties: {}
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: ExecDefn
+properties:
+  ? spec
+  ? returnType
+
+$type: Ident
+properties:
+  text: mint
+
+$type: List
+properties: {}
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: recipient
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Addr
+
+$type: FnArg
+properties:
+  option: false
+
+$type: Ident
+properties:
+  text: amount
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Uint128
+
+$type: List
+properties: {}
+
+$type: QueryDefn
+properties:
+  ? spec
+
+$type: Ident
+properties:
+  text: minter
+
+$type: List
+properties: {}
+
+$type: TypePath
+properties:
+  root: false
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: _
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: let
+
+$type: AssignStmt
+properties:
+  assignOp: =
+
+$type: Ident
+properties:
+  text: minter
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: MemberAccessExpr
+properties: {}
+
+$type: Ident
+properties:
+  text: state
+
+$type: Ident
+properties:
+  text: token_info
+
+$type: Ident
+properties:
+  text: minter
+
+$type: ReturnStmt
+properties: {}
+
+$type: Ident
+properties:
+  text: minter
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: CW2
+
+$type: List
+properties: {}
+
+$type: InterfaceVal
+properties: {}
+
+$type: Ident
+properties:
+  text: CW20
+
+$type: List
+properties: {}
+
+$type: Ident
+properties:
+  text: Mintable
+
+$type: Ident
+properties:
+  text: Allowances
+
+$type: Ident
+properties:
+  text: Enumerable
+
+$type: Ident
+properties:
+  text: Marketing
+
+Done in 4.04s.

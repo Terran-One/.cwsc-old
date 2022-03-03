@@ -231,7 +231,6 @@ export class Ident extends AST {
     this.setParentForChildren();
   }
 }
-
 export class List<T extends AST> extends AST {
   constructor(ctx: any, public elements: T[]) {
     super(ctx);
