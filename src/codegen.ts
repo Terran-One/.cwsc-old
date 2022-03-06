@@ -578,7 +578,8 @@ export class CWScriptCodegen {
     }
 
     if (ast instanceof AST.EmitStmt) {
-      return new IR.IR();
+      let expr = this.translate(env, ast.expr);
+      return new IR.Emit(expr);
     }
 
     if (ast instanceof AST.IfExpr) {
@@ -586,7 +587,26 @@ export class CWScriptCodegen {
     }
 
     if (ast instanceof AST.ExecStmt) {
-      return new IR.IR();
+      let expr = this.translate(env, ast.expr);
+      return new IR.Exec(expr);
+    }
+
+    if (ast instanceof AST.NamedArgsFnCallExpr) {
+      let expr = this.translate(env, ast.fn);
+      let args = ast.args.elements.map(arg => this.translate(env, arg));
+      return new IR.NamedArgsFnCall(expr, new IR.List(args));
+    }
+
+    if (ast instanceof AST.NamedExpr) {
+      let name = ast.name.text;
+      let value = this.translate(env, ast.value);
+      return new IR.NamedExpr(name, value);
+    }
+
+    if (ast instanceof AST.TupleVal) {
+      let type = this.translateType(env, ast.type);
+      let elements = ast.members.elements.map(x => this.translate(env, x));
+      return new IR.TupleVal(type, new IR.List(elements));
     }
 
     throw new Error(

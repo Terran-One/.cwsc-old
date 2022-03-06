@@ -191,3 +191,38 @@ export class Mod extends IR {
     this.setParentForChildren();
   }
 }
+
+export class TupleVal extends IR {
+  constructor(public type: Type, public values: List<IR>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class Emit extends IR {
+  constructor(public expr: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class NamedArgsFnCall extends IR {
+  constructor(public fn: IR, public args: List<IR>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class NamedExpr extends IR {
+  constructor(public name: string, public expr: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class Exec extends IR {
+  constructor(public expr: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
