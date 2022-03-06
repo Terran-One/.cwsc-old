@@ -1,6 +1,6 @@
 import * as AST from './ast';
+import { EnumVariantContext } from './grammar/CWScriptParser';
 import * as IR from './ir';
-import util from 'util';
 
 export interface FileSource {
   file: string;
@@ -52,6 +52,7 @@ export class CodegenEnv {
   }
 
   set(key: string, value: any) {
+    console.log(`${this.id} - set ${key} = ${value.constructor.name}`);
     this.data[key] = value;
   }
 
@@ -88,8 +89,8 @@ export class CodegenEnv {
 
 export class FileEnv extends CodegenEnv {
   constructor(public file: string, public parent: CodegenEnv) {
-    super(parent.manager, parent.id + ':' + file, parent);
-    this.manager.envs[file] = this;
+    super(parent.manager, file, parent);
+    this.manager.envs[this.id] = this;
   }
 
   createChildContractEnv(contract: AST.ContractDefn): ContractEnv {
@@ -97,8 +98,13 @@ export class FileEnv extends CodegenEnv {
     return contractEnv;
   }
 
-  createChildInterfaceEnv(interfaceDef: AST.InterfaceDefn): InterfaceEnv {
-    let interfaceEnv = new InterfaceEnv(interfaceDef.name.text, this);
+  createChildInterfaceEnv(interfaceDefn: AST.InterfaceDefn): InterfaceEnv {
+    let interfaceNameWithMixin =
+      interfaceDefn.name.text +
+      (interfaceDefn.mixinName !== undefined
+        ? '[' + interfaceDefn.mixinName!.text + ']'
+        : '');
+    let interfaceEnv = new InterfaceEnv(interfaceNameWithMixin, this);
     return interfaceEnv;
   }
 
@@ -128,7 +134,7 @@ export class ContractEnv extends CodegenEnv {
 
 export class InterfaceEnv extends CodegenEnv {
   constructor(public interface_: string, public parent: FileEnv) {
-    super(parent.manager, parent.id + ':', parent);
+    super(parent.manager, parent.id + ':' + interface_, parent);
     this.manager.envs[this.id] = this;
   }
 }
@@ -227,11 +233,7 @@ function _return(): string {
 }
 
 export class ImportedSymbol {
-  constructor(
-    public file: string,
-    public sourceEnv: CodegenEnv,
-    public symbol: string | AST.ImportSymbol
-  ) {}
+  constructor(public file: string, public symbol: any) {}
 }
 
 export class CWScriptCodegen {
@@ -244,9 +246,7 @@ export class CWScriptCodegen {
     }
 
     sources.forEach(source => {
-      console.log(this.envManager.getRootEnv());
-      let rootEnv = this.envManager.getRootEnv();
-      let fileEnv = rootEnv.createChildFileEnv(source);
+      let fileEnv = this.envManager.getRootEnv().createChildFileEnv(source);
       this.loadLocalDefns(fileEnv, source.ast);
       this.loadTypeDefns(fileEnv, source.ast);
     });
@@ -254,7 +254,29 @@ export class CWScriptCodegen {
     sources.forEach(source => {
       let fileEnv = this.envManager.getFileEnv(source.file);
       this.loadImports(fileEnv, source.ast);
+      // this.loadImports(fileEnv, source.ast);
     });
+  }
+
+  loadImports(env: FileEnv, ast: AST.SourceFile) {
+    ast.descendantsOfType(AST.ImportStmt).forEach(imp => {
+      this.loadImport(env, imp);
+    });
+  }
+
+  loadImport(env: FileEnv, ast: AST.ImportStmt) {
+    let { symbols, fileName } = ast;
+    let importEnv = this.envManager.getFileEnv(fileName);
+    if (symbols === '*') {
+      Object.entries(importEnv.data).forEach(([k, v]) => {
+        env.set(k, new ImportedSymbol(fileName, importEnv.lookup(k)));
+      });
+    } else if (symbols instanceof AST.List) {
+      symbols.elements.forEach(sym => {
+        if (sym instanceof AST.TypePathImportSymbol) {
+        }
+      });
+    }
   }
 
   loadTypeDefns(env: CodegenEnv, defn: AST.AST) {
@@ -319,11 +341,11 @@ export class CWScriptCodegen {
     });
   }
 
-  loadLocalDefns(env: CodegenEnv, sourceFile: AST.SourceFile): void {
+  loadLocalDefns(env: FileEnv, sourceFile: AST.SourceFile): void {
     let contractDefns = sourceFile.descendantsOfType(AST.ContractDefn);
     for (let contractDefn of contractDefns) {
-      env.set(_contract(contractDefn.name.text), contractDefn);
-      let contractEnv = env.createChild(_contract(contractDefn.name.text));
+      env.set(contractDefn.name.text, contractDefn);
+      let contractEnv = env.createChildContractEnv(contractDefn);
       this.loadErrorEnumStateDefns(contractEnv, contractDefn);
       this.loadTypeDefns(contractEnv, contractDefn);
       this.loadFnDefns(contractEnv, contractDefn);
@@ -336,57 +358,54 @@ export class CWScriptCodegen {
         (interfaceDefn.mixinName !== undefined
           ? '[' + interfaceDefn.mixinName!.text + ']'
           : '');
-      env.set(_interface(interfaceNameWithMixin), interfaceDefn);
-      let interfaceEnv = env.createChild(_interface(interfaceNameWithMixin));
+      env.set(interfaceNameWithMixin, interfaceDefn);
+      let interfaceEnv = env.createChildInterfaceEnv(interfaceDefn);
       this.loadErrorEnumStateDefns(interfaceEnv, interfaceDefn);
       this.loadTypeDefns(interfaceEnv, interfaceDefn);
       this.loadFnDecls(interfaceEnv, interfaceDefn);
     }
   }
 
-  loadImports(env: CodegenEnv, sourceFile: AST.SourceFile): void {
-    let importStmts = sourceFile.descendantsOfType(AST.ImportStmt);
-    for (let importStmt of importStmts) {
-      let file: string = importStmt.fileName;
-      let importEnv = this.envManager.getFileEnv(file);
-      if (importStmt.symbols === '*') {
-        for (let key of Object.keys(importEnv.data)) {
-          env.set(key, new ImportedSymbol(file, importEnv, key));
-        }
-      } else {
-        importStmt.symbols!.elements.forEach(symbol => {
-          if (symbol instanceof AST.List) {
-            symbol.elements.forEach(element => {
-              env.set(
-                element.text,
-                new ImportedSymbol(file, importEnv, element)
-              );
-            });
-          } else if (symbol instanceof AST.TypePathImportSymbol) {
-            let len = symbol.path.paths.elements.length;
-            env.set(
-              symbol.path.paths.elements[len - 1].text,
-              new ImportedSymbol(file, importEnv, symbol)
-            );
-          } else if (symbol instanceof AST.RenamedImportSymbol) {
-            env.set(
-              symbol.name.text,
-              new ImportedSymbol(file, importEnv, symbol)
-            );
-          } else if (symbol instanceof AST.DestructureImportSymbol) {
-            throw new Error('Destructure import not supported');
-          } else if (symbol instanceof AST.AllImportSymbol) {
-            throw new Error('All import not supported');
-          } else {
-            throw new Error(
-              // @ts-ignore
-              `Unknown import symbol - ${symbol.constructor.name}`
-            );
-          }
-        });
-      }
-    }
-  }
+  // loadImports(env: FileEnv, sourceFile: AST.SourceFile): void {
+  //   let importStmts = sourceFile.descendantsOfType(AST.ImportStmt);
+  //   for (let importStmt of importStmts) {
+  //     let file: string = importStmt.fileName;
+  //     let importEnv = this.envManager.getFileEnv(file);
+  //     if (importStmt.symbols === '*') {
+  //       for (let key of Object.keys(importEnv.data)) {
+  //         env.set(key, new ImportedSymbol(file, importEnv, key));
+  //       }
+  //     } else {
+  //       importStmt.symbols!.elements.forEach(symbol => {
+  //         if (symbol instanceof AST.List) {
+  //           symbol.elements.forEach(element => {
+  //             env.set(
+  //               element.text,
+  //               new ImportedSymbol(file, importEnv, element)
+  //             );
+  //           });
+  //         } else if (symbol instanceof AST.TypePathImportSymbol) {
+  //           let len = symbol.path.paths.elements.length;
+  //           env.set(
+  //             symbol.path.paths.elements[len - 1].text,
+  //             new ImportedSymbol(file, importEnv, symbol)
+  //           );
+  //         } else if (symbol instanceof AST.RenamedImportSymbol) {
+  //           env.set(
+  //             symbol.name.text,
+  //             new ImportedSymbol(file, importEnv, symbol)
+  //           );
+  //         } else if (symbol instanceof AST.DestructureImportSymbol) {
+  //           throw new Error('Destructure import not supported');
+  //         } else if (symbol instanceof AST.AllImportSymbol) {
+  //           throw new Error('All import not supported');
+  //         } else {
+  //           throw new Error(`Unknown import symbol`);
+  //         }
+  //       });
+  //     }
+  //   }
+  // }
 
   compileContract(name: string, file?: string): any {
     // find the source file where the contract is defined
@@ -413,7 +432,27 @@ export class CWScriptCodegen {
       .descendantsOfType(AST.ContractDefn)
       .find(x => x.name.text === name)!;
 
+    let instantiate;
     let exec: any = {};
+    let query: any = {};
+    let migrate;
+
+    for (let fn of contractDefn.descendantsOfType(AST.InstantiateDefn)) {
+      let env = this.envManager
+        .getFileEnv(sourceFile.file)
+        .getContractEnv(contractDefn.name.text)
+        .createChild(_instantiate());
+      instantiate = this.translate(env, fn);
+    }
+
+    for (let fn of contractDefn.descendantsOfType(AST.MigrateDefn)) {
+      let env = this.envManager
+        .getFileEnv(sourceFile.file)
+        .getContractEnv(contractDefn.name.text)
+        .createChild(_migrate());
+      migrate = this.translate(env, fn);
+    }
+
     for (const execDefn of contractDefn.descendantsOfType(AST.ExecDefn)) {
       let env = this.envManager
         .getFileEnv(sourceFile.file)
@@ -422,10 +461,21 @@ export class CWScriptCodegen {
       exec[execDefn.name!.text] = this.translate(env, execDefn);
     }
 
+    for (const queryDefn of contractDefn.descendantsOfType(AST.QueryDefn)) {
+      let env = this.envManager
+        .getFileEnv(sourceFile.file)
+        .getContractEnv(contractDefn.name.text)
+        .createChild(_query(queryDefn.name!.text));
+      query[queryDefn.name!.text] = this.translate(env, queryDefn);
+    }
+
     // get items
     return {
       name: contractDefn.name.text,
       exec,
+      query,
+      instantiate,
+      migrate,
     };
   }
 
@@ -435,12 +485,44 @@ export class CWScriptCodegen {
     return new IR.FnArg(name, type);
   }
 
+  public translateStructDefn(
+    env: CodegenEnv,
+    ast: AST.StructDefn
+  ): IR.StructType {
+    let name = ast.name.text;
+    let { enumVariant } = ast;
+    if (enumVariant instanceof AST.EnumVariantStruct) {
+      return new IR.StructStructType(
+        name,
+        new IR.List(
+          enumVariant.members.elements.map(
+            x =>
+              new IR.StructMember(x.name.text, this.translateType(env, x.type))
+          )
+        )
+      );
+    } else if (enumVariant instanceof AST.EnumVariantTuple) {
+      return new IR.TupleStructType(
+        name,
+        new IR.List(
+          enumVariant.members.elements.map(x => this.translateType(env, x))
+        )
+      );
+    } else if (enumVariant instanceof AST.EnumVariantUnit) {
+      return new IR.UnitStructType(name);
+    } else {
+      throw new Error(`Unknown enum variant type`);
+    }
+  }
+
   public translateType(env: CodegenEnv, type: AST.TypeExpr): IR.Type {
     if (type instanceof AST.TypePath) {
-      return new IR.TypePath(
-        type.root,
-        type.paths.elements.map(x => x.text)
-      );
+      let [first, ...rest] = type.paths.elements.map(x => x.text);
+      let base: any = env.lookup(first);
+      for (const path of rest) {
+        base = base[path];
+      }
+      return base;
     } else if (type instanceof AST.ParamzdTypeExpr) {
       return new IR.ParamzdTypeExpr(
         this.translateType(env, type.type),
@@ -466,12 +548,53 @@ export class CWScriptCodegen {
         throw new Error(`${base.toString()}.${type.member.text} is not a type`);
       }
       return res;
+    } else if (type instanceof AST.StructDefn) {
+      return this.translateStructDefn(env, type);
     } else {
-      throw new Error(`Unsupported type: ${type}`);
+      console.log(type.toData());
+      throw new Error(`Unsupported type: ${type.constructor.name}`);
     }
   }
 
+  public translateLetStmt(env: CodegenEnv, ast: AST.LetStmt): IR.IR {
+    ast.lhs.descendantsOfType(AST.Ident).forEach(i => {
+      env.set(i.text, i);
+    });
+
+    if (ast.lhs instanceof AST.IdentLHS) {
+      let lhs = ast.lhs.name;
+      let rhs = this.translate(env, ast.rhs);
+      return new IR.LetStmt(lhs, rhs);
+    }
+
+    throw new Error(`Unsupported LHS: ${ast.lhs}`);
+  }
+
   public translate(env: CodegenEnv, ast: AST.AST): IR.IR {
+    if (ast instanceof AST.LetStmt) {
+      return this.translateLetStmt(env, ast);
+    }
+
+    if (ast instanceof AST.InstantiateDefn) {
+      let args = ast.args.elements.map(arg => this.translateFnArg(env, arg));
+      let returnType;
+      if (ast.returnType !== undefined) {
+        returnType = this.translateType(env, ast.returnType);
+      } else {
+        returnType = new IR.UnitType();
+      }
+
+      ast.args.elements.forEach(arg => {
+        env.set(arg.name.text, arg);
+      });
+
+      return new IR.InstantiateDefn(
+        new IR.List(args),
+        returnType,
+        new IR.List(ast.body.elements.map(x => this.translate(env, x)))
+      );
+    }
+
     if (ast instanceof AST.ExecDefn) {
       // load the locals & return type
       let args = ast.args.elements.map(arg => this.translateFnArg(env, arg));
@@ -482,11 +605,9 @@ export class CWScriptCodegen {
         returnType = new IR.UnitType();
       }
 
-      args.forEach(arg => {
-        env.set(arg.name, arg);
+      ast.args.elements.forEach(arg => {
+        env.set(arg.name.text, arg);
       });
-
-      env.set(_return(), returnType);
 
       return new IR.ExecDefn(
         ast.name!.text,
@@ -523,7 +644,9 @@ export class CWScriptCodegen {
           throw new Error(`Unsupported assignOp: ${ast.assignOp}`);
       }
 
-      if (lhs instanceof IR.StateItemGet) {
+      if (lhs instanceof IR.Variable) {
+        return new IR.VariableSet(lhs.name, newValue);
+      } else if (lhs instanceof IR.StateItemGet) {
         return new IR.StateItemSet(lhs.name, newValue);
       } else if (lhs instanceof IR.StateMapGet) {
         return new IR.StateMapSet(lhs.name, lhs.keys, newValue);
@@ -552,11 +675,14 @@ export class CWScriptCodegen {
     }
 
     if (ast instanceof AST.Ident) {
-      return new IR.Ident(ast.text);
+      let res = env.lookup(ast.text);
+      if (res === undefined) {
+        throw new Error(`${ast.text} is not defined`);
+      }
+      return res;
     }
 
     if (ast instanceof AST.MemberAccessExpr) {
-      let lhs = this.translate(env, ast.lhs);
       let member = ast.member.text;
       if (ast.isState()) {
         let state = env.lookupWhere(
@@ -572,7 +698,13 @@ export class CWScriptCodegen {
           return new IR.StateMapGet(member, new IR.List([]));
         }
         throw new Error('Unknown state type: ' + state.constructor.name);
+      } else if (ast.isApi() || ast.isEnv() || ast.isMsg()) {
+        return new IR.SpecialVariableAccess(
+          (ast.lhs as AST.Ident).text,
+          member
+        );
       } else {
+        let lhs = this.translate(env, ast.lhs);
         return new IR.MemberAccess(lhs, member);
       }
     }
@@ -607,6 +739,11 @@ export class CWScriptCodegen {
       let type = this.translateType(env, ast.type);
       let elements = ast.members.elements.map(x => this.translate(env, x));
       return new IR.TupleVal(type, new IR.List(elements));
+    }
+
+    if (ast instanceof AST.FnArg) {
+      console.log(ast.constructor.name);
+      return this.translateFnArg(env, ast);
     }
 
     throw new Error(

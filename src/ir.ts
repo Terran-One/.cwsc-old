@@ -77,6 +77,13 @@ export class ExecDefn extends IR {
   }
 }
 
+export class InstantiateDefn extends IR {
+  constructor(public args: List<IR>, public returnType: IR, public body: List<IR>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
 export class FnArg extends IR {
   constructor(public name: string, public type: Type) {
     super();
@@ -222,6 +229,57 @@ export class NamedExpr extends IR {
 
 export class Exec extends IR {
   constructor(public expr: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class Variable extends IR {
+  constructor(public name: string, public value: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class SpecialVariableAccess extends IR {
+  constructor(public name: string, public member: string) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class LetStmt extends IR {
+  constructor(public name: Ident, public value: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class StructType extends Type {}
+
+export class UnitStructType extends StructType {
+  constructor(public name: string) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class TupleStructType extends StructType {
+  constructor(public name: string, public members: List<Type>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class StructStructType extends StructType {
+  constructor(public name: string, public members: List<StructMember>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class StructMember extends IR {
+  constructor(public name: string, public type: Type) {
     super();
     this.setParentForChildren();
   }

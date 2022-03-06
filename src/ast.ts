@@ -97,6 +97,7 @@ import {
   AllImportSymbolContext,
   GroupedImportSymbolContext,
   GroupedExprContext,
+  StructDefnContext,
 } from './grammar/CWScriptParser';
 import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
@@ -1090,6 +1091,40 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._option ? true : false,
       this.visit(ctx._valueType) as TypeExpr
     );
+  }
+
+  visitStructDefn(ctx: StructDefnContext): StructDefn {
+    let enumVariant = ctx.enumVariant();
+    let variants = { 
+      struct: enumVariant.enumVariant_struct(),
+      tuple: enumVariant.enumVariant_tuple(),
+      unit: enumVariant.enumVariant_unit()
+    };
+
+    if (variants.struct !== undefined) {
+      return new StructDefn(
+        ctx,
+        ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
+        this.visitIdent(variants.struct._name),
+        this.visitEnumVariant_struct(variants.struct)
+      );
+    } else if (variants.tuple !== undefined) {
+      return new StructDefn(
+        ctx,
+        ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
+        this.visitIdent(variants.tuple._name),
+        this.visitEnumVariant_tuple(variants.tuple)
+      );
+    } else if (variants.unit !== undefined) {
+      return new StructDefn(
+        ctx,
+        ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
+        this.visitIdent(variants.unit._name),
+        this.visitEnumVariant_unit(variants.unit)
+      );
+    }
+
+    throw new Error('Unreachable');
   }
 
   visitEnumVariant_struct(ctx: EnumVariant_structContext): EnumVariantStruct {

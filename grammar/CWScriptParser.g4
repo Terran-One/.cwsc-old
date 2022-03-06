@@ -216,8 +216,8 @@ stmt:
 
 letStmt_: LET letLHS EQ expr;
 letLHS:
-	ident (COLON typeExpr)		# IdentLHS
-	| LBRACE identList RBRACE	# StructUnpackLHS
+	ident (COLON varType = typeExpr)?	# IdentLHS
+	| LBRACE identList RBRACE			# StructUnpackLHS
 	| LPAREN (front = identList) (
 		COMMA DOT DOT DOT back = identList
 	)? RBRACE									# TupleUnpackLHSFrontBack

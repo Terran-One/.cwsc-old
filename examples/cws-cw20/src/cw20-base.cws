@@ -115,7 +115,7 @@ contract CW20Base extends CW2 implements
     }
 
     exec mint(recipient: Addr, amount: Uint128) {
-        config = state.token_info
+        let config = state.token_info
         if (config.mint == None) or (config.mint.minter != msg.sender) {
             fail Unauthorized 
         }
@@ -127,14 +127,14 @@ contract CW20Base extends CW2 implements
 
         state.token_info = config
         state.balances[recipient] += amount
-        emit Mint(minter, recipient, amount)
+        emit Mint(msg.sender, recipient, amount)
     }
 
     exec send(contract_addr: Addr, amount: Uint128, msg: Binary) {
         state.balances[msg.sender] -= amount
-        state.balances[contract] += amount
-        emit Send(msg.sender, contract, amount)
-        exec CW20Receiver(contract).receive(sender: msg.sender, item: amount, fire: msg)
+        state.balances[contract_addr] += amount
+        emit Send(msg.sender, contract_addr, amount)
+        exec CW20Receiver(contract_addr).receive(sender: msg.sender, item: amount, fire: msg)
     }
 
     query balance(address: Addr) => _ {
