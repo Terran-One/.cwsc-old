@@ -570,6 +570,22 @@ export class MemberAccessExpr extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public isState(): boolean {
+    return (this.lhs instanceof Ident && this.lhs.text === 'state');
+  }
+
+  public isMsg(): boolean {
+    return (this.lhs instanceof Ident && this.lhs.text === 'msg');
+  }
+
+  public isEnv(): boolean {
+    return (this.lhs instanceof Ident && this.lhs.text === 'env');
+  }
+
+  public isApi(): boolean {
+    return (this.lhs instanceof Ident && this.lhs.text === 'api');
+  }
 }
 
 //@Node()

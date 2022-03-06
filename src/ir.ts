@@ -19,30 +19,45 @@ export class List<T extends IR> extends IR implements TreeList<IR> {
   }
 }
 
-export class InstantiateHandler extends IR {
-  constructor(public returnType: any, public stmts: List<any>) {
+export class TableSet extends IR {
+  constructor(public table: string, public key: any, public value: any) {
     super();
+    this.setParentForChildren();
   }
 }
 
-export class QueryHandler extends IR {
+
+export class StateItemGet extends IR {
   constructor(public name: string) {
     super();
+    this.setParentForChildren();
   }
 }
 
-export class ExecHandler extends IR {
+export class StateItemSet extends IR {
+  constructor(public name: string, public value: any) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class MsgGet extends IR {
   constructor(public name: string) {
     super();
+    this.setParentForChildren();
   }
 }
 
-export class Contract extends IR {
-  constructor(public name: string, public items: any) {
+export class VariableSet extends IR {
+  constructor(public name: string, public value: any) {
     super();
+    this.setParentForChildren();
   }
+}
 
-  public get codegen(): any {
-    return {};
+export class StateMapSet extends IR {
+  constructor(public name: string, public key: any, public value: any) {
+    super();
+    this.setParentForChildren();
   }
 }

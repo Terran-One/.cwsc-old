@@ -106,7 +106,7 @@ interface CW20[Enumerable] {
     }
 }
 
-interface CW20[Enumerable] {
+interface CW20[EnumerableAllowances] {
     /// Returns all allowances this owner has approved. Supports pagination.
     /// @param owner Address of token owner
     /// @param start_after Account index to start from

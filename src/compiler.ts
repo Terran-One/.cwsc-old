@@ -1,6 +1,8 @@
+import { ContextSensitivityInfo } from 'antlr4ts/atn/ContextSensitivityInfo';
 import * as AST from './ast';
-import { ContractDefnContext } from './grammar/CWScriptParser';
+import { CWScriptEnv, SourceFileEnv } from './env';
 import * as IR from './ir';
+import util from 'util';
 
 export interface FileSource {
   file: string;
@@ -43,65 +45,117 @@ export class CompilationRequestBuilder {
   }
 }
 
-export interface CWScriptEnv {
-  register(item: any): void;
-}
+// export class CompilationContext extends CWScriptEnv {
+//   public global: CWScriptEnv;
+//   public sources: { [file: string]: SourceFileEnv };
 
-export class BasicEnv implements CWScriptEnv {
-  private items: any[] = [];
+//   constructor(globals: Record<string, any> = {}, sources: Source[] = []) {
+//     super();
+//     this.global = new CWScriptEnv(globals);
+//     this.sources = {};
+//     sources.forEach(source => {
+//       this.sources[source.file] = new SourceFileEnv(source.file, source.ast);
+//     });
+//   }
 
-  register(item: any) {
-    this.items.push(item);
-  }
-}
+//   /// Translate the AST into IR.
+//   public translate<T extends AST.AST>(env: CWScriptEnv, ast: T): IR.IR {
+//     if (ast instanceof AST.ContractDefn) {
+//       let body = new IR.List<IR.IR>(
+//         ast.body.elements.map(x => this.translate(env, x))
+//       );
+//       return new IR.ContractDefn(ast.name.text, body);
+//     }
 
-export class ASTEnv<T extends AST.AST> extends BasicEnv {
-  constructor(public ast: T) {
-    super();
-  }
-}
+//     if (ast instanceof AST.ExecDefn) {
+//       return new IR.ExecDefn(
+//         ast.name!.text,
+//         new IR.List<IR.FnArg>(
+//           ast.args.elements.map(x => this.translate(env, x) as IR.FnArg)
+//         ),
+//         ast.returnType,
+//         new IR.List<IR.IR>(ast.body.elements.map(x => this.translate(env, x)))
+//       );
+//     }
 
-export class SourceFileEnv extends ASTEnv<AST.SourceFile> {
-  constructor(public source: Source) {
-    super(source.ast);
-  }
-}
+//     if (ast instanceof AST.MemberAccessExpr) {
+//       if (ast.isState()) {
+//         return new IR.StateItemGet(ast.member.text);
+//       } else if (ast.isMsg()) {
+//         return new IR.MsgGet(ast.member.text);
+//       }
+//     }
 
-export class CompilationContext {
-  public envs: {
-    global: BasicEnv;
-    sources: { [key: string]: SourceFileEnv };
-  };
+//     if (ast instanceof AST.AssignStmt) {
+//       let rhs = this.translate(env, ast.rhs);
+//       if (ast.lhs instanceof AST.MemberAccessExpr) {
+//         if (ast.lhs.isState()) {
+//           return new IR.StateItemSet(ast.lhs.member.text, rhs);
+//         }
+//       } else if (ast.lhs instanceof AST.Ident) {
+//         return new IR.VariableSet(ast.lhs.text, rhs);
+//       } else if (ast.lhs instanceof AST.TableLookupExpr) {
+//         if (ast.lhs.lhs instanceof AST.MemberAccessExpr) {
+//           if (ast.lhs.lhs.isState()) {
+//             return new IR.StateMapSet(
+//               ast.lhs.lhs.member.text,
+//               this.translate(env, ast.lhs.key),
+//               rhs
+//             );
+//           }
+//         } else if (ast.lhs.lhs instanceof AST.Ident) {
+//           return new IR.TableSet(
+//             ast.lhs.lhs.text,
+//             this.translate(env, ast.lhs.key),
+//             rhs
+//           );
+//         } else {
+//           throw new Error('unsupported table lookup');
+//         }
+//       }
+//     }
 
-  constructor(globals: Record<string, any> = {}, sources: Source[] = []) {
-    this.envs = {
-      global: new BasicEnv(),
-      sources: {},
-    };
+//     return new IR.IR();
+//   }
+// }
 
-    sources.forEach(source => {
-      this.envs.sources[source.file] = new SourceFileEnv(source);
-    });
-  }
+// // export class CompilationJob {
+// //   constructor(public request: CompilationRequest) {
+// //     if (request.targets === undefined) {
+//       request.targets = [];
+//       request.sources.forEach(source => {
+//         source.ast.descendantsOfType(AST.ContractDefn).forEach(contract => {
+//           request.targets!.push({
+//             contract: contract.name.text,
+//             file: source.file,
+//           });
+//         });
+//       });
+//     }
+//   }
 
-  /// Translate the AST into IR.
-  public translate<T extends AST.AST>(ast: T): IR.IR {
-    if (ast instanceof AST.ContractDefn) {
-    }
-    return new IR.IR();
-  }
-}
+//   public compile() {
+//     let context = new CompilationContext({}, this.request.sources);
+//     // Step 1: Get contract definitions
+//     Object.values(context.sources).forEach(env => {
+//       env.ast.descendantsOfType(AST.ContractDefn).forEach(contract => {
+//         let ir = context.translate(env, contract);
+//         env.set(contract.name.text, ir, 'contract');
+//       });
+//     });
 
-export class CompilationJob {
-  constructor(public request: CompilationRequest) {}
-
-  public compile() {
-    let context = new CompilationContext({}, this.request.sources);
-    // Step 1: Get contract definitions
-    Object.entries(context.envs.sources).forEach(([file, env]) => {
-      env.ast.descendantsOfType(AST.ContractDefn).forEach(contract => {
-        env.register(context.translate(contract));
-      });
-    });
-  }
-}
+//     Object.values(context.sources)
+//       .map(x => x.items)
+//       .forEach(items => {
+//         if (items.__contract) {
+//           Object.values(items.__contract).forEach(contract => {
+//             console.log(
+//               util.inspect((contract as IR.ContractDefn).items.toData(), {
+//                 depth: null,
+//               })
+//             );
+//           });
+//         }
+//       });
+//   }
+// }

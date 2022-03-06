@@ -8,11 +8,8 @@ import util from 'util';
 
 import { parseCWScript } from './parser';
 import { ImportStmt } from './ast';
-import {
-  CompilationJob,
-  CompilationRequestBuilder,
-  CompilationRequest,
-} from './compiler';
+import { CompilationRequestBuilder, CompilationRequest } from './compiler';
+import { CodegenEnv, CWScriptCodegen } from './codegen';
 
 const program = new commander.Command();
 
@@ -58,10 +55,7 @@ files.forEach(file => {
 let cr = new CompilationRequestBuilder();
 sources.forEach(s => {
   cr.addSource(s);
-  console.log(JSON.stringify(s.ast.toData(), null, 2));
 });
 
-let request = cr.build();
-let job = new CompilationJob(request);
-
-job.compile();
+let codegen = new CWScriptCodegen(sources);
+console.log(codegen.envManager.envs);
