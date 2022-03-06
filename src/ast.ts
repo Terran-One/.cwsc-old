@@ -243,7 +243,7 @@ export class RenamedImportSymbol extends AST {
   }
 }
 
-type ImportSymbol =
+export type ImportSymbol =
   | TypePathImportSymbol
   | DestructureImportSymbol
   | AllImportSymbol
@@ -330,31 +330,33 @@ export class EventDefn extends AST {
   }
 }
 
-export type StateDefn = ItemDefn | MapDefn;
+export class StateDefn extends AST {
+  constructor(ctx: any, public key: Ident, public type: TypeExpr) { super(); }
+};
 
 //@Node()
-export class ItemDefn extends AST {
+export class ItemDefn extends StateDefn {
   constructor(
     ctx: any,
     public spec: CWSpec | undefined,
-    public key: Ident,
-    public type: TypeExpr
+    key: Ident,
+    type: TypeExpr
   ) {
-    super(ctx);
+    super(ctx, key, type);
     this.setParentForChildren();
   }
 }
 
 //@Node()
-export class MapDefn extends AST {
+export class MapDefn extends StateDefn {
   constructor(
     ctx: any,
     public spec: CWSpec | undefined,
-    public key: Ident,
+    key: Ident,
     public mapKeys: List<MapDefnKey>,
-    public type: TypeExpr
+    type: TypeExpr
   ) {
-    super(ctx);
+    super(ctx, key, type);
     this.setParentForChildren();
   }
 }

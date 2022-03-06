@@ -110,7 +110,7 @@ contract CW20Base extends CW2 implements
 
     exec burn(amount: Uint128) {
         state.balances[msg.sender] -= amount
-        state.token_supply -= amount
+        state.token_info.total_supply -= amount
         emit Burn(msg.sender, amount)
     }
 

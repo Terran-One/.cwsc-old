@@ -48,6 +48,10 @@ export class Tree<T extends Tree<any>> {
     }
   }
 
+  public get ancestors(): T[] {
+    return Array.from(this.walkAncestors());
+  }
+
   /// Breadth-first traversal of descendant nodes.
   public *walkDescendantsBFS(): IterableIterator<T> {
     yield* this.children;

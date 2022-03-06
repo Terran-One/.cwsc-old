@@ -56,12 +56,18 @@ export class VariableSet extends IR {
 }
 
 export class StateMapSet extends IR {
-  constructor(public name: string, public key: any, public value: any) {
+  constructor(public name: string, public keys: List<IR>, public value: IR) {
     super();
     this.setParentForChildren();
   }
 }
 
+export class StateMapGet extends IR {
+  constructor(public name: string, public keys: List<IR>) {
+    super();
+    this.setParentForChildren();
+  }
+}
 
 
 export class ExecDefn extends IR {
@@ -133,3 +139,55 @@ export class ParamzdTypeExpr extends Type {
   }
 }
 
+export class MemberAccess extends IR {
+  constructor(public expr: IR, public member: string) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class TableLookup extends IR {
+  constructor(public table: IR, public key: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class Ident extends IR {
+  constructor(public text: string) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class Add extends IR {
+  constructor(public lhs: IR, public rhs: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class Sub extends IR {
+  constructor(public lhs: IR, public rhs: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+export class Mul extends IR {
+  constructor(public lhs: IR, public rhs: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+export class Div extends IR {
+  constructor(public lhs: IR, public rhs: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}
+export class Mod extends IR {
+  constructor(public lhs: IR, public rhs: IR) {
+    super();
+    this.setParentForChildren();
+  }
+}

@@ -1,5 +1,6 @@
 import * as AST from './ast';
 import * as IR from './ir';
+import util from 'util';
 
 export interface FileSource {
   file: string;
@@ -26,7 +27,7 @@ export class CodegenEnv {
 
     let finalId;
     if (inheritIdPath) {
-      finalId = `${this.id}$${id}`;
+      finalId = `${this.id}:${id}`;
     } else {
       finalId = id;
     }
@@ -41,6 +42,11 @@ export class CodegenEnv {
     return newEnv;
   }
 
+  createChildFileEnv(source: Source): FileEnv {
+    let fileEnv = new FileEnv(source.file, this);
+    return fileEnv;
+  }
+
   get(key: string): any {
     return this.data[key];
   }
@@ -53,7 +59,7 @@ export class CodegenEnv {
     delete this.data[key];
   }
 
-  lookup(key: string): IR.IR | undefined {
+  lookup(key: string): AST.AST | undefined {
     let env: CodegenEnv | undefined = this;
     while (env !== undefined) {
       let value = env.get(key);
@@ -64,6 +70,66 @@ export class CodegenEnv {
       env = env.parent;
     }
     return undefined;
+  }
+
+  lookupWhere(predicate: (k: string, v?: any) => boolean): AST.AST | undefined {
+    let env: CodegenEnv | undefined = this;
+    while (env !== undefined) {
+      let value = Object.entries(env.data).find(([k, v]) => predicate(k, v));
+      if (value !== undefined) {
+        return value[1];
+      }
+
+      env = env.parent;
+    }
+    return undefined;
+  }
+}
+
+export class FileEnv extends CodegenEnv {
+  constructor(public file: string, public parent: CodegenEnv) {
+    super(parent.manager, parent.id + ':' + file, parent);
+    this.manager.envs[file] = this;
+  }
+
+  createChildContractEnv(contract: AST.ContractDefn): ContractEnv {
+    let contractEnv = new ContractEnv(contract.name.text, this);
+    return contractEnv;
+  }
+
+  createChildInterfaceEnv(interfaceDef: AST.InterfaceDefn): InterfaceEnv {
+    let interfaceEnv = new InterfaceEnv(interfaceDef.name.text, this);
+    return interfaceEnv;
+  }
+
+  getContractEnv(contractName: string): ContractEnv {
+    let contractEnv = this.manager.getEnv(this.id + ':' + contractName);
+    if (contractEnv === undefined) {
+      throw new Error(`EnvManager: contract ${contractName} not found`);
+    }
+    return contractEnv as ContractEnv;
+  }
+
+  getInterfaceEnv(interfaceName: string): InterfaceEnv {
+    let interfaceEnv = this.manager.getEnv(this.id + ':' + interfaceName);
+    if (interfaceEnv === undefined) {
+      throw new Error(`EnvManager: interface ${interfaceName} not found`);
+    }
+    return interfaceEnv as InterfaceEnv;
+  }
+}
+
+export class ContractEnv extends CodegenEnv {
+  constructor(public contract: string, public parent: FileEnv) {
+    super(parent.manager, parent.id + ':' + contract, parent);
+    this.manager.envs[this.id] = this;
+  }
+}
+
+export class InterfaceEnv extends CodegenEnv {
+  constructor(public interface_: string, public parent: FileEnv) {
+    super(parent.manager, parent.id + ':', parent);
+    this.manager.envs[this.id] = this;
   }
 }
 
@@ -91,17 +157,13 @@ export class EnvManager {
     return this.envs[id];
   }
 
-  getFileEnv(file: string): CodegenEnv {
+  getFileEnv(file: string): FileEnv {
     if (this.envs[file] === undefined) {
       throw new Error(`EnvManager: no env for file ${file}`);
     }
-    let env = this.getEnv(`$${file}`);
-    return env;
+    let env = this.getEnv(`${file}`);
+    return env as FileEnv;
   }
-}
-
-function ENVPATH(...segments: string[]): string {
-  return '$' + segments.join('$');
 }
 
 function _struct(s: string): string {
@@ -133,11 +195,11 @@ function _migrate(): string {
 }
 
 function _item(s: string): string {
-  return `__state__${s}`;
+  return `__state:item__${s}`;
 }
 
 function _map(s: string): string {
-  return `__state__${s}`;
+  return `__state:map__${s}`;
 }
 
 function _event(s: string): string {
@@ -164,6 +226,14 @@ function _return(): string {
   return `__return__`;
 }
 
+export class ImportedSymbol {
+  constructor(
+    public file: string,
+    public sourceEnv: CodegenEnv,
+    public symbol: string | AST.ImportSymbol
+  ) {}
+}
+
 export class CWScriptCodegen {
   public envManager: EnvManager;
   constructor(public sources: Source[], envManager?: EnvManager) {
@@ -175,9 +245,15 @@ export class CWScriptCodegen {
 
     sources.forEach(source => {
       console.log(this.envManager.getRootEnv());
-      let sourceEnv = this.envManager.getRootEnv().createChild(source.file);
-      this.loadImports(sourceEnv, source.ast);
-      this.loadLocalDefns(sourceEnv, source.ast);
+      let rootEnv = this.envManager.getRootEnv();
+      let fileEnv = rootEnv.createChildFileEnv(source);
+      this.loadLocalDefns(fileEnv, source.ast);
+      this.loadTypeDefns(fileEnv, source.ast);
+    });
+
+    sources.forEach(source => {
+      let fileEnv = this.envManager.getFileEnv(source.file);
+      this.loadImports(fileEnv, source.ast);
     });
   }
 
@@ -271,21 +347,42 @@ export class CWScriptCodegen {
   loadImports(env: CodegenEnv, sourceFile: AST.SourceFile): void {
     let importStmts = sourceFile.descendantsOfType(AST.ImportStmt);
     for (let importStmt of importStmts) {
-      let importEnv = this.envManager.getFileEnv(importStmt.fileName);
+      let file: string = importStmt.fileName;
+      let importEnv = this.envManager.getFileEnv(file);
       if (importStmt.symbols === '*') {
-        for (let key of importEnv.data.keys()) {
-          env.set(key, importEnv.get(key));
+        for (let key of Object.keys(importEnv.data)) {
+          env.set(key, new ImportedSymbol(file, importEnv, key));
         }
       } else {
         importStmt.symbols!.elements.forEach(symbol => {
-          if (symbol instanceof AST.TypePathImportSymbol) {
-            env.set(symbol.path.paths.elements[-1].text, importEnv.get(...symbol.path.paths.elements));
+          if (symbol instanceof AST.List) {
+            symbol.elements.forEach(element => {
+              env.set(
+                element.text,
+                new ImportedSymbol(file, importEnv, element)
+              );
+            });
+          } else if (symbol instanceof AST.TypePathImportSymbol) {
+            let len = symbol.path.paths.elements.length;
+            env.set(
+              symbol.path.paths.elements[len - 1].text,
+              new ImportedSymbol(file, importEnv, symbol)
+            );
           } else if (symbol instanceof AST.RenamedImportSymbol) {
-            env.set(symbol.name.text, importEnv.get(symbol.))
+            env.set(
+              symbol.name.text,
+              new ImportedSymbol(file, importEnv, symbol)
+            );
+          } else if (symbol instanceof AST.DestructureImportSymbol) {
+            throw new Error('Destructure import not supported');
+          } else if (symbol instanceof AST.AllImportSymbol) {
+            throw new Error('All import not supported');
+          } else {
+            throw new Error(
+              // @ts-ignore
+              `Unknown import symbol - ${symbol.constructor.name}`
+            );
           }
-          
-        {
-          env.set(symbol.text, importEnv.get(symbol.text));
         });
       }
     }
@@ -319,7 +416,8 @@ export class CWScriptCodegen {
     let exec: any = {};
     for (const execDefn of contractDefn.descendantsOfType(AST.ExecDefn)) {
       let env = this.envManager
-        .getEnv(ENVPATH(sourceFile.file, _contract(contractDefn.name.text)))
+        .getFileEnv(sourceFile.file)
+        .getContractEnv(contractDefn.name.text)
         .createChild(_exec(execDefn.name!.text));
       exec[execDefn.name!.text] = this.translate(env, execDefn);
     }
@@ -399,7 +497,84 @@ export class CWScriptCodegen {
     }
 
     if (ast instanceof AST.AssignStmt) {
+      let lhs = this.translate(env, ast.lhs);
+      let rhs = this.translate(env, ast.rhs);
+      let newValue;
+      switch (ast.assignOp) {
+        case '=':
+          newValue = rhs;
+          break;
+        case '+=':
+          newValue = new IR.Add(lhs, rhs);
+          break;
+        case '-=':
+          newValue = new IR.Sub(lhs, rhs);
+          break;
+        case '*=':
+          newValue = new IR.Mul(lhs, rhs);
+          break;
+        case '/=':
+          newValue = new IR.Div(lhs, rhs);
+          break;
+        case '%=':
+          newValue = new IR.Mod(lhs, rhs);
+          break;
+        default:
+          throw new Error(`Unsupported assignOp: ${ast.assignOp}`);
+      }
+
+      if (lhs instanceof IR.StateItemGet) {
+        return new IR.StateItemSet(lhs.name, newValue);
+      } else if (lhs instanceof IR.StateMapGet) {
+        return new IR.StateMapSet(lhs.name, lhs.keys, newValue);
+      }
       return new IR.IR();
+    }
+
+    if (ast instanceof AST.TableLookupExpr) {
+      let lhs = this.translate(env, ast.lhs);
+      let key = this.translate(env, ast.key);
+      if (lhs instanceof IR.StateMapGet) {
+        let { name, keys } = lhs;
+        // find the state - we don't need to check that it exists
+        // we already have StateMapGet
+        let state = env.lookup(_map(name)) as AST.MapDefn;
+        // check if we have keys left to index
+        if (keys.elements.length < state!.mapKeys.elements.length) {
+          return new IR.StateMapGet(
+            lhs.name,
+            new IR.List([...keys.elements, key])
+          );
+        }
+      } else {
+        return new IR.TableLookup(lhs, key);
+      }
+    }
+
+    if (ast instanceof AST.Ident) {
+      return new IR.Ident(ast.text);
+    }
+
+    if (ast instanceof AST.MemberAccessExpr) {
+      let lhs = this.translate(env, ast.lhs);
+      let member = ast.member.text;
+      if (ast.isState()) {
+        let state = env.lookupWhere(
+          (k, v) => v instanceof AST.StateDefn && v.key.text === member
+        );
+        if (state === undefined) {
+          throw new Error('State not found: ' + member);
+        }
+
+        if (state instanceof AST.ItemDefn) {
+          return new IR.StateItemGet(member);
+        } else if (state instanceof AST.MapDefn) {
+          return new IR.StateMapGet(member, new IR.List([]));
+        }
+        throw new Error('Unknown state type: ' + state.constructor.name);
+      } else {
+        return new IR.MemberAccess(lhs, member);
+      }
     }
 
     if (ast instanceof AST.EmitStmt) {

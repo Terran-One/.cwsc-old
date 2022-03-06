@@ -59,4 +59,5 @@ sources.forEach(s => {
 });
 
 let codegen = new CWScriptCodegen(sources);
-codegen.compileContract('CW20Base');
+let contract = codegen.compileContract('CW20Base');
+console.log(util.inspect(contract.exec.mint.body, { depth: null }));
