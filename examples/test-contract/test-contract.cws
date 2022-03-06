@@ -32,6 +32,7 @@ contract MyTestContract {
             fail Unauthorized{}
         }
 
+        state.count = count
         emit Call("reset")
     }
 
