@@ -352,7 +352,7 @@ export class MapDefn extends AST {
     public spec: CWSpec | undefined,
     public key: Ident,
     public mapKeys: List<MapDefnKey>,
-    public type: List<TypeExpr>
+    public type: TypeExpr
   ) {
     super(ctx);
     this.setParentForChildren();
@@ -797,7 +797,7 @@ export class StructMember extends AST {
 }
 
 // TODO: change
-type TypeExpr = any;
+export type TypeExpr = TypePath | ParamzdTypeExpr | TupleTypeExpr | ShortOptionTypeExpr | ShortVecTypeExpr | RefTypeExpr | ReflectiveTypeExpr | StructDefn | EnumDefn | TypeAliasDefn;
 export class TypePath extends AST {
   constructor(ctx: any, public root: boolean, public paths: List<Ident>) {
     super(ctx);
@@ -1126,7 +1126,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
         ctx
           .tupleMembers()
           .typeExpr()
-          .map(x => this.visit(x))
+          .map(x => this.visit(x) as TypeExpr)
       )
     );
   }
@@ -1250,7 +1250,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       undefined,
       this.visitFnArgs(ctx.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null,
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
       this.visit(ctx.fnBody()) as List<Stmt>
     );
   }
@@ -1263,7 +1263,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
       this.visitFnArgs(fn.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null,
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
       this.visit(fn.fnBody()) as List<Stmt>
     );
   }
@@ -1284,7 +1284,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
       this.visitFnArgs(fn.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null,
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
       this.visit(fn.fnBody()) as List<Stmt>
     );
   }
@@ -1296,7 +1296,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       undefined,
       this.visitFnArgs(ctx.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null,
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
       this.visit(ctx.fnBody()) as List<Stmt>
     );
   }
@@ -1316,7 +1316,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       undefined,
       this.visitFnArgs(ctx.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
     );
   }
 
@@ -1328,7 +1328,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
       this.visitFnArgs(fn.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
     );
   }
 
@@ -1348,7 +1348,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
       this.visitFnArgs(fn.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined
     );
   }
 
@@ -1367,7 +1367,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       undefined,
       this.visitFnArgs(ctx.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : null
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
     );
   }
 
@@ -1396,7 +1396,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   }
 
   visitTupleVal(ctx: TupleValContext): TupleVal {
-    let type = this.visit(ctx._tupleType) as TypeExpr;
+    let type = this.visit(ctx._tupleType) as TypePath;
     let items = ctx.exprList().expr() || [];
     return new TupleVal(
       ctx,
@@ -1421,7 +1421,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitStructVal(ctx: StructValContext): StructVal {
     let structVal = ctx.structVal_();
-    let type = this.visit(structVal._structType) as TypeExpr;
+    let type = this.visit(structVal._structType) as TypePath;
     let members = structVal.structValMembers()?.structValMember() || [];
     return new StructVal(
       ctx,
@@ -1617,7 +1617,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     return new IdentLHS(
       ctx,
       this.visitIdent(ctx.ident()),
-      typeExpr ? this.visit(typeExpr) : undefined
+      typeExpr ? this.visit(typeExpr) as TypeExpr : undefined
     );
   }
 

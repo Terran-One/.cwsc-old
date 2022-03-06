@@ -61,3 +61,75 @@ export class StateMapSet extends IR {
     this.setParentForChildren();
   }
 }
+
+
+
+export class ExecDefn extends IR {
+  constructor(public name: string, public args: List<IR>, public returnType: IR, public body: List<IR>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class FnArg extends IR {
+  constructor(public name: string, public type: Type) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export abstract class Type extends IR {
+  public reflect(member: string): any {
+    return undefined;
+  }
+}
+export class OptionType extends Type {
+  constructor(public inner: Type) {
+    super();
+    this.setParentForChildren();
+  }
+
+}
+
+export class TypePath extends Type {
+  constructor(public root: boolean, public paths: string[]) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class TupleType extends Type {
+  constructor(public types: List<Type>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class VecType extends Type {
+  constructor(public inner: Type) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class RefType extends Type {
+  constructor(public inner: Type) {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class UnitType extends Type {
+  constructor() {
+    super();
+    this.setParentForChildren();
+  }
+}
+
+export class ParamzdTypeExpr extends Type {
+  constructor(public type: Type, public params: List<Type>) {
+    super();
+    this.setParentForChildren();
+  }
+}
+

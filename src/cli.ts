@@ -42,6 +42,7 @@ function addSourceFile(file: string) {
   });
   ast.descendantsOfType(ImportStmt).forEach(i => {
     const resolvedPath = resolveFileImport(file, i.fileName);
+    i.fileName = resolvedPath;
     if (sources.findIndex(x => x.file === resolvedPath) === -1) {
       addSourceFile(resolvedPath);
     }
@@ -58,4 +59,4 @@ sources.forEach(s => {
 });
 
 let codegen = new CWScriptCodegen(sources);
-console.log(codegen.envManager.envs);
+codegen.compileContract('CW20Base');

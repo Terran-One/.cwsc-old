@@ -145,9 +145,6 @@ contract CW20Base extends CW2 implements
         token_info: state.token_info
     }
 
-    exec mint(recipient: Addr, amount: Uint128) {
-
-    }
 
     query minter() -> _ {
         let minter = state.token_info.minter
