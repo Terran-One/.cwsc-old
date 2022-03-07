@@ -64,6 +64,9 @@ export class CodegenEnv {
     let env: CodegenEnv | undefined = this;
     while (env !== undefined) {
       let value = env.get(key);
+      while (typeof value === 'function') {
+        value = value();
+      }
       if (value !== undefined) {
         return value;
       }
@@ -130,12 +133,44 @@ export class ContractEnv extends CodegenEnv {
     super(parent.manager, parent.id + ':' + contract, parent);
     this.manager.envs[this.id] = this;
   }
+
+  public get query(): Record<string, Namespace<AST.QueryDefn>> {
+    return Object.fromEntries(
+      Object.entries(this.data).filter(
+        ([k, v]) => v.obj instanceof AST.QueryDefn
+      )
+    );
+  }
 }
 
 export class InterfaceEnv extends CodegenEnv {
   constructor(public interface_: string, public parent: FileEnv) {
     super(parent.manager, parent.id + ':' + interface_, parent);
     this.manager.envs[this.id] = this;
+  }
+
+  public get query(): Record<string, Namespace<AST.QueryDecl>> {
+    return Object.fromEntries(
+      Object.entries(this.data)
+        .filter(([k, v]) => v.obj instanceof AST.QueryDecl)
+        .map(([k, v]) => [k.replace(_query(''), ''), v.obj])
+    );
+  }
+
+  createChildFnDeclEnv(fn: string): FnDeclEnv {
+    let fnDeclEnv = new FnDeclEnv(fn, this);
+    return fnDeclEnv;
+  }
+}
+
+export class FnDeclEnv extends CodegenEnv {
+  constructor(public fn: string, public parent: InterfaceEnv) {
+    super(parent.manager, parent.id + ':' + fn, parent);
+    this.manager.envs[this.id] = this;
+  }
+
+  public get response(): string {
+    return 'RESPONSE';
   }
 }
 
@@ -232,8 +267,8 @@ function _return(): string {
   return `__return__`;
 }
 
-export class ImportedSymbol {
-  constructor(public file: string, public symbol: any) {}
+export class Namespace<T, E extends CodegenEnv = CodegenEnv> {
+  constructor(public obj: T, public env: E) {}
 }
 
 export class CWScriptCodegen {
@@ -247,17 +282,14 @@ export class CWScriptCodegen {
 
     sources.forEach(source => {
       let fileEnv = this.envManager.getRootEnv().createChildFileEnv(source);
+      // load contracts & interfaces
       this.loadLocalDefns(fileEnv, source.ast);
+      // load types
       this.loadTypeDefns(fileEnv, source.ast);
-      console.log(Object.keys(fileEnv.data));
     });
-
-    console.log('DONE 2');
     sources.forEach(source => {
-      console.log('DONE 3');
-
       let fileEnv = this.envManager.getFileEnv(source.file);
-      console.log(Object.keys(fileEnv.data));
+      // load imports
       this.loadImports(fileEnv, source.ast);
     });
   }
@@ -329,7 +361,7 @@ export class CWScriptCodegen {
     });
   }
 
-  loadFnDefns(env: CodegenEnv, defn: AST.AST) {
+  loadFnDefns(env: ContractEnv, defn: AST.AST) {
     defn.descendantsOfType(AST.InstantiateDefn).forEach(x => {
       env.set(_instantiate(), x);
     });
@@ -337,14 +369,16 @@ export class CWScriptCodegen {
       env.set(_migrate(), x);
     });
     defn.descendantsOfType(AST.ExecDefn).forEach(x => {
-      env.set(_exec(x.name!.text), x);
+      let execEnv = env.createChild(_exec(x.name!.text));
+      env.set(_exec(x.name!.text), new Namespace(x, execEnv));
     });
     defn.descendantsOfType(AST.QueryDefn).forEach(x => {
-      env.set(_query(x.name!.text), x);
+      let queryEnv = env.createChild(_query(x.name!.text));
+      env.set(_query(x.name!.text), new Namespace(x, queryEnv));
     });
   }
 
-  loadFnDecls(env: CodegenEnv, defn: AST.AST) {
+  loadFnDecls(env: InterfaceEnv, defn: AST.AST) {
     defn.descendantsOfType(AST.InstantiateDecl).forEach(x => {
       env.set(_instantiate(), x);
     });
@@ -352,18 +386,20 @@ export class CWScriptCodegen {
       env.set(_migrate(), x);
     });
     defn.descendantsOfType(AST.ExecDecl).forEach(x => {
-      env.set(_exec(x.name!.text), x);
+      let execEnv = env.createChild(_exec(x.name!.text));
+      env.set(_exec(x.name!.text), new Namespace(x, execEnv));
     });
     defn.descendantsOfType(AST.QueryDecl).forEach(x => {
-      env.set(_query(x.name!.text), x);
+      let queryEnv = env.createChildFnDeclEnv(_query(x));
+      env.set(_query(x.name!.text), new Namespace(x, queryEnv));
     });
   }
 
   loadLocalDefns(env: FileEnv, sourceFile: AST.SourceFile): void {
     let contractDefns = sourceFile.descendantsOfType(AST.ContractDefn);
     for (let contractDefn of contractDefns) {
-      env.set(contractDefn.name.text, contractDefn);
       let contractEnv = env.createChildContractEnv(contractDefn);
+      env.set(contractDefn.name.text, new Namespace(contractDefn, contractEnv));
       this.loadErrorEnumStateDefns(contractEnv, contractDefn);
       this.loadTypeDefns(contractEnv, contractDefn);
       this.loadFnDefns(contractEnv, contractDefn);
@@ -376,8 +412,12 @@ export class CWScriptCodegen {
         (interfaceDefn.mixinName !== undefined
           ? '[' + interfaceDefn.mixinName!.text + ']'
           : '');
-      env.set(interfaceNameWithMixin, interfaceDefn);
       let interfaceEnv = env.createChildInterfaceEnv(interfaceDefn);
+
+      env.set(
+        interfaceNameWithMixin,
+        new Namespace(interfaceDefn, interfaceEnv)
+      );
       this.loadErrorEnumStateDefns(interfaceEnv, interfaceDefn);
       this.loadTypeDefns(interfaceEnv, interfaceDefn);
       this.loadFnDecls(interfaceEnv, interfaceDefn);
@@ -538,6 +578,9 @@ export class CWScriptCodegen {
       let [first, ...rest] = type.paths.elements.map(x => x.text);
       let base: any = env.lookup(first);
       for (const path of rest) {
+        if (base instanceof Namespace) {
+          base = base.env;
+        }
         base = base[path];
       }
       return base;
@@ -558,7 +601,7 @@ export class CWScriptCodegen {
       return new IR.RefType(this.translateType(env, type.type));
     } else if (type instanceof AST.ReflectiveTypeExpr) {
       let base = this.translateType(env, type.type);
-      let res = base.reflect(type.member.text);
+      let res = (base as any)[type.member.text];
       if (res === undefined) {
         throw new Error(`${base.toString()} has no member ${type.member.text}`);
       }

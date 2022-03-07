@@ -31,7 +31,7 @@ interface CW20 {
         /// @res.field symbol Symbol of token
         /// @res.field decimals Number of decimal places (eg: 6 => 1,000,000 tokens = 1 unit)
         /// @res.field total_supply Number of total tokens in supply
-        token_info() -> struct _ {
+        mint() -> struct _ {
             name: String,
             symbol: String,
             decimals: u8,
