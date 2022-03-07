@@ -21,13 +21,10 @@ import { DecimalValContext } from "./CWScriptParser";
 import { TrueValContext } from "./CWScriptParser";
 import { FalseValContext } from "./CWScriptParser";
 import { IdentValContext } from "./CWScriptParser";
+import { ImportAllStmtContext } from "./CWScriptParser";
+import { ImportItemsStmtContext } from "./CWScriptParser";
 import { NormalFnBodyContext } from "./CWScriptParser";
 import { ArrowFnBodyContext } from "./CWScriptParser";
-import { GroupedImportSymbolContext } from "./CWScriptParser";
-import { TypePathImportSymbolContext } from "./CWScriptParser";
-import { DestructureImportSymbolContext } from "./CWScriptParser";
-import { AllImportSymbolContext } from "./CWScriptParser";
-import { RenamedImportSymbolContext } from "./CWScriptParser";
 import { IdentLHSContext } from "./CWScriptParser";
 import { StructUnpackLHSContext } from "./CWScriptParser";
 import { TupleUnpackLHSFrontBackContext } from "./CWScriptParser";
@@ -72,8 +69,8 @@ import { InterfaceListContext } from "./CWScriptParser";
 import { InterfaceValContext } from "./CWScriptParser";
 import { InterfaceDefnContext } from "./CWScriptParser";
 import { ImportStmtContext } from "./CWScriptParser";
-import { ImportSymbolListContext } from "./CWScriptParser";
-import { ImportSymbolContext } from "./CWScriptParser";
+import { ImportListContext } from "./CWScriptParser";
+import { ImportItemContext } from "./CWScriptParser";
 import { ContractBodyContext } from "./CWScriptParser";
 import { InterfaceBodyContext } from "./CWScriptParser";
 import { ContractItemContext } from "./CWScriptParser";
@@ -306,6 +303,22 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitIdentVal?: (ctx: IdentValContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `ImportAllStmt`
+	 * labeled alternative in `CWScriptParser.importStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitImportAllStmt?: (ctx: ImportAllStmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `ImportItemsStmt`
+	 * labeled alternative in `CWScriptParser.importStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitImportItemsStmt?: (ctx: ImportItemsStmtContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `NormalFnBody`
 	 * labeled alternative in `CWScriptParser.fnBody`.
 	 * @param ctx the parse tree
@@ -320,46 +333,6 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitArrowFnBody?: (ctx: ArrowFnBodyContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `GroupedImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitGroupedImportSymbol?: (ctx: GroupedImportSymbolContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `TypePathImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitTypePathImportSymbol?: (ctx: TypePathImportSymbolContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `DestructureImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitDestructureImportSymbol?: (ctx: DestructureImportSymbolContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `AllImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitAllImportSymbol?: (ctx: AllImportSymbolContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `RenamedImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitRenamedImportSymbol?: (ctx: RenamedImportSymbolContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `IdentLHS`
@@ -707,18 +680,18 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitImportStmt?: (ctx: ImportStmtContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CWScriptParser.importSymbolList`.
+	 * Visit a parse tree produced by `CWScriptParser.importList`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitImportSymbolList?: (ctx: ImportSymbolListContext) => Result;
+	visitImportList?: (ctx: ImportListContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CWScriptParser.importSymbol`.
+	 * Visit a parse tree produced by `CWScriptParser.importItem`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitImportSymbol?: (ctx: ImportSymbolContext) => Result;
+	visitImportItem?: (ctx: ImportItemContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CWScriptParser.contractBody`.

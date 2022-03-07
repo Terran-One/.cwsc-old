@@ -1,12 +1,5 @@
 import (
     CW20,
-    CW20::{
-        Mintable,
-        Allowances,
-        Enumerable,
-        Marketing
-    },
-    CW20::*
 ) from "./cw20.cws"
 import * from "./common.cws"
 

@@ -14,7 +14,6 @@ import {
   InterfaceListContext,
   InterfaceValContext,
   ContractDefnContext,
-  ImportSymbolContext,
   AssignStmtContext,
   FailStmtContext,
   ReturnStmtContext,
@@ -81,11 +80,6 @@ import {
   MigrateDeclContext,
   InterfaceBodyContext,
   MigrateDefnContext,
-  ImportStmtContext,
-  ImportSymbolListContext,
-  TypePathImportSymbolContext,
-  DestructureImportSymbolContext,
-  RenamedImportSymbolContext,
   TypePathContext,
   ParamzdTypeExprContext,
   TypeParamContext,
@@ -94,10 +88,11 @@ import {
   ShortVecTypeExprContext,
   RefTypeExprContext,
   ReflectiveTypeExprContext,
-  AllImportSymbolContext,
-  GroupedImportSymbolContext,
   GroupedExprContext,
   StructDefnContext,
+  ImportAllStmtContext,
+  ImportItemsStmtContext,
+  ImportItemContext,
 } from './grammar/CWScriptParser';
 import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
@@ -201,54 +196,38 @@ export class ImportStmt extends AST {
   constructor(
     ctx: any,
     public fileName: string,
-    public symbols?: '*' | List<ImportSymbol>
   ) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
-//@Node()
-export class TypePathImportSymbol extends AST {
-  constructor(ctx: any, public path: TypePath) {
-    super(ctx);
+export class ImportAllStmt extends ImportStmt {
+  constructor(ctx: any, public fileName: string) {
+    super(ctx, fileName);
     this.setParentForChildren();
   }
 }
 
-//@Node()
-export class DestructureImportSymbol extends AST {
+export class ImportItemsStmt extends ImportStmt {
   constructor(
     ctx: any,
-    public path: TypePath,
-    public symbols: List<ImportSymbol>
+    public fileName: string,
+    public items: List<ImportItem>
   ) {
-    super(ctx);
+    super(ctx, fileName);
     this.setParentForChildren();
   }
 }
 
 //@Node()
-export class AllImportSymbol extends AST {
-  constructor(ctx: any, public path: TypePath) {
+export class ImportItem extends AST {
+  constructor(ctx: any, public symbol: Ident, public alias?: Ident) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
-//@Node()
-export class RenamedImportSymbol extends AST {
-  constructor(ctx: any, public symbol: ImportSymbol, public name: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export type ImportSymbol =
-  | TypePathImportSymbol
-  | DestructureImportSymbol
-  | AllImportSymbol
-  | RenamedImportSymbol;
 
 //@Node()
 export class InterfaceDefn extends AST {
@@ -257,7 +236,7 @@ export class InterfaceDefn extends AST {
     public spec: CWSpec | undefined,
     public name: Ident,
     public body: List<InterfaceItem>,
-    public parents?: List<InterfaceVal>,
+    public baseInterfaces?: List<InterfaceVal>,
     public mixinName?: Ident
   ) {
     super(ctx);
@@ -272,7 +251,7 @@ export class ContractDefn extends AST {
     public spec: CWSpec | undefined,
     public name: Ident,
     public body: List<ContractItem>,
-    public parents?: List<Ident>,
+    public baseContracts?: List<Ident>,
     public interfaces?: List<InterfaceVal>
   ) {
     super(ctx);
@@ -906,62 +885,31 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     );
   }
 
-  visitImportStmt(ctx: ImportStmtContext): ImportStmt {
-    let star = ctx._star;
+  visitImportAllStmt(ctx: ImportAllStmtContext): ImportAllStmt {
     let fileName = ctx._fileName.text!.replace(/^["'](.+(?=["']$))["']$/, '$1');
-
-    if (star !== undefined) {
-      return new ImportStmt(ctx, fileName, <const>'*');
-    } else {
-      return new ImportStmt(
-        ctx,
-        fileName,
-        this.visitImportSymbolList(ctx._symbols)
-      );
-    }
-  }
-
-  visitGroupedImportSymbol(
-    ctx: GroupedImportSymbolContext
-  ): List<ImportSymbol> {
-    return this.visitImportSymbolList(ctx.importSymbolList());
-  }
-
-  visitImportSymbolList(ctx: ImportSymbolListContext): List<ImportSymbol> {
-    let symbols = ctx._importItems || [];
-    return new List(
+    return new ImportAllStmt(
       ctx,
-      symbols.map(symbol => this.visit(symbol)) as ImportSymbol[]
+      fileName,
     );
   }
 
-  visitTypePathImportSymbol(
-    ctx: TypePathImportSymbolContext
-  ): TypePathImportSymbol {
-    return new TypePathImportSymbol(ctx, this.visitTypePath(ctx.typePath()));
-  }
-
-  visitDestructureImportSymbol(
-    ctx: DestructureImportSymbolContext
-  ): DestructureImportSymbol {
-    return new DestructureImportSymbol(
+  visitImportItem(ctx: ImportItemContext): ImportItem {
+    return new ImportItem(
       ctx,
-      this.visitTypePath(ctx.typePath()),
-      this.visitImportSymbolList(ctx.importSymbolList())
+      this.visitIdent(ctx._symbol),
+      ctx._alias ? this.visitIdent(ctx._alias) : undefined,
     );
   }
 
-  visitAllImportSymbol(ctx: AllImportSymbolContext): AllImportSymbol {
-    return new AllImportSymbol(ctx, this.visitTypePath(ctx.typePath()));
-  }
+  visitImportItemsStmt(ctx: ImportItemsStmtContext): ImportItemsStmt {
+    let fileName = ctx._fileName.text!.replace(/^["'](.+(?=["']$))["']$/, '$1');
+    let items = 
+      ctx._items._importItems.map(item => this.visitImportItem(item));
 
-  visitRenamedImportSymbol(
-    ctx: RenamedImportSymbolContext
-  ): RenamedImportSymbol {
-    return new RenamedImportSymbol(
+    return new ImportItemsStmt(
       ctx,
-      this.visit(ctx.importSymbol()) as ImportSymbol,
-      this.visitIdent(ctx.ident())
+      fileName,
+      new List(ctx, items)
     );
   }
 
@@ -1062,7 +1010,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(ctx._name),
       this.visitInterfaceBody(ctx.interfaceBody()),
-      ctx._parents ? this.visitInterfaceList(ctx._parents) : undefined,
+      ctx._baseInterfaces ? this.visitInterfaceList(ctx._baseInterfaces) : undefined,
       ctx._mixinName ? this.visitIdent(ctx._mixinName) : undefined
     );
   }
@@ -1078,7 +1026,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(ctx._name),
       this.visitContractBody(ctx.contractBody()),
-      ctx._parents ? this.visitIdentList(ctx._parents) : undefined,
+      ctx._baseContracts ? this.visitIdentList(ctx._baseContracts) : undefined,
       ctx._interfaces ? this.visitInterfaceList(ctx._interfaces) : undefined
     );
   }

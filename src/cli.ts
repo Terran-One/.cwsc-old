@@ -7,7 +7,7 @@ import path from 'path';
 import util from 'util';
 
 import { parseCWScript } from './parser';
-import { ImportStmt } from './ast';
+import { ImportAllStmt, ImportStmt } from './ast';
 import { CompilationRequestBuilder, CompilationRequest } from './compiler';
 import { CodegenEnv, CWScriptCodegen } from './codegen';
 
@@ -40,13 +40,16 @@ function addSourceFile(file: string) {
     file: path.resolve(file),
     ast: ast,
   });
-  ast.descendantsOfType(ImportStmt).forEach(i => {
-    const resolvedPath = resolveFileImport(file, i.fileName);
-    i.fileName = resolvedPath;
-    if (sources.findIndex(x => x.file === resolvedPath) === -1) {
-      addSourceFile(resolvedPath);
-    }
-  });
+  ast.descendants
+    .filter(x => x instanceof ImportStmt)
+    .map(x => x as ImportStmt)
+    .forEach(i => {
+      const resolvedPath = resolveFileImport(file, i.fileName);
+      i.fileName = resolvedPath;
+      if (sources.findIndex(x => x.file === resolvedPath) === -1) {
+        addSourceFile(resolvedPath);
+      }
+    });
 }
 
 files.forEach(file => {

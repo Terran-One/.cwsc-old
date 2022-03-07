@@ -249,32 +249,50 @@ export class CWScriptCodegen {
       let fileEnv = this.envManager.getRootEnv().createChildFileEnv(source);
       this.loadLocalDefns(fileEnv, source.ast);
       this.loadTypeDefns(fileEnv, source.ast);
+      console.log(Object.keys(fileEnv.data));
     });
 
+    console.log('DONE 2');
     sources.forEach(source => {
+      console.log('DONE 3');
+
       let fileEnv = this.envManager.getFileEnv(source.file);
+      console.log(Object.keys(fileEnv.data));
       this.loadImports(fileEnv, source.ast);
-      // this.loadImports(fileEnv, source.ast);
     });
   }
 
   loadImports(env: FileEnv, ast: AST.SourceFile) {
-    ast.descendantsOfType(AST.ImportStmt).forEach(imp => {
-      this.loadImport(env, imp);
-    });
+    ast.descendants
+      .filter(
+        x => x instanceof AST.ImportStmt || x instanceof AST.ImportAllStmt
+      )
+      .map(x => x as AST.ImportStmt)
+      .forEach(imp => {
+        console.log(`loading imports for ${env.file}`);
+        this.loadImport(env, imp);
+      });
   }
 
   loadImport(env: FileEnv, ast: AST.ImportStmt) {
-    let { symbols, fileName } = ast;
+    let { fileName } = ast;
     let importEnv = this.envManager.getFileEnv(fileName);
-    if (symbols === '*') {
-      Object.entries(importEnv.data).forEach(([k, v]) => {
-        env.set(k, new ImportedSymbol(fileName, importEnv.lookup(k)));
+    if (ast instanceof AST.ImportAllStmt) {
+      Object.keys(importEnv.data).forEach(k => {
+        env.set(k, () => importEnv.lookup(k));
       });
-    } else if (symbols instanceof AST.List) {
-      symbols.elements.forEach(sym => {
-        if (sym instanceof AST.TypePathImportSymbol) {
+    } else if (ast instanceof AST.ImportItemsStmt) {
+      ast.items.elements.forEach(item => {
+        let importedSymbol = importEnv.lookup(item.symbol.text);
+        if (importedSymbol === undefined) {
+          throw new Error(
+            `CWScriptCodegen: import ${fileName}:${item.symbol.text} not found`
+          );
         }
+        env.set(
+          item.alias !== undefined ? item.alias.text : item.symbol.text,
+          () => importEnv.lookup(item.symbol.text)
+        );
       });
     }
   }
@@ -551,7 +569,6 @@ export class CWScriptCodegen {
     } else if (type instanceof AST.StructDefn) {
       return this.translateStructDefn(env, type);
     } else {
-      console.log(type.toData());
       throw new Error(`Unsupported type: ${type.constructor.name}`);
     }
   }

@@ -115,8 +115,8 @@ export class CWScriptParser extends Parser {
 	public static readonly RULE_interfaceVal = 4;
 	public static readonly RULE_interfaceDefn = 5;
 	public static readonly RULE_importStmt = 6;
-	public static readonly RULE_importSymbolList = 7;
-	public static readonly RULE_importSymbol = 8;
+	public static readonly RULE_importList = 7;
+	public static readonly RULE_importItem = 8;
 	public static readonly RULE_contractBody = 9;
 	public static readonly RULE_interfaceBody = 10;
 	public static readonly RULE_contractItem = 11;
@@ -197,7 +197,7 @@ export class CWScriptParser extends Parser {
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
 		"sourceFile", "topLevelStmt", "contractDefn", "interfaceList", "interfaceVal", 
-		"interfaceDefn", "importStmt", "importSymbolList", "importSymbol", "contractBody", 
+		"interfaceDefn", "importStmt", "importList", "importItem", "contractBody", 
 		"interfaceBody", "contractItem", "interfaceItem", "errorDefn", "errorDefnBlock", 
 		"errorDefnBlock_item", "eventDefn", "eventDefnBlock", "eventDefnBlock_item", 
 		"stateDefn", "stateDefnBlock", "stateDefnBlock_item", "itemDefn", "mapDefn", 
@@ -394,7 +394,7 @@ export class CWScriptParser extends Parser {
 				this.state = 193;
 				this.match(CWScriptParser.EXTENDS);
 				this.state = 194;
-				_localctx._parents = this.identList();
+				_localctx._baseContracts = this.identList();
 				}
 			}
 
@@ -560,7 +560,7 @@ export class CWScriptParser extends Parser {
 				this.state = 229;
 				this.match(CWScriptParser.EXTENDS);
 				this.state = 230;
-				_localctx._parents = this.interfaceList();
+				_localctx._baseInterfaces = this.interfaceList();
 				}
 			}
 
@@ -586,39 +586,109 @@ export class CWScriptParser extends Parser {
 	public importStmt(): ImportStmtContext {
 		let _localctx: ImportStmtContext = new ImportStmtContext(this._ctx, this.state);
 		this.enterRule(_localctx, 12, CWScriptParser.RULE_importStmt);
+		let _la: number;
 		try {
-			this.enterOuterAlt(_localctx, 1);
-			{
-			this.state = 235;
-			this.match(CWScriptParser.IMPORT);
-			this.state = 238;
+			this.state = 253;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 11, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 13, this._ctx) ) {
 			case 1:
+				_localctx = new ImportAllStmtContext(_localctx);
+				this.enterOuterAlt(_localctx, 1);
 				{
-				{
+				this.state = 235;
+				this.match(CWScriptParser.IMPORT);
 				this.state = 236;
-				_localctx._symbols = this.importSymbolList();
+				this.match(CWScriptParser.MUL);
+				this.state = 237;
+				this.match(CWScriptParser.FROM);
+				{
+				this.state = 238;
+				(_localctx as ImportAllStmtContext)._fileName = this.match(CWScriptParser.StringLiteral);
 				}
 				}
 				break;
 
 			case 2:
+				_localctx = new ImportItemsStmtContext(_localctx);
+				this.enterOuterAlt(_localctx, 2);
 				{
+				this.state = 239;
+				this.match(CWScriptParser.IMPORT);
+				this.state = 248;
+				this._errHandler.sync(this);
+				switch (this._input.LA(1)) {
+				case CWScriptParser.LPAREN:
+					{
+					{
+					this.state = 240;
+					this.match(CWScriptParser.LPAREN);
+					{
+					this.state = 241;
+					(_localctx as ImportItemsStmtContext)._items = this.importList();
+					}
+					this.state = 243;
+					this._errHandler.sync(this);
+					_la = this._input.LA(1);
+					if (_la === CWScriptParser.COMMA) {
+						{
+						this.state = 242;
+						this.match(CWScriptParser.COMMA);
+						}
+					}
+
+					this.state = 245;
+					this.match(CWScriptParser.RPAREN);
+					}
+					}
+					break;
+				case CWScriptParser.CONTRACT:
+				case CWScriptParser.INTERFACE:
+				case CWScriptParser.IMPORT:
+				case CWScriptParser.IMPLEMENTS:
+				case CWScriptParser.EXTENDS:
+				case CWScriptParser.ERROR:
+				case CWScriptParser.EVENT:
+				case CWScriptParser.INSTANTIATE:
+				case CWScriptParser.EXEC:
+				case CWScriptParser.QUERY:
+				case CWScriptParser.MIGRATE:
+				case CWScriptParser.FOR:
+				case CWScriptParser.IN:
+				case CWScriptParser.FROM:
+				case CWScriptParser.STATE:
+				case CWScriptParser.TIMES:
+				case CWScriptParser.IF:
+				case CWScriptParser.ELSE:
+				case CWScriptParser.AND:
+				case CWScriptParser.OR:
+				case CWScriptParser.TRUE:
+				case CWScriptParser.FALSE:
+				case CWScriptParser.LET:
+				case CWScriptParser.RETURN:
+				case CWScriptParser.STRUCT:
+				case CWScriptParser.ENUM:
+				case CWScriptParser.TYPE:
+				case CWScriptParser.EMIT:
+				case CWScriptParser.Ident:
+					{
+					{
+					this.state = 247;
+					(_localctx as ImportItemsStmtContext)._items = this.importList();
+					}
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
+				}
+				this.state = 250;
+				this.match(CWScriptParser.FROM);
 				{
-				this.state = 237;
-				_localctx._star = this.match(CWScriptParser.MUL);
+				this.state = 251;
+				(_localctx as ImportItemsStmtContext)._fileName = this.match(CWScriptParser.StringLiteral);
 				}
 				}
 				break;
 			}
-			this.state = 240;
-			this.match(CWScriptParser.FROM);
-			{
-			this.state = 241;
-			_localctx._fileName = this.match(CWScriptParser.StringLiteral);
-			}
-			}
 		}
 		catch (re) {
 			if (re instanceof RecognitionException) {
@@ -635,158 +705,36 @@ export class CWScriptParser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
-	public importSymbolList(): ImportSymbolListContext {
-		let _localctx: ImportSymbolListContext = new ImportSymbolListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 14, CWScriptParser.RULE_importSymbolList);
-		let _la: number;
-		try {
-			this.enterOuterAlt(_localctx, 1);
-			{
-			{
-			this.state = 243;
-			_localctx._importSymbol = this.importSymbol(0);
-			_localctx._importItems.push(_localctx._importSymbol);
-			}
-			this.state = 248;
-			this._errHandler.sync(this);
-			_la = this._input.LA(1);
-			while (_la === CWScriptParser.COMMA) {
-				{
-				{
-				this.state = 244;
-				this.match(CWScriptParser.COMMA);
-				{
-				this.state = 245;
-				_localctx._importSymbol = this.importSymbol(0);
-				_localctx._importItems.push(_localctx._importSymbol);
-				}
-				}
-				}
-				this.state = 250;
-				this._errHandler.sync(this);
-				_la = this._input.LA(1);
-			}
-			}
-		}
-		catch (re) {
-			if (re instanceof RecognitionException) {
-				_localctx.exception = re;
-				this._errHandler.reportError(this, re);
-				this._errHandler.recover(this, re);
-			} else {
-				throw re;
-			}
-		}
-		finally {
-			this.exitRule();
-		}
-		return _localctx;
-	}
-
-	public importSymbol(): ImportSymbolContext;
-	public importSymbol(_p: number): ImportSymbolContext;
-	// @RuleVersion(0)
-	public importSymbol(_p?: number): ImportSymbolContext {
-		if (_p === undefined) {
-			_p = 0;
-		}
-
-		let _parentctx: ParserRuleContext = this._ctx;
-		let _parentState: number = this.state;
-		let _localctx: ImportSymbolContext = new ImportSymbolContext(this._ctx, _parentState);
-		let _prevctx: ImportSymbolContext = _localctx;
-		let _startState: number = 16;
-		this.enterRecursionRule(_localctx, 16, CWScriptParser.RULE_importSymbol, _p);
+	public importList(): ImportListContext {
+		let _localctx: ImportListContext = new ImportListContext(this._ctx, this.state);
+		this.enterRule(_localctx, 14, CWScriptParser.RULE_importList);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 267;
-			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 13, this._ctx) ) {
-			case 1:
-				{
-				_localctx = new GroupedImportSymbolContext(_localctx);
-				this._ctx = _localctx;
-				_prevctx = _localctx;
-
-				this.state = 252;
-				this.match(CWScriptParser.LPAREN);
-				this.state = 253;
-				this.importSymbolList();
-				this.state = 254;
-				this.match(CWScriptParser.RPAREN);
-				}
-				break;
-
-			case 2:
-				{
-				_localctx = new TypePathImportSymbolContext(_localctx);
-				this._ctx = _localctx;
-				_prevctx = _localctx;
-				this.state = 256;
-				this.typePath();
-				}
-				break;
-
-			case 3:
-				{
-				_localctx = new DestructureImportSymbolContext(_localctx);
-				this._ctx = _localctx;
-				_prevctx = _localctx;
-				this.state = 257;
-				this.typePath();
-				this.state = 258;
-				this.match(CWScriptParser.D_COLON);
-				this.state = 259;
-				this.match(CWScriptParser.LBRACE);
-				this.state = 260;
-				this.importSymbolList();
-				this.state = 261;
-				this.match(CWScriptParser.RBRACE);
-				}
-				break;
-
-			case 4:
-				{
-				_localctx = new AllImportSymbolContext(_localctx);
-				this._ctx = _localctx;
-				_prevctx = _localctx;
-				this.state = 263;
-				this.typePath();
-				this.state = 264;
-				this.match(CWScriptParser.D_COLON);
-				this.state = 265;
-				this.match(CWScriptParser.MUL);
-				}
-				break;
+			{
+			this.state = 255;
+			_localctx._importItem = this.importItem();
+			_localctx._importItems.push(_localctx._importItem);
 			}
-			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 274;
+			this.state = 260;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 14, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
-					if (this._parseListeners != null) {
-						this.triggerExitRuleEvent();
-					}
-					_prevctx = _localctx;
 					{
 					{
-					_localctx = new RenamedImportSymbolContext(new ImportSymbolContext(_parentctx, _parentState));
-					this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_importSymbol);
-					this.state = 269;
-					if (!(this.precpred(this._ctx, 1))) {
-						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
+					this.state = 256;
+					this.match(CWScriptParser.COMMA);
+					{
+					this.state = 257;
+					_localctx._importItem = this.importItem();
+					_localctx._importItems.push(_localctx._importItem);
 					}
-					this.state = 270;
-					this.match(CWScriptParser.AS);
-					this.state = 271;
-					this.ident();
 					}
 					}
 				}
-				this.state = 276;
+				this.state = 262;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 14, this._ctx);
 			}
@@ -802,7 +750,47 @@ export class CWScriptParser extends Parser {
 			}
 		}
 		finally {
-			this.unrollRecursionContexts(_parentctx);
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public importItem(): ImportItemContext {
+		let _localctx: ImportItemContext = new ImportItemContext(this._ctx, this.state);
+		this.enterRule(_localctx, 16, CWScriptParser.RULE_importItem);
+		let _la: number;
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			{
+			this.state = 263;
+			_localctx._symbol = this.ident();
+			}
+			this.state = 266;
+			this._errHandler.sync(this);
+			_la = this._input.LA(1);
+			if (_la === CWScriptParser.AS) {
+				{
+				this.state = 264;
+				this.match(CWScriptParser.AS);
+				this.state = 265;
+				_localctx._alias = this.ident();
+				}
+			}
+
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
 		}
 		return _localctx;
 	}
@@ -814,23 +802,23 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 277;
+			this.state = 268;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 281;
+			this.state = 272;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CWScriptParser.ERROR) | (1 << CWScriptParser.EVENT) | (1 << CWScriptParser.INSTANTIATE) | (1 << CWScriptParser.EXEC) | (1 << CWScriptParser.QUERY) | (1 << CWScriptParser.MIGRATE) | (1 << CWScriptParser.STATE) | (1 << CWScriptParser.STRUCT) | (1 << CWScriptParser.ENUM) | (1 << CWScriptParser.TYPE))) !== 0) || _la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
 				{
-				this.state = 278;
+				this.state = 269;
 				_localctx._items = this.contractItem();
 				}
 				}
-				this.state = 283;
+				this.state = 274;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 284;
+			this.state = 275;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -856,23 +844,23 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 286;
+			this.state = 277;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 290;
+			this.state = 281;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CWScriptParser.ERROR) | (1 << CWScriptParser.EVENT) | (1 << CWScriptParser.INSTANTIATE) | (1 << CWScriptParser.EXEC) | (1 << CWScriptParser.QUERY) | (1 << CWScriptParser.MIGRATE) | (1 << CWScriptParser.STATE) | (1 << CWScriptParser.STRUCT) | (1 << CWScriptParser.ENUM) | (1 << CWScriptParser.TYPE))) !== 0) || _la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
 				{
-				this.state = 287;
+				this.state = 278;
 				_localctx._items = this.interfaceItem();
 				}
 				}
-				this.state = 292;
+				this.state = 283;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 293;
+			this.state = 284;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -895,13 +883,13 @@ export class CWScriptParser extends Parser {
 		let _localctx: ContractItemContext = new ContractItemContext(this._ctx, this.state);
 		this.enterRule(_localctx, 22, CWScriptParser.RULE_contractItem);
 		try {
-			this.state = 308;
+			this.state = 299;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 17, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 18, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 295;
+				this.state = 286;
 				this.typeDefn();
 				}
 				break;
@@ -909,7 +897,7 @@ export class CWScriptParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 296;
+				this.state = 287;
 				this.errorDefn();
 				}
 				break;
@@ -917,7 +905,7 @@ export class CWScriptParser extends Parser {
 			case 3:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 297;
+				this.state = 288;
 				this.errorDefnBlock();
 				}
 				break;
@@ -925,7 +913,7 @@ export class CWScriptParser extends Parser {
 			case 4:
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 298;
+				this.state = 289;
 				this.eventDefn();
 				}
 				break;
@@ -933,7 +921,7 @@ export class CWScriptParser extends Parser {
 			case 5:
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 299;
+				this.state = 290;
 				this.eventDefnBlock();
 				}
 				break;
@@ -941,7 +929,7 @@ export class CWScriptParser extends Parser {
 			case 6:
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 300;
+				this.state = 291;
 				this.stateDefn();
 				}
 				break;
@@ -949,7 +937,7 @@ export class CWScriptParser extends Parser {
 			case 7:
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 301;
+				this.state = 292;
 				this.stateDefnBlock();
 				}
 				break;
@@ -957,7 +945,7 @@ export class CWScriptParser extends Parser {
 			case 8:
 				this.enterOuterAlt(_localctx, 8);
 				{
-				this.state = 302;
+				this.state = 293;
 				this.instantiateDefn();
 				}
 				break;
@@ -965,7 +953,7 @@ export class CWScriptParser extends Parser {
 			case 9:
 				this.enterOuterAlt(_localctx, 9);
 				{
-				this.state = 303;
+				this.state = 294;
 				this.execDefn();
 				}
 				break;
@@ -973,7 +961,7 @@ export class CWScriptParser extends Parser {
 			case 10:
 				this.enterOuterAlt(_localctx, 10);
 				{
-				this.state = 304;
+				this.state = 295;
 				this.execDefnBlock();
 				}
 				break;
@@ -981,7 +969,7 @@ export class CWScriptParser extends Parser {
 			case 11:
 				this.enterOuterAlt(_localctx, 11);
 				{
-				this.state = 305;
+				this.state = 296;
 				this.queryDefn();
 				}
 				break;
@@ -989,7 +977,7 @@ export class CWScriptParser extends Parser {
 			case 12:
 				this.enterOuterAlt(_localctx, 12);
 				{
-				this.state = 306;
+				this.state = 297;
 				this.queryDefnBlock();
 				}
 				break;
@@ -997,7 +985,7 @@ export class CWScriptParser extends Parser {
 			case 13:
 				this.enterOuterAlt(_localctx, 13);
 				{
-				this.state = 307;
+				this.state = 298;
 				this.migrateDefn();
 				}
 				break;
@@ -1022,13 +1010,13 @@ export class CWScriptParser extends Parser {
 		let _localctx: InterfaceItemContext = new InterfaceItemContext(this._ctx, this.state);
 		this.enterRule(_localctx, 24, CWScriptParser.RULE_interfaceItem);
 		try {
-			this.state = 323;
+			this.state = 314;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 18, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 19, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 310;
+				this.state = 301;
 				this.typeDefn();
 				}
 				break;
@@ -1036,7 +1024,7 @@ export class CWScriptParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 311;
+				this.state = 302;
 				this.errorDefn();
 				}
 				break;
@@ -1044,7 +1032,7 @@ export class CWScriptParser extends Parser {
 			case 3:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 312;
+				this.state = 303;
 				this.errorDefnBlock();
 				}
 				break;
@@ -1052,7 +1040,7 @@ export class CWScriptParser extends Parser {
 			case 4:
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 313;
+				this.state = 304;
 				this.eventDefn();
 				}
 				break;
@@ -1060,7 +1048,7 @@ export class CWScriptParser extends Parser {
 			case 5:
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 314;
+				this.state = 305;
 				this.eventDefnBlock();
 				}
 				break;
@@ -1068,7 +1056,7 @@ export class CWScriptParser extends Parser {
 			case 6:
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 315;
+				this.state = 306;
 				this.stateDefn();
 				}
 				break;
@@ -1076,7 +1064,7 @@ export class CWScriptParser extends Parser {
 			case 7:
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 316;
+				this.state = 307;
 				this.stateDefnBlock();
 				}
 				break;
@@ -1084,7 +1072,7 @@ export class CWScriptParser extends Parser {
 			case 8:
 				this.enterOuterAlt(_localctx, 8);
 				{
-				this.state = 317;
+				this.state = 308;
 				this.instantiateDecl();
 				}
 				break;
@@ -1092,7 +1080,7 @@ export class CWScriptParser extends Parser {
 			case 9:
 				this.enterOuterAlt(_localctx, 9);
 				{
-				this.state = 318;
+				this.state = 309;
 				this.execDecl();
 				}
 				break;
@@ -1100,7 +1088,7 @@ export class CWScriptParser extends Parser {
 			case 10:
 				this.enterOuterAlt(_localctx, 10);
 				{
-				this.state = 319;
+				this.state = 310;
 				this.execDeclBlock();
 				}
 				break;
@@ -1108,7 +1096,7 @@ export class CWScriptParser extends Parser {
 			case 11:
 				this.enterOuterAlt(_localctx, 11);
 				{
-				this.state = 320;
+				this.state = 311;
 				this.queryDecl();
 				}
 				break;
@@ -1116,7 +1104,7 @@ export class CWScriptParser extends Parser {
 			case 12:
 				this.enterOuterAlt(_localctx, 12);
 				{
-				this.state = 321;
+				this.state = 312;
 				this.queryDeclBlock();
 				}
 				break;
@@ -1124,7 +1112,7 @@ export class CWScriptParser extends Parser {
 			case 13:
 				this.enterOuterAlt(_localctx, 13);
 				{
-				this.state = 322;
+				this.state = 313;
 				this.migrateDecl();
 				}
 				break;
@@ -1152,19 +1140,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 326;
+			this.state = 317;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 325;
+				this.state = 316;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 328;
+			this.state = 319;
 			this.match(CWScriptParser.ERROR);
-			this.state = 329;
+			this.state = 320;
 			this.enumVariant();
 			}
 		}
@@ -1190,25 +1178,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 331;
+			this.state = 322;
 			this.match(CWScriptParser.ERROR);
-			this.state = 332;
+			this.state = 323;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 336;
+			this.state = 327;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
 				{
-				this.state = 333;
+				this.state = 324;
 				this.errorDefnBlock_item();
 				}
 				}
-				this.state = 338;
+				this.state = 329;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 339;
+			this.state = 330;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -1234,17 +1222,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 342;
+			this.state = 333;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 341;
+				this.state = 332;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 344;
+			this.state = 335;
 			this.enumVariant();
 			}
 		}
@@ -1270,19 +1258,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 347;
+			this.state = 338;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 346;
+				this.state = 337;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 349;
+			this.state = 340;
 			this.match(CWScriptParser.EVENT);
-			this.state = 350;
+			this.state = 341;
 			this.enumVariant();
 			}
 		}
@@ -1308,25 +1296,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 352;
+			this.state = 343;
 			this.match(CWScriptParser.EVENT);
-			this.state = 353;
+			this.state = 344;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 357;
+			this.state = 348;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
 				{
-				this.state = 354;
+				this.state = 345;
 				this.eventDefnBlock_item();
 				}
 				}
-				this.state = 359;
+				this.state = 350;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 360;
+			this.state = 351;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -1352,17 +1340,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 363;
+			this.state = 354;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 362;
+				this.state = 353;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 365;
+			this.state = 356;
 			this.enumVariant();
 			}
 		}
@@ -1386,27 +1374,27 @@ export class CWScriptParser extends Parser {
 		this.enterRule(_localctx, 38, CWScriptParser.RULE_stateDefn);
 		let _la: number;
 		try {
-			this.state = 377;
+			this.state = 368;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 27, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 28, this._ctx) ) {
 			case 1:
 				_localctx = new StateItemDefnContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 368;
+				this.state = 359;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 					{
-					this.state = 367;
+					this.state = 358;
 					(_localctx as StateItemDefnContext)._spec = this.cwspec();
 					}
 				}
 
-				this.state = 370;
+				this.state = 361;
 				this.match(CWScriptParser.STATE);
 				{
-				this.state = 371;
+				this.state = 362;
 				(_localctx as StateItemDefnContext)._item = this.itemDefn();
 				}
 				}
@@ -1416,19 +1404,19 @@ export class CWScriptParser extends Parser {
 				_localctx = new StateMapDefnContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 373;
+				this.state = 364;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 					{
-					this.state = 372;
+					this.state = 363;
 					(_localctx as StateMapDefnContext)._spec = this.cwspec();
 					}
 				}
 
-				this.state = 375;
+				this.state = 366;
 				this.match(CWScriptParser.STATE);
-				this.state = 376;
+				this.state = 367;
 				(_localctx as StateMapDefnContext)._map = this.mapDefn();
 				}
 				break;
@@ -1456,25 +1444,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 379;
+			this.state = 370;
 			this.match(CWScriptParser.STATE);
-			this.state = 380;
+			this.state = 371;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 384;
+			this.state = 375;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
 				{
-				this.state = 381;
+				this.state = 372;
 				this.stateDefnBlock_item();
 				}
 				}
-				this.state = 386;
+				this.state = 377;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 387;
+			this.state = 378;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -1498,25 +1486,25 @@ export class CWScriptParser extends Parser {
 		this.enterRule(_localctx, 42, CWScriptParser.RULE_stateDefnBlock_item);
 		let _la: number;
 		try {
-			this.state = 397;
+			this.state = 388;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 31, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 32, this._ctx) ) {
 			case 1:
 				_localctx = new StateBlockItemDefnContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 390;
+				this.state = 381;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 					{
-					this.state = 389;
+					this.state = 380;
 					(_localctx as StateBlockItemDefnContext)._spec = this.cwspec();
 					}
 				}
 
 				{
-				this.state = 392;
+				this.state = 383;
 				(_localctx as StateBlockItemDefnContext)._item = this.itemDefn();
 				}
 				}
@@ -1526,18 +1514,18 @@ export class CWScriptParser extends Parser {
 				_localctx = new StateBlockMapDefnContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 394;
+				this.state = 385;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 					{
-					this.state = 393;
+					this.state = 384;
 					(_localctx as StateBlockMapDefnContext)._spec = this.cwspec();
 					}
 				}
 
 				{
-				this.state = 396;
+				this.state = 387;
 				(_localctx as StateBlockMapDefnContext)._map = this.mapDefn();
 				}
 				}
@@ -1566,13 +1554,13 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 399;
+			this.state = 390;
 			_localctx._key = this.ident();
 			}
-			this.state = 400;
+			this.state = 391;
 			this.match(CWScriptParser.COLON);
 			{
-			this.state = 401;
+			this.state = 392;
 			_localctx._valueType = this.typeExpr(0);
 			}
 			}
@@ -1599,17 +1587,17 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 403;
+			this.state = 394;
 			_localctx._key = this.ident();
 			}
 			{
-			this.state = 404;
+			this.state = 395;
 			_localctx._mapKeys = this.mapDefnKeys();
 			}
-			this.state = 405;
+			this.state = 396;
 			this.match(CWScriptParser.COLON);
 			{
-			this.state = 406;
+			this.state = 397;
 			_localctx._valueType = this.typeExpr(0);
 			}
 			}
@@ -1636,17 +1624,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 409;
+			this.state = 400;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			do {
 				{
 				{
-				this.state = 408;
+				this.state = 399;
 				this.mapDefnKey();
 				}
 				}
-				this.state = 411;
+				this.state = 402;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			} while (_la === CWScriptParser.LBRACK);
@@ -1673,25 +1661,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 413;
+			this.state = 404;
 			this.match(CWScriptParser.LBRACK);
-			this.state = 417;
+			this.state = 408;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 33, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 34, this._ctx) ) {
 			case 1:
 				{
-				this.state = 414;
+				this.state = 405;
 				_localctx._keyName = this.ident();
-				this.state = 415;
+				this.state = 406;
 				this.match(CWScriptParser.COLON);
 				}
 				break;
 			}
 			{
-			this.state = 419;
+			this.state = 410;
 			_localctx._keyType = this.typeExpr(0);
 			}
-			this.state = 420;
+			this.state = 411;
 			this.match(CWScriptParser.RBRACK);
 			}
 		}
@@ -1717,31 +1705,31 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 423;
+			this.state = 414;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 422;
+				this.state = 413;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 425;
+			this.state = 416;
 			this.match(CWScriptParser.INSTANTIATE);
-			this.state = 426;
+			this.state = 417;
 			this.fnArgs();
-			this.state = 428;
+			this.state = 419;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.ARROW) {
 				{
-				this.state = 427;
+				this.state = 418;
 				this.fnType();
 				}
 			}
 
-			this.state = 430;
+			this.state = 421;
 			this.fnBody();
 			}
 		}
@@ -1767,26 +1755,26 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 433;
+			this.state = 424;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 432;
+				this.state = 423;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 435;
+			this.state = 426;
 			this.match(CWScriptParser.INSTANTIATE);
-			this.state = 436;
+			this.state = 427;
 			this.fnArgs();
-			this.state = 438;
+			this.state = 429;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.ARROW) {
 				{
-				this.state = 437;
+				this.state = 428;
 				this.fnType();
 				}
 			}
@@ -1815,19 +1803,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 441;
+			this.state = 432;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 440;
+				this.state = 431;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 443;
+			this.state = 434;
 			this.match(CWScriptParser.EXEC);
-			this.state = 444;
+			this.state = 435;
 			this.namedFnDefn();
 			}
 		}
@@ -1853,25 +1841,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 446;
+			this.state = 437;
 			this.match(CWScriptParser.EXEC);
-			this.state = 447;
+			this.state = 438;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 451;
+			this.state = 442;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
 				{
-				this.state = 448;
+				this.state = 439;
 				this.execDefnBlock_item();
 				}
 				}
-				this.state = 453;
+				this.state = 444;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 454;
+			this.state = 445;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -1897,17 +1885,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 457;
+			this.state = 448;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 456;
+				this.state = 447;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 459;
+			this.state = 450;
 			this.namedFnDefn();
 			}
 		}
@@ -1933,19 +1921,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 462;
+			this.state = 453;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 461;
+				this.state = 452;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 464;
+			this.state = 455;
 			this.match(CWScriptParser.EXEC);
-			this.state = 465;
+			this.state = 456;
 			this.namedFnDecl();
 			}
 		}
@@ -1971,25 +1959,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 467;
+			this.state = 458;
 			this.match(CWScriptParser.EXEC);
-			this.state = 468;
+			this.state = 459;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 472;
+			this.state = 463;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
 				{
-				this.state = 469;
+				this.state = 460;
 				this.execDeclBlock_item();
 				}
 				}
-				this.state = 474;
+				this.state = 465;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 475;
+			this.state = 466;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -2015,17 +2003,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 478;
+			this.state = 469;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 477;
+				this.state = 468;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 480;
+			this.state = 471;
 			this.namedFnDecl();
 			}
 		}
@@ -2051,19 +2039,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 483;
+			this.state = 474;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 482;
+				this.state = 473;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 485;
+			this.state = 476;
 			this.match(CWScriptParser.QUERY);
-			this.state = 486;
+			this.state = 477;
 			this.namedFnDefn();
 			}
 		}
@@ -2089,25 +2077,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 488;
+			this.state = 479;
 			this.match(CWScriptParser.QUERY);
-			this.state = 489;
+			this.state = 480;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 493;
+			this.state = 484;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
 				{
-				this.state = 490;
+				this.state = 481;
 				this.queryDefnBlock_item();
 				}
 				}
-				this.state = 495;
+				this.state = 486;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 496;
+			this.state = 487;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -2133,17 +2121,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 499;
+			this.state = 490;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 498;
+				this.state = 489;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 501;
+			this.state = 492;
 			this.namedFnDefn();
 			}
 		}
@@ -2169,19 +2157,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 504;
+			this.state = 495;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 503;
+				this.state = 494;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 506;
+			this.state = 497;
 			this.match(CWScriptParser.QUERY);
-			this.state = 507;
+			this.state = 498;
 			this.namedFnDecl();
 			}
 		}
@@ -2207,25 +2195,25 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 509;
+			this.state = 500;
 			this.match(CWScriptParser.QUERY);
-			this.state = 510;
+			this.state = 501;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 514;
+			this.state = 505;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
 				{
-				this.state = 511;
+				this.state = 502;
 				this.queryDeclBlock_item();
 				}
 				}
-				this.state = 516;
+				this.state = 507;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 517;
+			this.state = 508;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -2251,17 +2239,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 520;
+			this.state = 511;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 519;
+				this.state = 510;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 522;
+			this.state = 513;
 			this.namedFnDecl();
 			}
 		}
@@ -2287,31 +2275,31 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 525;
+			this.state = 516;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 524;
+				this.state = 515;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 527;
+			this.state = 518;
 			this.match(CWScriptParser.MIGRATE);
-			this.state = 528;
+			this.state = 519;
 			this.fnArgs();
-			this.state = 530;
+			this.state = 521;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.ARROW) {
 				{
-				this.state = 529;
+				this.state = 520;
 				this.fnType();
 				}
 			}
 
-			this.state = 532;
+			this.state = 523;
 			this.fnBody();
 			}
 		}
@@ -2337,26 +2325,26 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 535;
+			this.state = 526;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 534;
+				this.state = 525;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 537;
+			this.state = 528;
 			this.match(CWScriptParser.MIGRATE);
-			this.state = 538;
+			this.state = 529;
 			this.fnArgs();
-			this.state = 540;
+			this.state = 531;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.ARROW) {
 				{
-				this.state = 539;
+				this.state = 530;
 				this.fnType();
 				}
 			}
@@ -2382,13 +2370,13 @@ export class CWScriptParser extends Parser {
 		let _localctx: EnumVariantContext = new EnumVariantContext(this._ctx, this.state);
 		this.enterRule(_localctx, 84, CWScriptParser.RULE_enumVariant);
 		try {
-			this.state = 545;
+			this.state = 536;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 54, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 55, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 542;
+				this.state = 533;
 				this.enumVariant_struct();
 				}
 				break;
@@ -2396,7 +2384,7 @@ export class CWScriptParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 543;
+				this.state = 534;
 				this.enumVariant_tuple();
 				}
 				break;
@@ -2404,7 +2392,7 @@ export class CWScriptParser extends Parser {
 			case 3:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 544;
+				this.state = 535;
 				this.enumVariant_unit();
 				}
 				break;
@@ -2432,21 +2420,21 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 547;
+			this.state = 538;
 			_localctx._name = this.ident();
 			}
-			this.state = 550;
+			this.state = 541;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case CWScriptParser.LPAREN:
 				{
-				this.state = 548;
+				this.state = 539;
 				this.parenStructMembers();
 				}
 				break;
 			case CWScriptParser.LBRACE:
 				{
-				this.state = 549;
+				this.state = 540;
 				this.curlyStructMembers();
 				}
 				break;
@@ -2477,10 +2465,10 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 552;
+			this.state = 543;
 			_localctx._name = this.ident();
 			}
-			this.state = 553;
+			this.state = 544;
 			_localctx._members = this.tupleMembers();
 			}
 		}
@@ -2506,7 +2494,7 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 555;
+			this.state = 546;
 			_localctx._name = this.ident();
 			}
 			}
@@ -2533,27 +2521,27 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 557;
+			this.state = 548;
 			this.match(CWScriptParser.LPAREN);
-			this.state = 558;
+			this.state = 549;
 			this.typeExpr(0);
-			this.state = 563;
+			this.state = 554;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CWScriptParser.COMMA) {
 				{
 				{
-				this.state = 559;
+				this.state = 550;
 				this.match(CWScriptParser.COMMA);
-				this.state = 560;
+				this.state = 551;
 				this.typeExpr(0);
 				}
 				}
-				this.state = 565;
+				this.state = 556;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 566;
+			this.state = 557;
 			this.match(CWScriptParser.RPAREN);
 			}
 		}
@@ -2579,35 +2567,35 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 568;
+			this.state = 559;
 			this.match(CWScriptParser.LPAREN);
-			this.state = 577;
+			this.state = 568;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
-				this.state = 569;
+				this.state = 560;
 				this.structMember();
-				this.state = 574;
+				this.state = 565;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === CWScriptParser.COMMA) {
 					{
 					{
-					this.state = 570;
+					this.state = 561;
 					this.match(CWScriptParser.COMMA);
-					this.state = 571;
+					this.state = 562;
 					this.structMember();
 					}
 					}
-					this.state = 576;
+					this.state = 567;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
 				}
 			}
 
-			this.state = 579;
+			this.state = 570;
 			this.match(CWScriptParser.RPAREN);
 			}
 		}
@@ -2634,39 +2622,39 @@ export class CWScriptParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 581;
+			this.state = 572;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 593;
+			this.state = 584;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.CWSPEC_LINE_COMMENT - 72)) | (1 << (CWScriptParser.CWSPEC_BLOCK_COMMENT - 72)))) !== 0)) {
 				{
-				this.state = 582;
+				this.state = 573;
 				this.structMember();
-				this.state = 587;
+				this.state = 578;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 59, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 60, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 583;
+						this.state = 574;
 						this.match(CWScriptParser.COMMA);
-						this.state = 584;
+						this.state = 575;
 						this.structMember();
 						}
 						}
 					}
-					this.state = 589;
+					this.state = 580;
 					this._errHandler.sync(this);
-					_alt = this.interpreter.adaptivePredict(this._input, 59, this._ctx);
+					_alt = this.interpreter.adaptivePredict(this._input, 60, this._ctx);
 				}
-				this.state = 591;
+				this.state = 582;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.COMMA) {
 					{
-					this.state = 590;
+					this.state = 581;
 					this.match(CWScriptParser.COMMA);
 					}
 				}
@@ -2674,7 +2662,7 @@ export class CWScriptParser extends Parser {
 				}
 			}
 
-			this.state = 595;
+			this.state = 586;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -2700,34 +2688,34 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 598;
+			this.state = 589;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 597;
+				this.state = 588;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
 			{
-			this.state = 600;
+			this.state = 591;
 			_localctx._name = this.ident();
 			}
-			this.state = 602;
+			this.state = 593;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.QUEST) {
 				{
-				this.state = 601;
+				this.state = 592;
 				_localctx._option = this.match(CWScriptParser.QUEST);
 				}
 			}
 
-			this.state = 604;
+			this.state = 595;
 			this.match(CWScriptParser.COLON);
 			{
-			this.state = 605;
+			this.state = 596;
 			_localctx._valueType = this.typeExpr(0);
 			}
 			}
@@ -2766,16 +2754,16 @@ export class CWScriptParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 623;
+			this.state = 614;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 65, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 66, this._ctx) ) {
 			case 1:
 				{
 				_localctx = new TypePathExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
 
-				this.state = 608;
+				this.state = 599;
 				this.typePath();
 				}
 				break;
@@ -2785,31 +2773,31 @@ export class CWScriptParser extends Parser {
 				_localctx = new TupleTypeExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 609;
+				this.state = 600;
 				this.match(CWScriptParser.LPAREN);
 				{
-				this.state = 610;
+				this.state = 601;
 				(_localctx as TupleTypeExprContext)._typeExpr = this.typeExpr(0);
 				(_localctx as TupleTypeExprContext)._members.push((_localctx as TupleTypeExprContext)._typeExpr);
 				}
-				this.state = 615;
+				this.state = 606;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la === CWScriptParser.COMMA) {
 					{
 					{
-					this.state = 611;
+					this.state = 602;
 					this.match(CWScriptParser.COMMA);
-					this.state = 612;
+					this.state = 603;
 					(_localctx as TupleTypeExprContext)._typeExpr = this.typeExpr(0);
 					(_localctx as TupleTypeExprContext)._members.push((_localctx as TupleTypeExprContext)._typeExpr);
 					}
 					}
-					this.state = 617;
+					this.state = 608;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 618;
+				this.state = 609;
 				this.match(CWScriptParser.RPAREN);
 				}
 				break;
@@ -2819,9 +2807,9 @@ export class CWScriptParser extends Parser {
 				_localctx = new RefTypeExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 620;
+				this.state = 611;
 				this.match(CWScriptParser.AMP);
-				this.state = 621;
+				this.state = 612;
 				this.typeExpr(3);
 				}
 				break;
@@ -2831,15 +2819,15 @@ export class CWScriptParser extends Parser {
 				_localctx = new TypeDefnExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 622;
+				this.state = 613;
 				this.typeDefn();
 				}
 				break;
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 637;
+			this.state = 628;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 67, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 68, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -2847,18 +2835,18 @@ export class CWScriptParser extends Parser {
 					}
 					_prevctx = _localctx;
 					{
-					this.state = 635;
+					this.state = 626;
 					this._errHandler.sync(this);
-					switch ( this.interpreter.adaptivePredict(this._input, 66, this._ctx) ) {
+					switch ( this.interpreter.adaptivePredict(this._input, 67, this._ctx) ) {
 					case 1:
 						{
 						_localctx = new ParamzdTypeExprContext(new TypeExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_typeExpr);
-						this.state = 625;
+						this.state = 616;
 						if (!(this.precpred(this._ctx, 7))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 7)");
 						}
-						this.state = 626;
+						this.state = 617;
 						this.typeParam();
 						}
 						break;
@@ -2867,11 +2855,11 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new ShortOptionTypeExprContext(new TypeExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_typeExpr);
-						this.state = 627;
+						this.state = 618;
 						if (!(this.precpred(this._ctx, 5))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 5)");
 						}
-						this.state = 628;
+						this.state = 619;
 						this.match(CWScriptParser.QUEST);
 						}
 						break;
@@ -2880,13 +2868,13 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new ShortVecTypeExprContext(new TypeExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_typeExpr);
-						this.state = 629;
+						this.state = 620;
 						if (!(this.precpred(this._ctx, 4))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 4)");
 						}
-						this.state = 630;
+						this.state = 621;
 						this.match(CWScriptParser.LBRACK);
-						this.state = 631;
+						this.state = 622;
 						this.match(CWScriptParser.RBRACK);
 						}
 						break;
@@ -2895,22 +2883,22 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new ReflectiveTypeExprContext(new TypeExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_typeExpr);
-						this.state = 632;
+						this.state = 623;
 						if (!(this.precpred(this._ctx, 2))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 						}
-						this.state = 633;
+						this.state = 624;
 						this.match(CWScriptParser.DOLLAR);
-						this.state = 634;
+						this.state = 625;
 						this.ident();
 						}
 						break;
 					}
 					}
 				}
-				this.state = 639;
+				this.state = 630;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 67, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 68, this._ctx);
 			}
 			}
 		}
@@ -2936,27 +2924,27 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 640;
+			this.state = 631;
 			this.match(CWScriptParser.LT);
-			this.state = 641;
+			this.state = 632;
 			this.typeExpr(0);
-			this.state = 646;
+			this.state = 637;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CWScriptParser.COMMA) {
 				{
 				{
-				this.state = 642;
+				this.state = 633;
 				this.match(CWScriptParser.COMMA);
-				this.state = 643;
+				this.state = 634;
 				this.typeExpr(0);
 				}
 				}
-				this.state = 648;
+				this.state = 639;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 649;
+			this.state = 640;
 			this.match(CWScriptParser.GT);
 			}
 		}
@@ -2983,26 +2971,26 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 651;
+			this.state = 642;
 			this.ident();
 			}
-			this.state = 656;
+			this.state = 647;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 69, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 70, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 652;
+					this.state = 643;
 					this.match(CWScriptParser.D_COLON);
-					this.state = 653;
+					this.state = 644;
 					this.ident();
 					}
 					}
 				}
-				this.state = 658;
+				this.state = 649;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 69, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 70, this._ctx);
 			}
 			}
 		}
@@ -3028,17 +3016,17 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 660;
+			this.state = 651;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.D_COLON) {
 				{
-				this.state = 659;
+				this.state = 650;
 				_localctx._root = this.match(CWScriptParser.D_COLON);
 				}
 			}
 
-			this.state = 662;
+			this.state = 653;
 			this.pathList();
 			}
 		}
@@ -3061,13 +3049,13 @@ export class CWScriptParser extends Parser {
 		let _localctx: TypeDefnContext = new TypeDefnContext(this._ctx, this.state);
 		this.enterRule(_localctx, 108, CWScriptParser.RULE_typeDefn);
 		try {
-			this.state = 667;
+			this.state = 658;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 71, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 72, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 664;
+				this.state = 655;
 				this.structDefn();
 				}
 				break;
@@ -3075,7 +3063,7 @@ export class CWScriptParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 665;
+				this.state = 656;
 				this.enumDefn();
 				}
 				break;
@@ -3083,7 +3071,7 @@ export class CWScriptParser extends Parser {
 			case 3:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 666;
+				this.state = 657;
 				this.typeAliasDefn();
 				}
 				break;
@@ -3111,19 +3099,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 670;
+			this.state = 661;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 669;
+				this.state = 660;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 672;
+			this.state = 663;
 			this.match(CWScriptParser.STRUCT);
-			this.state = 673;
+			this.state = 664;
 			this.enumVariant();
 			}
 		}
@@ -3149,27 +3137,27 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 676;
+			this.state = 667;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 675;
+				this.state = 666;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 678;
+			this.state = 669;
 			this.match(CWScriptParser.ENUM);
 			{
-			this.state = 679;
+			this.state = 670;
 			_localctx._name = this.ident();
 			}
-			this.state = 680;
+			this.state = 671;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 681;
+			this.state = 672;
 			this.enumVariantList();
-			this.state = 682;
+			this.state = 673;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -3196,45 +3184,45 @@ export class CWScriptParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 697;
+			this.state = 688;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || _la === CWScriptParser.Ident) {
 				{
-				this.state = 684;
+				this.state = 675;
 				this.enumVariant();
-				this.state = 691;
+				this.state = 682;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 75, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 76, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 686;
+						this.state = 677;
 						this._errHandler.sync(this);
 						_la = this._input.LA(1);
 						if (_la === CWScriptParser.COMMA) {
 							{
-							this.state = 685;
+							this.state = 676;
 							this.match(CWScriptParser.COMMA);
 							}
 						}
 
-						this.state = 688;
+						this.state = 679;
 						this.enumVariant();
 						}
 						}
 					}
-					this.state = 693;
+					this.state = 684;
 					this._errHandler.sync(this);
-					_alt = this.interpreter.adaptivePredict(this._input, 75, this._ctx);
+					_alt = this.interpreter.adaptivePredict(this._input, 76, this._ctx);
 				}
-				this.state = 695;
+				this.state = 686;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.COMMA) {
 					{
-					this.state = 694;
+					this.state = 685;
 					this.match(CWScriptParser.COMMA);
 					}
 				}
@@ -3266,26 +3254,26 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 700;
+			this.state = 691;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT) {
 				{
-				this.state = 699;
+				this.state = 690;
 				_localctx._spec = this.cwspec();
 				}
 			}
 
-			this.state = 702;
+			this.state = 693;
 			this.match(CWScriptParser.TYPE);
 			{
-			this.state = 703;
+			this.state = 694;
 			_localctx._name = this.ident();
 			}
-			this.state = 704;
+			this.state = 695;
 			this.match(CWScriptParser.EQ);
 			{
-			this.state = 705;
+			this.state = 696;
 			_localctx._typeValue = this.typeExpr(0);
 			}
 			}
@@ -3313,17 +3301,17 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 707;
+			this.state = 698;
 			_localctx._fnName = this.ident();
 			}
-			this.state = 708;
+			this.state = 699;
 			this.fnArgs();
-			this.state = 710;
+			this.state = 701;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.ARROW) {
 				{
-				this.state = 709;
+				this.state = 700;
 				this.fnType();
 				}
 			}
@@ -3353,22 +3341,22 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 712;
+			this.state = 703;
 			_localctx._fnName = this.ident();
 			}
-			this.state = 713;
+			this.state = 704;
 			this.fnArgs();
-			this.state = 715;
+			this.state = 706;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.ARROW) {
 				{
-				this.state = 714;
+				this.state = 705;
 				this.fnType();
 				}
 			}
 
-			this.state = 717;
+			this.state = 708;
 			this.fnBody();
 			}
 		}
@@ -3394,9 +3382,9 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 719;
+			this.state = 710;
 			this.match(CWScriptParser.ARROW);
-			this.state = 720;
+			this.state = 711;
 			_localctx._retType = this.typeExpr(0);
 			}
 			}
@@ -3423,19 +3411,19 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 722;
+			this.state = 713;
 			this.match(CWScriptParser.LPAREN);
-			this.state = 724;
+			this.state = 715;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || _la === CWScriptParser.Ident) {
 				{
-				this.state = 723;
+				this.state = 714;
 				this.fnArgList();
 				}
 			}
 
-			this.state = 726;
+			this.state = 717;
 			this.match(CWScriptParser.RPAREN);
 			}
 		}
@@ -3461,21 +3449,21 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 728;
+			this.state = 719;
 			this.fnArg();
-			this.state = 733;
+			this.state = 724;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CWScriptParser.COMMA) {
 				{
 				{
-				this.state = 729;
+				this.state = 720;
 				this.match(CWScriptParser.COMMA);
-				this.state = 730;
+				this.state = 721;
 				this.fnArg();
 				}
 				}
-				this.state = 735;
+				this.state = 726;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -3504,23 +3492,23 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 736;
+			this.state = 727;
 			_localctx._argName = this.ident();
 			}
-			this.state = 738;
+			this.state = 729;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.QUEST) {
 				{
-				this.state = 737;
+				this.state = 728;
 				_localctx._option = this.match(CWScriptParser.QUEST);
 				}
 			}
 
-			this.state = 740;
+			this.state = 731;
 			this.match(CWScriptParser.COLON);
 			{
-			this.state = 741;
+			this.state = 732;
 			_localctx._argType = this.typeExpr(0);
 			}
 			}
@@ -3545,7 +3533,7 @@ export class CWScriptParser extends Parser {
 		this.enterRule(_localctx, 130, CWScriptParser.RULE_fnBody);
 		let _la: number;
 		try {
-			this.state = 753;
+			this.state = 744;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case CWScriptParser.LBRACE:
@@ -3553,23 +3541,23 @@ export class CWScriptParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				{
-				this.state = 743;
+				this.state = 734;
 				this.match(CWScriptParser.LBRACE);
-				this.state = 747;
+				this.state = 738;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CWScriptParser.CONTRACT) | (1 << CWScriptParser.INTERFACE) | (1 << CWScriptParser.IMPORT) | (1 << CWScriptParser.IMPLEMENTS) | (1 << CWScriptParser.EXTENDS) | (1 << CWScriptParser.ERROR) | (1 << CWScriptParser.EVENT) | (1 << CWScriptParser.INSTANTIATE) | (1 << CWScriptParser.EXEC) | (1 << CWScriptParser.QUERY) | (1 << CWScriptParser.MIGRATE) | (1 << CWScriptParser.FOR) | (1 << CWScriptParser.IN) | (1 << CWScriptParser.FROM) | (1 << CWScriptParser.STATE) | (1 << CWScriptParser.TIMES) | (1 << CWScriptParser.IF) | (1 << CWScriptParser.ELSE) | (1 << CWScriptParser.AND) | (1 << CWScriptParser.OR) | (1 << CWScriptParser.TRUE) | (1 << CWScriptParser.FALSE) | (1 << CWScriptParser.LET) | (1 << CWScriptParser.FAIL) | (1 << CWScriptParser.RETURN) | (1 << CWScriptParser.STRUCT) | (1 << CWScriptParser.ENUM) | (1 << CWScriptParser.TYPE))) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & ((1 << (CWScriptParser.EMIT - 32)) | (1 << (CWScriptParser.LPAREN - 32)) | (1 << (CWScriptParser.LBRACK - 32)) | (1 << (CWScriptParser.EXCLAM - 32)) | (1 << (CWScriptParser.D_COLON - 32)) | (1 << (CWScriptParser.PLUS - 32)) | (1 << (CWScriptParser.MINUS - 32)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.StringLiteral - 72)) | (1 << (CWScriptParser.IntegerLiteral - 72)) | (1 << (CWScriptParser.DecimalLiteral - 72)))) !== 0)) {
 					{
 					{
-					this.state = 744;
+					this.state = 735;
 					this.stmt();
 					}
 					}
-					this.state = 749;
+					this.state = 740;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 750;
+				this.state = 741;
 				this.match(CWScriptParser.RBRACE);
 				}
 				}
@@ -3579,9 +3567,9 @@ export class CWScriptParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				{
-				this.state = 751;
+				this.state = 742;
 				this.match(CWScriptParser.FAT_ARROW);
-				this.state = 752;
+				this.state = 743;
 				this.stmt();
 				}
 				}
@@ -3610,14 +3598,14 @@ export class CWScriptParser extends Parser {
 		this.enterRule(_localctx, 132, CWScriptParser.RULE_stmt);
 		let _la: number;
 		try {
-			this.state = 771;
+			this.state = 762;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 86, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 87, this._ctx) ) {
 			case 1:
 				_localctx = new LetStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 755;
+				this.state = 746;
 				this.letStmt_();
 				}
 				break;
@@ -3626,9 +3614,9 @@ export class CWScriptParser extends Parser {
 				_localctx = new AssignStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 756;
+				this.state = 747;
 				this.expr(0);
-				this.state = 757;
+				this.state = 748;
 				(_localctx as AssignStmtContext)._assignOp = this._input.LT(1);
 				_la = this._input.LA(1);
 				if (!(((((_la - 54)) & ~0x1F) === 0 && ((1 << (_la - 54)) & ((1 << (CWScriptParser.EQ - 54)) | (1 << (CWScriptParser.PLUS_EQ - 54)) | (1 << (CWScriptParser.MINUS_EQ - 54)) | (1 << (CWScriptParser.MUL_EQ - 54)) | (1 << (CWScriptParser.DIV_EQ - 54)) | (1 << (CWScriptParser.MOD_EQ - 54)))) !== 0))) {
@@ -3641,7 +3629,7 @@ export class CWScriptParser extends Parser {
 					this._errHandler.reportMatch(this);
 					this.consume();
 				}
-				this.state = 758;
+				this.state = 749;
 				this.expr(0);
 				}
 				break;
@@ -3650,7 +3638,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new IfStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 760;
+				this.state = 751;
 				this.ifExpr_();
 				}
 				break;
@@ -3659,7 +3647,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new ForStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 761;
+				this.state = 752;
 				this.forStmt_();
 				}
 				break;
@@ -3668,9 +3656,9 @@ export class CWScriptParser extends Parser {
 				_localctx = new ExecStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 762;
+				this.state = 753;
 				this.match(CWScriptParser.EXEC);
-				this.state = 763;
+				this.state = 754;
 				this.expr(0);
 				}
 				break;
@@ -3679,9 +3667,9 @@ export class CWScriptParser extends Parser {
 				_localctx = new EmitStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 764;
+				this.state = 755;
 				this.match(CWScriptParser.EMIT);
-				this.state = 765;
+				this.state = 756;
 				this.expr(0);
 				}
 				break;
@@ -3690,9 +3678,9 @@ export class CWScriptParser extends Parser {
 				_localctx = new ReturnStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 766;
+				this.state = 757;
 				this.match(CWScriptParser.RETURN);
-				this.state = 767;
+				this.state = 758;
 				this.expr(0);
 				}
 				break;
@@ -3701,9 +3689,9 @@ export class CWScriptParser extends Parser {
 				_localctx = new FailStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 8);
 				{
-				this.state = 768;
+				this.state = 759;
 				this.match(CWScriptParser.FAIL);
-				this.state = 769;
+				this.state = 760;
 				this.expr(0);
 				}
 				break;
@@ -3712,7 +3700,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new ExprStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 9);
 				{
-				this.state = 770;
+				this.state = 761;
 				this.expr(0);
 				}
 				break;
@@ -3739,13 +3727,13 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 773;
+			this.state = 764;
 			this.match(CWScriptParser.LET);
-			this.state = 774;
+			this.state = 765;
 			this.letLHS();
-			this.state = 775;
+			this.state = 766;
 			this.match(CWScriptParser.EQ);
-			this.state = 776;
+			this.state = 767;
 			this.expr(0);
 			}
 		}
@@ -3769,23 +3757,23 @@ export class CWScriptParser extends Parser {
 		this.enterRule(_localctx, 136, CWScriptParser.RULE_letLHS);
 		let _la: number;
 		try {
-			this.state = 804;
+			this.state = 795;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 89, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 90, this._ctx) ) {
 			case 1:
 				_localctx = new IdentLHSContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 778;
+				this.state = 769;
 				this.ident();
-				this.state = 781;
+				this.state = 772;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.COLON) {
 					{
-					this.state = 779;
+					this.state = 770;
 					this.match(CWScriptParser.COLON);
-					this.state = 780;
+					this.state = 771;
 					(_localctx as IdentLHSContext)._varType = this.typeExpr(0);
 					}
 				}
@@ -3797,11 +3785,11 @@ export class CWScriptParser extends Parser {
 				_localctx = new StructUnpackLHSContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 783;
+				this.state = 774;
 				this.match(CWScriptParser.LBRACE);
-				this.state = 784;
+				this.state = 775;
 				this.identList();
-				this.state = 785;
+				this.state = 776;
 				this.match(CWScriptParser.RBRACE);
 				}
 				break;
@@ -3810,31 +3798,31 @@ export class CWScriptParser extends Parser {
 				_localctx = new TupleUnpackLHSFrontBackContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 787;
+				this.state = 778;
 				this.match(CWScriptParser.LPAREN);
 				{
-				this.state = 788;
+				this.state = 779;
 				(_localctx as TupleUnpackLHSFrontBackContext)._front = this.identList();
 				}
-				this.state = 794;
+				this.state = 785;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la === CWScriptParser.COMMA) {
 					{
-					this.state = 789;
+					this.state = 780;
 					this.match(CWScriptParser.COMMA);
-					this.state = 790;
+					this.state = 781;
 					this.match(CWScriptParser.DOT);
-					this.state = 791;
+					this.state = 782;
 					this.match(CWScriptParser.DOT);
-					this.state = 792;
+					this.state = 783;
 					this.match(CWScriptParser.DOT);
-					this.state = 793;
+					this.state = 784;
 					(_localctx as TupleUnpackLHSFrontBackContext)._back = this.identList();
 					}
 				}
 
-				this.state = 796;
+				this.state = 787;
 				this.match(CWScriptParser.RBRACE);
 				}
 				break;
@@ -3843,17 +3831,17 @@ export class CWScriptParser extends Parser {
 				_localctx = new TupleUnpackLHSBackContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 798;
+				this.state = 789;
 				this.match(CWScriptParser.LPAREN);
-				this.state = 799;
+				this.state = 790;
 				this.match(CWScriptParser.COMMA);
-				this.state = 800;
+				this.state = 791;
 				this.match(CWScriptParser.DOT);
-				this.state = 801;
+				this.state = 792;
 				this.match(CWScriptParser.DOT);
-				this.state = 802;
+				this.state = 793;
 				this.match(CWScriptParser.DOT);
-				this.state = 803;
+				this.state = 794;
 				(_localctx as TupleUnpackLHSBackContext)._back = this.identList();
 				}
 				break;
@@ -3893,20 +3881,20 @@ export class CWScriptParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 817;
+			this.state = 808;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 90, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 91, this._ctx) ) {
 			case 1:
 				{
 				_localctx = new GroupedExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
 
-				this.state = 807;
+				this.state = 798;
 				this.match(CWScriptParser.LPAREN);
-				this.state = 808;
+				this.state = 799;
 				this.expr(0);
-				this.state = 809;
+				this.state = 800;
 				this.match(CWScriptParser.RPAREN);
 				}
 				break;
@@ -3916,7 +3904,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new UnaryExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 811;
+				this.state = 802;
 				(_localctx as UnaryExprContext)._op = this._input.LT(1);
 				_la = this._input.LA(1);
 				if (!(((((_la - 43)) & ~0x1F) === 0 && ((1 << (_la - 43)) & ((1 << (CWScriptParser.EXCLAM - 43)) | (1 << (CWScriptParser.PLUS - 43)) | (1 << (CWScriptParser.MINUS - 43)))) !== 0))) {
@@ -3929,7 +3917,7 @@ export class CWScriptParser extends Parser {
 					this._errHandler.reportMatch(this);
 					this.consume();
 				}
-				this.state = 812;
+				this.state = 803;
 				this.expr(11);
 				}
 				break;
@@ -3939,7 +3927,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new IfExpContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 813;
+				this.state = 804;
 				this.ifExpr_();
 				}
 				break;
@@ -3949,9 +3937,9 @@ export class CWScriptParser extends Parser {
 				_localctx = new QueryExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 814;
+				this.state = 805;
 				this.match(CWScriptParser.QUERY);
-				this.state = 815;
+				this.state = 806;
 				this.expr(2);
 				}
 				break;
@@ -3961,15 +3949,15 @@ export class CWScriptParser extends Parser {
 				_localctx = new ValExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
-				this.state = 816;
+				this.state = 807;
 				this.val();
 				}
 				break;
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 862;
+			this.state = 853;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 94, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 95, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -3977,20 +3965,20 @@ export class CWScriptParser extends Parser {
 					}
 					_prevctx = _localctx;
 					{
-					this.state = 860;
+					this.state = 851;
 					this._errHandler.sync(this);
-					switch ( this.interpreter.adaptivePredict(this._input, 93, this._ctx) ) {
+					switch ( this.interpreter.adaptivePredict(this._input, 94, this._ctx) ) {
 					case 1:
 						{
 						_localctx = new ExpExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 819;
+						this.state = 810;
 						if (!(this.precpred(this._ctx, 10))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 10)");
 						}
-						this.state = 820;
+						this.state = 811;
 						this.match(CWScriptParser.POW);
-						this.state = 821;
+						this.state = 812;
 						this.expr(11);
 						}
 						break;
@@ -3999,11 +3987,11 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new MultDivModExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 822;
+						this.state = 813;
 						if (!(this.precpred(this._ctx, 9))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 9)");
 						}
-						this.state = 823;
+						this.state = 814;
 						(_localctx as MultDivModExprContext)._op = this._input.LT(1);
 						_la = this._input.LA(1);
 						if (!(((((_la - 61)) & ~0x1F) === 0 && ((1 << (_la - 61)) & ((1 << (CWScriptParser.MUL - 61)) | (1 << (CWScriptParser.DIV - 61)) | (1 << (CWScriptParser.MOD - 61)))) !== 0))) {
@@ -4016,7 +4004,7 @@ export class CWScriptParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 824;
+						this.state = 815;
 						this.expr(10);
 						}
 						break;
@@ -4025,11 +4013,11 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new AddSubExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 825;
+						this.state = 816;
 						if (!(this.precpred(this._ctx, 8))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 8)");
 						}
-						this.state = 826;
+						this.state = 817;
 						(_localctx as AddSubExprContext)._op = this._input.LT(1);
 						_la = this._input.LA(1);
 						if (!(_la === CWScriptParser.PLUS || _la === CWScriptParser.MINUS)) {
@@ -4042,7 +4030,7 @@ export class CWScriptParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 827;
+						this.state = 818;
 						this.expr(9);
 						}
 						break;
@@ -4051,11 +4039,11 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new CompExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 828;
+						this.state = 819;
 						if (!(this.precpred(this._ctx, 7))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 7)");
 						}
-						this.state = 829;
+						this.state = 820;
 						(_localctx as CompExprContext)._op = this._input.LT(1);
 						_la = this._input.LA(1);
 						if (!(((((_la - 67)) & ~0x1F) === 0 && ((1 << (_la - 67)) & ((1 << (CWScriptParser.LT - 67)) | (1 << (CWScriptParser.LT_EQ - 67)) | (1 << (CWScriptParser.GT - 67)) | (1 << (CWScriptParser.GT_EQ - 67)))) !== 0))) {
@@ -4068,7 +4056,7 @@ export class CWScriptParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 830;
+						this.state = 821;
 						this.expr(8);
 						}
 						break;
@@ -4077,11 +4065,11 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new EqExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 831;
+						this.state = 822;
 						if (!(this.precpred(this._ctx, 6))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 6)");
 						}
-						this.state = 832;
+						this.state = 823;
 						(_localctx as EqExprContext)._op = this._input.LT(1);
 						_la = this._input.LA(1);
 						if (!(_la === CWScriptParser.EQEQ || _la === CWScriptParser.NEQ)) {
@@ -4094,7 +4082,7 @@ export class CWScriptParser extends Parser {
 							this._errHandler.reportMatch(this);
 							this.consume();
 						}
-						this.state = 833;
+						this.state = 824;
 						this.expr(7);
 						}
 						break;
@@ -4103,13 +4091,13 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new AndExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 834;
+						this.state = 825;
 						if (!(this.precpred(this._ctx, 5))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 5)");
 						}
-						this.state = 835;
+						this.state = 826;
 						this.match(CWScriptParser.AND);
-						this.state = 836;
+						this.state = 827;
 						this.expr(6);
 						}
 						break;
@@ -4118,13 +4106,13 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new OrExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 837;
+						this.state = 828;
 						if (!(this.precpred(this._ctx, 4))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 4)");
 						}
-						this.state = 838;
+						this.state = 829;
 						this.match(CWScriptParser.OR);
-						this.state = 839;
+						this.state = 830;
 						this.expr(5);
 						}
 						break;
@@ -4133,13 +4121,13 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new MemberAccessExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 840;
+						this.state = 831;
 						if (!(this.precpred(this._ctx, 15))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 15)");
 						}
-						this.state = 841;
+						this.state = 832;
 						this.match(CWScriptParser.DOT);
-						this.state = 842;
+						this.state = 833;
 						this.ident();
 						}
 						break;
@@ -4148,15 +4136,15 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new TableLookupExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 843;
+						this.state = 834;
 						if (!(this.precpred(this._ctx, 14))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 14)");
 						}
-						this.state = 844;
+						this.state = 835;
 						this.match(CWScriptParser.LBRACK);
-						this.state = 845;
+						this.state = 836;
 						this.expr(0);
-						this.state = 846;
+						this.state = 837;
 						this.match(CWScriptParser.RBRACK);
 						}
 						break;
@@ -4165,23 +4153,23 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new PosArgsFnCallExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 848;
+						this.state = 839;
 						if (!(this.precpred(this._ctx, 13))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 13)");
 						}
-						this.state = 849;
+						this.state = 840;
 						this.match(CWScriptParser.LPAREN);
-						this.state = 851;
+						this.state = 842;
 						this._errHandler.sync(this);
 						_la = this._input.LA(1);
 						if ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << CWScriptParser.CONTRACT) | (1 << CWScriptParser.INTERFACE) | (1 << CWScriptParser.IMPORT) | (1 << CWScriptParser.IMPLEMENTS) | (1 << CWScriptParser.EXTENDS) | (1 << CWScriptParser.ERROR) | (1 << CWScriptParser.EVENT) | (1 << CWScriptParser.INSTANTIATE) | (1 << CWScriptParser.EXEC) | (1 << CWScriptParser.QUERY) | (1 << CWScriptParser.MIGRATE) | (1 << CWScriptParser.FOR) | (1 << CWScriptParser.IN) | (1 << CWScriptParser.FROM) | (1 << CWScriptParser.STATE) | (1 << CWScriptParser.TIMES) | (1 << CWScriptParser.IF) | (1 << CWScriptParser.ELSE) | (1 << CWScriptParser.AND) | (1 << CWScriptParser.OR) | (1 << CWScriptParser.TRUE) | (1 << CWScriptParser.FALSE) | (1 << CWScriptParser.LET) | (1 << CWScriptParser.RETURN) | (1 << CWScriptParser.STRUCT) | (1 << CWScriptParser.ENUM) | (1 << CWScriptParser.TYPE))) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & ((1 << (CWScriptParser.EMIT - 32)) | (1 << (CWScriptParser.LPAREN - 32)) | (1 << (CWScriptParser.LBRACK - 32)) | (1 << (CWScriptParser.EXCLAM - 32)) | (1 << (CWScriptParser.D_COLON - 32)) | (1 << (CWScriptParser.PLUS - 32)) | (1 << (CWScriptParser.MINUS - 32)))) !== 0) || ((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (CWScriptParser.Ident - 72)) | (1 << (CWScriptParser.StringLiteral - 72)) | (1 << (CWScriptParser.IntegerLiteral - 72)) | (1 << (CWScriptParser.DecimalLiteral - 72)))) !== 0)) {
 							{
-							this.state = 850;
+							this.state = 841;
 							this.exprList();
 							}
 						}
 
-						this.state = 853;
+						this.state = 844;
 						this.match(CWScriptParser.RPAREN);
 						}
 						break;
@@ -4190,32 +4178,32 @@ export class CWScriptParser extends Parser {
 						{
 						_localctx = new NamedArgsFnCallExprContext(new ExprContext(_parentctx, _parentState));
 						this.pushNewRecursionContext(_localctx, _startState, CWScriptParser.RULE_expr);
-						this.state = 854;
+						this.state = 845;
 						if (!(this.precpred(this._ctx, 12))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 12)");
 						}
-						this.state = 855;
+						this.state = 846;
 						this.match(CWScriptParser.LPAREN);
-						this.state = 857;
+						this.state = 848;
 						this._errHandler.sync(this);
 						_la = this._input.LA(1);
 						if (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || _la === CWScriptParser.Ident) {
 							{
-							this.state = 856;
+							this.state = 847;
 							this.namedExprList();
 							}
 						}
 
-						this.state = 859;
+						this.state = 850;
 						this.match(CWScriptParser.RPAREN);
 						}
 						break;
 					}
 					}
 				}
-				this.state = 864;
+				this.state = 855;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 94, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 95, this._ctx);
 			}
 			}
 		}
@@ -4238,16 +4226,16 @@ export class CWScriptParser extends Parser {
 		let _localctx: ValContext = new ValContext(this._ctx, this.state);
 		this.enterRule(_localctx, 140, CWScriptParser.RULE_val);
 		try {
-			this.state = 883;
+			this.state = 874;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 95, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 96, this._ctx) ) {
 			case 1:
 				_localctx = new UnitValContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 865;
+				this.state = 856;
 				this.match(CWScriptParser.LPAREN);
-				this.state = 866;
+				this.state = 857;
 				this.match(CWScriptParser.RPAREN);
 				}
 				break;
@@ -4256,7 +4244,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new StructValContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 867;
+				this.state = 858;
 				this.structVal_();
 				}
 				break;
@@ -4265,13 +4253,13 @@ export class CWScriptParser extends Parser {
 				_localctx = new TupleValContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 868;
+				this.state = 859;
 				(_localctx as TupleValContext)._tupleType = this.typePath();
-				this.state = 869;
+				this.state = 860;
 				this.match(CWScriptParser.LPAREN);
-				this.state = 870;
+				this.state = 861;
 				this.exprList();
-				this.state = 871;
+				this.state = 862;
 				this.match(CWScriptParser.RPAREN);
 				}
 				break;
@@ -4280,11 +4268,11 @@ export class CWScriptParser extends Parser {
 				_localctx = new VecValContext(_localctx);
 				this.enterOuterAlt(_localctx, 4);
 				{
-				this.state = 873;
+				this.state = 864;
 				this.match(CWScriptParser.LBRACK);
-				this.state = 874;
+				this.state = 865;
 				this.exprList();
-				this.state = 875;
+				this.state = 866;
 				this.match(CWScriptParser.RBRACK);
 				}
 				break;
@@ -4293,7 +4281,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new StringValContext(_localctx);
 				this.enterOuterAlt(_localctx, 5);
 				{
-				this.state = 877;
+				this.state = 868;
 				this.match(CWScriptParser.StringLiteral);
 				}
 				break;
@@ -4302,7 +4290,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new IntegerValContext(_localctx);
 				this.enterOuterAlt(_localctx, 6);
 				{
-				this.state = 878;
+				this.state = 869;
 				this.match(CWScriptParser.IntegerLiteral);
 				}
 				break;
@@ -4311,7 +4299,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new DecimalValContext(_localctx);
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 879;
+				this.state = 870;
 				this.match(CWScriptParser.DecimalLiteral);
 				}
 				break;
@@ -4320,7 +4308,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new TrueValContext(_localctx);
 				this.enterOuterAlt(_localctx, 8);
 				{
-				this.state = 880;
+				this.state = 871;
 				this.match(CWScriptParser.TRUE);
 				}
 				break;
@@ -4329,7 +4317,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new FalseValContext(_localctx);
 				this.enterOuterAlt(_localctx, 9);
 				{
-				this.state = 881;
+				this.state = 872;
 				this.match(CWScriptParser.FALSE);
 				}
 				break;
@@ -4338,7 +4326,7 @@ export class CWScriptParser extends Parser {
 				_localctx = new IdentValContext(_localctx);
 				this.enterOuterAlt(_localctx, 10);
 				{
-				this.state = 882;
+				this.state = 873;
 				this.ident();
 				}
 				break;
@@ -4367,22 +4355,22 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 885;
+			this.state = 876;
 			_localctx._structType = this.typePath();
 			}
-			this.state = 886;
+			this.state = 877;
 			this.match(CWScriptParser.LBRACE);
-			this.state = 888;
+			this.state = 879;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0) || _la === CWScriptParser.Ident) {
 				{
-				this.state = 887;
+				this.state = 878;
 				_localctx._members = this.structValMembers();
 				}
 			}
 
-			this.state = 890;
+			this.state = 881;
 			this.match(CWScriptParser.RBRACE);
 			}
 		}
@@ -4409,32 +4397,32 @@ export class CWScriptParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 892;
+			this.state = 883;
 			this.structValMember();
-			this.state = 897;
+			this.state = 888;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 97, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 98, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 893;
+					this.state = 884;
 					this.match(CWScriptParser.COMMA);
-					this.state = 894;
+					this.state = 885;
 					this.structValMember();
 					}
 					}
 				}
-				this.state = 899;
+				this.state = 890;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 97, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 98, this._ctx);
 			}
-			this.state = 901;
+			this.state = 892;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la === CWScriptParser.COMMA) {
 				{
-				this.state = 900;
+				this.state = 891;
 				this.match(CWScriptParser.COMMA);
 				}
 			}
@@ -4463,11 +4451,11 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 903;
+			this.state = 894;
 			_localctx._name = this.ident();
-			this.state = 904;
+			this.state = 895;
 			this.match(CWScriptParser.COLON);
-			this.state = 905;
+			this.state = 896;
 			_localctx._value = this.expr(0);
 			}
 			}
@@ -4493,24 +4481,24 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 907;
+			this.state = 898;
 			this.ifClause_();
-			this.state = 909;
-			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 99, this._ctx) ) {
-			case 1:
-				{
-				this.state = 908;
-				this.elseIfClauses();
-				}
-				break;
-			}
-			this.state = 912;
+			this.state = 900;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 100, this._ctx) ) {
 			case 1:
 				{
-				this.state = 911;
+				this.state = 899;
+				this.elseIfClauses();
+				}
+				break;
+			}
+			this.state = 903;
+			this._errHandler.sync(this);
+			switch ( this.interpreter.adaptivePredict(this._input, 101, this._ctx) ) {
+			case 1:
+				{
+				this.state = 902;
 				this.elseClause();
 				}
 				break;
@@ -4536,20 +4524,20 @@ export class CWScriptParser extends Parser {
 		let _localctx: IfClause_Context = new IfClause_Context(this._ctx, this.state);
 		this.enterRule(_localctx, 150, CWScriptParser.RULE_ifClause_);
 		try {
-			this.state = 922;
+			this.state = 913;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 101, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 102, this._ctx) ) {
 			case 1:
 				_localctx = new IfClauseContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 914;
+				this.state = 905;
 				this.match(CWScriptParser.IF);
 				{
-				this.state = 915;
+				this.state = 906;
 				(_localctx as IfClauseContext)._predicate = this.expr(0);
 				}
-				this.state = 916;
+				this.state = 907;
 				this.fnBody();
 				}
 				break;
@@ -4558,11 +4546,11 @@ export class CWScriptParser extends Parser {
 				_localctx = new IfLetClauseContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 918;
+				this.state = 909;
 				this.match(CWScriptParser.IF);
-				this.state = 919;
+				this.state = 910;
 				this.letStmt_();
-				this.state = 920;
+				this.state = 911;
 				this.fnBody();
 				}
 				break;
@@ -4590,7 +4578,7 @@ export class CWScriptParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 926;
+			this.state = 917;
 			this._errHandler.sync(this);
 			_alt = 1;
 			do {
@@ -4598,9 +4586,9 @@ export class CWScriptParser extends Parser {
 				case 1:
 					{
 					{
-					this.state = 924;
+					this.state = 915;
 					this.match(CWScriptParser.ELSE);
-					this.state = 925;
+					this.state = 916;
 					this.ifClause_();
 					}
 					}
@@ -4608,9 +4596,9 @@ export class CWScriptParser extends Parser {
 				default:
 					throw new NoViableAltException(this);
 				}
-				this.state = 928;
+				this.state = 919;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 102, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 103, this._ctx);
 			} while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER);
 			}
 		}
@@ -4635,9 +4623,9 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 930;
+			this.state = 921;
 			this.match(CWScriptParser.ELSE);
-			this.state = 931;
+			this.state = 922;
 			this.fnBody();
 			}
 		}
@@ -4660,22 +4648,22 @@ export class CWScriptParser extends Parser {
 		let _localctx: ForStmt_Context = new ForStmt_Context(this._ctx, this.state);
 		this.enterRule(_localctx, 156, CWScriptParser.RULE_forStmt_);
 		try {
-			this.state = 944;
+			this.state = 935;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 103, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 104, this._ctx) ) {
 			case 1:
 				_localctx = new ForInStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 933;
+				this.state = 924;
 				this.match(CWScriptParser.FOR);
-				this.state = 934;
+				this.state = 925;
 				(_localctx as ForInStmtContext)._item = this.letLHS();
-				this.state = 935;
+				this.state = 926;
 				this.match(CWScriptParser.IN);
-				this.state = 936;
+				this.state = 927;
 				(_localctx as ForInStmtContext)._iterItems = this.expr(0);
-				this.state = 937;
+				this.state = 928;
 				this.fnBody();
 				}
 				break;
@@ -4684,13 +4672,13 @@ export class CWScriptParser extends Parser {
 				_localctx = new ForTimesStmtContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 939;
+				this.state = 930;
 				this.match(CWScriptParser.FOR);
-				this.state = 940;
+				this.state = 931;
 				this.expr(0);
-				this.state = 941;
+				this.state = 932;
 				this.match(CWScriptParser.TIMES);
-				this.state = 942;
+				this.state = 933;
 				this.fnBody();
 				}
 				break;
@@ -4719,30 +4707,30 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 946;
+			this.state = 937;
 			_localctx._ident = this.ident();
 			_localctx._symbols.push(_localctx._ident);
 			}
-			this.state = 951;
+			this.state = 942;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 104, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 105, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 947;
+					this.state = 938;
 					this.match(CWScriptParser.COMMA);
 					{
-					this.state = 948;
+					this.state = 939;
 					_localctx._ident = this.ident();
 					_localctx._symbols.push(_localctx._ident);
 					}
 					}
 					}
 				}
-				this.state = 953;
+				this.state = 944;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 104, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 105, this._ctx);
 			}
 			}
 		}
@@ -4768,21 +4756,21 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 954;
+			this.state = 945;
 			this.expr(0);
-			this.state = 959;
+			this.state = 950;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CWScriptParser.COMMA) {
 				{
 				{
-				this.state = 955;
+				this.state = 946;
 				this.match(CWScriptParser.COMMA);
-				this.state = 956;
+				this.state = 947;
 				this.expr(0);
 				}
 				}
-				this.state = 961;
+				this.state = 952;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -4810,21 +4798,21 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 962;
+			this.state = 953;
 			this.namedExpr();
-			this.state = 967;
+			this.state = 958;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la === CWScriptParser.COMMA) {
 				{
 				{
-				this.state = 963;
+				this.state = 954;
 				this.match(CWScriptParser.COMMA);
-				this.state = 964;
+				this.state = 955;
 				this.namedExpr();
 				}
 				}
-				this.state = 969;
+				this.state = 960;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -4852,11 +4840,11 @@ export class CWScriptParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 970;
+			this.state = 961;
 			_localctx._name = this.ident();
-			this.state = 971;
+			this.state = 962;
 			this.match(CWScriptParser.COLON);
-			this.state = 972;
+			this.state = 963;
 			_localctx._value = this.expr(0);
 			}
 			}
@@ -4880,13 +4868,13 @@ export class CWScriptParser extends Parser {
 		let _localctx: IdentContext = new IdentContext(this._ctx, this.state);
 		this.enterRule(_localctx, 166, CWScriptParser.RULE_ident);
 		try {
-			this.state = 976;
+			this.state = 967;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case CWScriptParser.Ident:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 974;
+				this.state = 965;
 				this.match(CWScriptParser.Ident);
 				}
 				break;
@@ -4920,7 +4908,7 @@ export class CWScriptParser extends Parser {
 			case CWScriptParser.EMIT:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 975;
+				this.state = 966;
 				this.reservedKeyword();
 				}
 				break;
@@ -4951,7 +4939,7 @@ export class CWScriptParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 979;
+			this.state = 970;
 			this._errHandler.sync(this);
 			_alt = 1;
 			do {
@@ -4959,7 +4947,7 @@ export class CWScriptParser extends Parser {
 				case 1:
 					{
 					{
-					this.state = 978;
+					this.state = 969;
 					_la = this._input.LA(1);
 					if (!(_la === CWScriptParser.CWSPEC_LINE_COMMENT || _la === CWScriptParser.CWSPEC_BLOCK_COMMENT)) {
 					this._errHandler.recoverInline(this);
@@ -4977,9 +4965,9 @@ export class CWScriptParser extends Parser {
 				default:
 					throw new NoViableAltException(this);
 				}
-				this.state = 981;
+				this.state = 972;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 108, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 109, this._ctx);
 			} while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER);
 			}
 		}
@@ -5005,7 +4993,7 @@ export class CWScriptParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 983;
+			this.state = 974;
 			_la = this._input.LA(1);
 			if (!(((((_la - 1)) & ~0x1F) === 0 && ((1 << (_la - 1)) & ((1 << (CWScriptParser.CONTRACT - 1)) | (1 << (CWScriptParser.INTERFACE - 1)) | (1 << (CWScriptParser.IMPORT - 1)) | (1 << (CWScriptParser.IMPLEMENTS - 1)) | (1 << (CWScriptParser.EXTENDS - 1)) | (1 << (CWScriptParser.ERROR - 1)) | (1 << (CWScriptParser.EVENT - 1)) | (1 << (CWScriptParser.INSTANTIATE - 1)) | (1 << (CWScriptParser.EXEC - 1)) | (1 << (CWScriptParser.QUERY - 1)) | (1 << (CWScriptParser.MIGRATE - 1)) | (1 << (CWScriptParser.FOR - 1)) | (1 << (CWScriptParser.IN - 1)) | (1 << (CWScriptParser.FROM - 1)) | (1 << (CWScriptParser.STATE - 1)) | (1 << (CWScriptParser.TIMES - 1)) | (1 << (CWScriptParser.IF - 1)) | (1 << (CWScriptParser.ELSE - 1)) | (1 << (CWScriptParser.AND - 1)) | (1 << (CWScriptParser.OR - 1)) | (1 << (CWScriptParser.TRUE - 1)) | (1 << (CWScriptParser.FALSE - 1)) | (1 << (CWScriptParser.LET - 1)) | (1 << (CWScriptParser.RETURN - 1)) | (1 << (CWScriptParser.STRUCT - 1)) | (1 << (CWScriptParser.ENUM - 1)) | (1 << (CWScriptParser.TYPE - 1)) | (1 << (CWScriptParser.EMIT - 1)))) !== 0))) {
 			this._errHandler.recoverInline(this);
@@ -5036,9 +5024,6 @@ export class CWScriptParser extends Parser {
 
 	public sempred(_localctx: RuleContext, ruleIndex: number, predIndex: number): boolean {
 		switch (ruleIndex) {
-		case 8:
-			return this.importSymbol_sempred(_localctx as ImportSymbolContext, predIndex);
-
 		case 50:
 			return this.typeExpr_sempred(_localctx as TypeExprContext, predIndex);
 
@@ -5047,62 +5032,55 @@ export class CWScriptParser extends Parser {
 		}
 		return true;
 	}
-	private importSymbol_sempred(_localctx: ImportSymbolContext, predIndex: number): boolean {
-		switch (predIndex) {
-		case 0:
-			return this.precpred(this._ctx, 1);
-		}
-		return true;
-	}
 	private typeExpr_sempred(_localctx: TypeExprContext, predIndex: number): boolean {
 		switch (predIndex) {
-		case 1:
+		case 0:
 			return this.precpred(this._ctx, 7);
 
-		case 2:
+		case 1:
 			return this.precpred(this._ctx, 5);
 
-		case 3:
+		case 2:
 			return this.precpred(this._ctx, 4);
 
-		case 4:
+		case 3:
 			return this.precpred(this._ctx, 2);
 		}
 		return true;
 	}
 	private expr_sempred(_localctx: ExprContext, predIndex: number): boolean {
 		switch (predIndex) {
-		case 5:
+		case 4:
 			return this.precpred(this._ctx, 10);
 
-		case 6:
+		case 5:
 			return this.precpred(this._ctx, 9);
 
-		case 7:
+		case 6:
 			return this.precpred(this._ctx, 8);
 
-		case 8:
+		case 7:
 			return this.precpred(this._ctx, 7);
 
-		case 9:
+		case 8:
 			return this.precpred(this._ctx, 6);
 
-		case 10:
+		case 9:
 			return this.precpred(this._ctx, 5);
 
-		case 11:
+		case 10:
 			return this.precpred(this._ctx, 4);
 
-		case 12:
+		case 11:
 			return this.precpred(this._ctx, 15);
 
-		case 13:
+		case 12:
 			return this.precpred(this._ctx, 14);
 
-		case 14:
+		case 13:
 			return this.precpred(this._ctx, 13);
 
-		case 15:
+		case 14:
 			return this.precpred(this._ctx, 12);
 		}
 		return true;
@@ -5110,7 +5088,7 @@ export class CWScriptParser extends Parser {
 
 	private static readonly _serializedATNSegments: number = 2;
 	private static readonly _serializedATNSegment0: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03R\u03DC\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03R\u03D3\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
@@ -5130,481 +5108,477 @@ export class CWScriptParser extends Parser {
 		"\x05\xD1\n\x05\f\x05\x0E\x05\xD4\v\x05\x03\x06\x03\x06\x03\x06\x03\x06" +
 		"\x03\x06\x05\x06\xDB\n\x06\x03\x07\x05\x07\xDE\n\x07\x03\x07\x03\x07\x03" +
 		"\x07\x03\x07\x03\x07\x03\x07\x05\x07\xE6\n\x07\x03\x07\x03\x07\x05\x07" +
-		"\xEA\n\x07\x03\x07\x03\x07\x03\b\x03\b\x03\b\x05\b\xF1\n\b\x03\b\x03\b" +
-		"\x03\b\x03\t\x03\t\x03\t\x07\t\xF9\n\t\f\t\x0E\t\xFC\v\t\x03\n\x03\n\x03" +
-		"\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03" +
-		"\n\x03\n\x05\n\u010E\n\n\x03\n\x03\n\x03\n\x07\n\u0113\n\n\f\n\x0E\n\u0116" +
-		"\v\n\x03\v\x03\v\x07\v\u011A\n\v\f\v\x0E\v\u011D\v\v\x03\v\x03\v\x03\f" +
-		"\x03\f\x07\f\u0123\n\f\f\f\x0E\f\u0126\v\f\x03\f\x03\f\x03\r\x03\r\x03" +
-		"\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x05\r\u0137" +
-		"\n\r\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03" +
-		"\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x05\x0E\u0146\n\x0E\x03\x0F\x05\x0F" +
-		"\u0149\n\x0F\x03\x0F\x03\x0F\x03\x0F\x03\x10\x03\x10\x03\x10\x07\x10\u0151" +
-		"\n\x10\f\x10\x0E\x10\u0154\v\x10\x03\x10\x03\x10\x03\x11\x05\x11\u0159" +
-		"\n\x11\x03\x11\x03\x11\x03\x12\x05\x12\u015E\n\x12\x03\x12\x03\x12\x03" +
-		"\x12\x03\x13\x03\x13\x03\x13\x07\x13\u0166\n\x13\f\x13\x0E\x13\u0169\v" +
-		"\x13\x03\x13\x03\x13\x03\x14\x05\x14\u016E\n\x14\x03\x14\x03\x14\x03\x15" +
-		"\x05\x15\u0173\n\x15\x03\x15\x03\x15\x03\x15\x05\x15\u0178\n\x15\x03\x15" +
-		"\x03\x15\x05\x15\u017C\n\x15\x03\x16\x03\x16\x03\x16\x07\x16\u0181\n\x16" +
-		"\f\x16\x0E\x16\u0184\v\x16\x03\x16\x03\x16\x03\x17\x05\x17\u0189\n\x17" +
-		"\x03\x17\x03\x17\x05\x17\u018D\n\x17\x03\x17\x05\x17\u0190\n\x17\x03\x18" +
-		"\x03\x18\x03\x18\x03\x18\x03\x19\x03\x19\x03\x19\x03\x19\x03\x19\x03\x1A" +
-		"\x06\x1A\u019C\n\x1A\r\x1A\x0E\x1A\u019D\x03\x1B\x03\x1B\x03\x1B\x03\x1B" +
-		"\x05\x1B\u01A4\n\x1B\x03\x1B\x03\x1B\x03\x1B\x03\x1C\x05\x1C\u01AA\n\x1C" +
-		"\x03\x1C\x03\x1C\x03\x1C\x05\x1C\u01AF\n\x1C\x03\x1C\x03\x1C\x03\x1D\x05" +
-		"\x1D\u01B4\n\x1D\x03\x1D\x03\x1D\x03\x1D\x05\x1D\u01B9\n\x1D\x03\x1E\x05" +
-		"\x1E\u01BC\n\x1E\x03\x1E\x03\x1E\x03\x1E\x03\x1F\x03\x1F\x03\x1F\x07\x1F" +
-		"\u01C4\n\x1F\f\x1F\x0E\x1F\u01C7\v\x1F\x03\x1F\x03\x1F\x03 \x05 \u01CC" +
-		"\n \x03 \x03 \x03!\x05!\u01D1\n!\x03!\x03!\x03!\x03\"\x03\"\x03\"\x07" +
-		"\"\u01D9\n\"\f\"\x0E\"\u01DC\v\"\x03\"\x03\"\x03#\x05#\u01E1\n#\x03#\x03" +
-		"#\x03$\x05$\u01E6\n$\x03$\x03$\x03$\x03%\x03%\x03%\x07%\u01EE\n%\f%\x0E" +
-		"%\u01F1\v%\x03%\x03%\x03&\x05&\u01F6\n&\x03&\x03&\x03\'\x05\'\u01FB\n" +
-		"\'\x03\'\x03\'\x03\'\x03(\x03(\x03(\x07(\u0203\n(\f(\x0E(\u0206\v(\x03" +
-		"(\x03(\x03)\x05)\u020B\n)\x03)\x03)\x03*\x05*\u0210\n*\x03*\x03*\x03*" +
-		"\x05*\u0215\n*\x03*\x03*\x03+\x05+\u021A\n+\x03+\x03+\x03+\x05+\u021F" +
-		"\n+\x03,\x03,\x03,\x05,\u0224\n,\x03-\x03-\x03-\x05-\u0229\n-\x03.\x03" +
-		".\x03.\x03/\x03/\x030\x030\x030\x030\x070\u0234\n0\f0\x0E0\u0237\v0\x03" +
-		"0\x030\x031\x031\x031\x031\x071\u023F\n1\f1\x0E1\u0242\v1\x051\u0244\n" +
-		"1\x031\x031\x032\x032\x032\x032\x072\u024C\n2\f2\x0E2\u024F\v2\x032\x05" +
-		"2\u0252\n2\x052\u0254\n2\x032\x032\x033\x053\u0259\n3\x033\x033\x053\u025D" +
-		"\n3\x033\x033\x033\x034\x034\x034\x034\x034\x034\x074\u0268\n4\f4\x0E" +
-		"4\u026B\v4\x034\x034\x034\x034\x034\x054\u0272\n4\x034\x034\x034\x034" +
-		"\x034\x034\x034\x034\x034\x034\x074\u027E\n4\f4\x0E4\u0281\v4\x035\x03" +
-		"5\x035\x035\x075\u0287\n5\f5\x0E5\u028A\v5\x035\x035\x036\x036\x036\x07" +
-		"6\u0291\n6\f6\x0E6\u0294\v6\x037\x057\u0297\n7\x037\x037\x038\x038\x03" +
-		"8\x058\u029E\n8\x039\x059\u02A1\n9\x039\x039\x039\x03:\x05:\u02A7\n:\x03" +
-		":\x03:\x03:\x03:\x03:\x03:\x03;\x03;\x05;\u02B1\n;\x03;\x07;\u02B4\n;" +
-		"\f;\x0E;\u02B7\v;\x03;\x05;\u02BA\n;\x05;\u02BC\n;\x03<\x05<\u02BF\n<" +
-		"\x03<\x03<\x03<\x03<\x03<\x03=\x03=\x03=\x05=\u02C9\n=\x03>\x03>\x03>" +
-		"\x05>\u02CE\n>\x03>\x03>\x03?\x03?\x03?\x03@\x03@\x05@\u02D7\n@\x03@\x03" +
-		"@\x03A\x03A\x03A\x07A\u02DE\nA\fA\x0EA\u02E1\vA\x03B\x03B\x05B\u02E5\n" +
-		"B\x03B\x03B\x03B\x03C\x03C\x07C\u02EC\nC\fC\x0EC\u02EF\vC\x03C\x03C\x03" +
-		"C\x05C\u02F4\nC\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x03" +
-		"D\x03D\x03D\x03D\x03D\x03D\x05D\u0306\nD\x03E\x03E\x03E\x03E\x03E\x03" +
-		"F\x03F\x03F\x05F\u0310\nF\x03F\x03F\x03F\x03F\x03F\x03F\x03F\x03F\x03" +
-		"F\x03F\x03F\x05F\u031D\nF\x03F\x03F\x03F\x03F\x03F\x03F\x03F\x03F\x05" +
-		"F\u0327\nF\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x05" +
-		"G\u0334\nG\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03" +
+		"\xEA\n\x07\x03\x07\x03\x07\x03\b\x03\b\x03\b\x03\b\x03\b\x03\b\x03\b\x03" +
+		"\b\x05\b\xF6\n\b\x03\b\x03\b\x03\b\x05\b\xFB\n\b\x03\b\x03\b\x03\b\x05" +
+		"\b\u0100\n\b\x03\t\x03\t\x03\t\x07\t\u0105\n\t\f\t\x0E\t\u0108\v\t\x03" +
+		"\n\x03\n\x03\n\x05\n\u010D\n\n\x03\v\x03\v\x07\v\u0111\n\v\f\v\x0E\v\u0114" +
+		"\v\v\x03\v\x03\v\x03\f\x03\f\x07\f\u011A\n\f\f\f\x0E\f\u011D\v\f\x03\f" +
+		"\x03\f\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x03" +
+		"\r\x03\r\x03\r\x05\r\u012E\n\r\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E" +
+		"\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x05\x0E" +
+		"\u013D\n\x0E\x03\x0F\x05\x0F\u0140\n\x0F\x03\x0F\x03\x0F\x03\x0F\x03\x10" +
+		"\x03\x10\x03\x10\x07\x10\u0148\n\x10\f\x10\x0E\x10\u014B\v\x10\x03\x10" +
+		"\x03\x10\x03\x11\x05\x11\u0150\n\x11\x03\x11\x03\x11\x03\x12\x05\x12\u0155" +
+		"\n\x12\x03\x12\x03\x12\x03\x12\x03\x13\x03\x13\x03\x13\x07\x13\u015D\n" +
+		"\x13\f\x13\x0E\x13\u0160\v\x13\x03\x13\x03\x13\x03\x14\x05\x14\u0165\n" +
+		"\x14\x03\x14\x03\x14\x03\x15\x05\x15\u016A\n\x15\x03\x15\x03\x15\x03\x15" +
+		"\x05\x15\u016F\n\x15\x03\x15\x03\x15\x05\x15\u0173\n\x15\x03\x16\x03\x16" +
+		"\x03\x16\x07\x16\u0178\n\x16\f\x16\x0E\x16\u017B\v\x16\x03\x16\x03\x16" +
+		"\x03\x17\x05\x17\u0180\n\x17\x03\x17\x03\x17\x05\x17\u0184\n\x17\x03\x17" +
+		"\x05\x17\u0187\n\x17\x03\x18\x03\x18\x03\x18\x03\x18\x03\x19\x03\x19\x03" +
+		"\x19\x03\x19\x03\x19\x03\x1A\x06\x1A\u0193\n\x1A\r\x1A\x0E\x1A\u0194\x03" +
+		"\x1B\x03\x1B\x03\x1B\x03\x1B\x05\x1B\u019B\n\x1B\x03\x1B\x03\x1B\x03\x1B" +
+		"\x03\x1C\x05\x1C\u01A1\n\x1C\x03\x1C\x03\x1C\x03\x1C\x05\x1C\u01A6\n\x1C" +
+		"\x03\x1C\x03\x1C\x03\x1D\x05\x1D\u01AB\n\x1D\x03\x1D\x03\x1D\x03\x1D\x05" +
+		"\x1D\u01B0\n\x1D\x03\x1E\x05\x1E\u01B3\n\x1E\x03\x1E\x03\x1E\x03\x1E\x03" +
+		"\x1F\x03\x1F\x03\x1F\x07\x1F\u01BB\n\x1F\f\x1F\x0E\x1F\u01BE\v\x1F\x03" +
+		"\x1F\x03\x1F\x03 \x05 \u01C3\n \x03 \x03 \x03!\x05!\u01C8\n!\x03!\x03" +
+		"!\x03!\x03\"\x03\"\x03\"\x07\"\u01D0\n\"\f\"\x0E\"\u01D3\v\"\x03\"\x03" +
+		"\"\x03#\x05#\u01D8\n#\x03#\x03#\x03$\x05$\u01DD\n$\x03$\x03$\x03$\x03" +
+		"%\x03%\x03%\x07%\u01E5\n%\f%\x0E%\u01E8\v%\x03%\x03%\x03&\x05&\u01ED\n" +
+		"&\x03&\x03&\x03\'\x05\'\u01F2\n\'\x03\'\x03\'\x03\'\x03(\x03(\x03(\x07" +
+		"(\u01FA\n(\f(\x0E(\u01FD\v(\x03(\x03(\x03)\x05)\u0202\n)\x03)\x03)\x03" +
+		"*\x05*\u0207\n*\x03*\x03*\x03*\x05*\u020C\n*\x03*\x03*\x03+\x05+\u0211" +
+		"\n+\x03+\x03+\x03+\x05+\u0216\n+\x03,\x03,\x03,\x05,\u021B\n,\x03-\x03" +
+		"-\x03-\x05-\u0220\n-\x03.\x03.\x03.\x03/\x03/\x030\x030\x030\x030\x07" +
+		"0\u022B\n0\f0\x0E0\u022E\v0\x030\x030\x031\x031\x031\x031\x071\u0236\n" +
+		"1\f1\x0E1\u0239\v1\x051\u023B\n1\x031\x031\x032\x032\x032\x032\x072\u0243" +
+		"\n2\f2\x0E2\u0246\v2\x032\x052\u0249\n2\x052\u024B\n2\x032\x032\x033\x05" +
+		"3\u0250\n3\x033\x033\x053\u0254\n3\x033\x033\x033\x034\x034\x034\x034" +
+		"\x034\x034\x074\u025F\n4\f4\x0E4\u0262\v4\x034\x034\x034\x034\x034\x05" +
+		"4\u0269\n4\x034\x034\x034\x034\x034\x034\x034\x034\x034\x034\x074\u0275" +
+		"\n4\f4\x0E4\u0278\v4\x035\x035\x035\x035\x075\u027E\n5\f5\x0E5\u0281\v" +
+		"5\x035\x035\x036\x036\x036\x076\u0288\n6\f6\x0E6\u028B\v6\x037\x057\u028E" +
+		"\n7\x037\x037\x038\x038\x038\x058\u0295\n8\x039\x059\u0298\n9\x039\x03" +
+		"9\x039\x03:\x05:\u029E\n:\x03:\x03:\x03:\x03:\x03:\x03:\x03;\x03;\x05" +
+		";\u02A8\n;\x03;\x07;\u02AB\n;\f;\x0E;\u02AE\v;\x03;\x05;\u02B1\n;\x05" +
+		";\u02B3\n;\x03<\x05<\u02B6\n<\x03<\x03<\x03<\x03<\x03<\x03=\x03=\x03=" +
+		"\x05=\u02C0\n=\x03>\x03>\x03>\x05>\u02C5\n>\x03>\x03>\x03?\x03?\x03?\x03" +
+		"@\x03@\x05@\u02CE\n@\x03@\x03@\x03A\x03A\x03A\x07A\u02D5\nA\fA\x0EA\u02D8" +
+		"\vA\x03B\x03B\x05B\u02DC\nB\x03B\x03B\x03B\x03C\x03C\x07C\u02E3\nC\fC" +
+		"\x0EC\u02E6\vC\x03C\x03C\x03C\x05C\u02EB\nC\x03D\x03D\x03D\x03D\x03D\x03" +
+		"D\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x03D\x05D\u02FD\nD\x03" +
+		"E\x03E\x03E\x03E\x03E\x03F\x03F\x03F\x05F\u0307\nF\x03F\x03F\x03F\x03" +
+		"F\x03F\x03F\x03F\x03F\x03F\x03F\x03F\x05F\u0314\nF\x03F\x03F\x03F\x03" +
+		"F\x03F\x03F\x03F\x03F\x05F\u031E\nF\x03G\x03G\x03G\x03G\x03G\x03G\x03" +
+		"G\x03G\x03G\x03G\x03G\x05G\u032B\nG\x03G\x03G\x03G\x03G\x03G\x03G\x03" +
 		"G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03" +
-		"G\x03G\x03G\x03G\x03G\x03G\x03G\x05G\u0356\nG\x03G\x03G\x03G\x03G\x05" +
-		"G\u035C\nG\x03G\x07G\u035F\nG\fG\x0EG\u0362\vG\x03H\x03H\x03H\x03H\x03" +
-		"H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x05" +
-		"H\u0376\nH\x03I\x03I\x03I\x05I\u037B\nI\x03I\x03I\x03J\x03J\x03J\x07J" +
-		"\u0382\nJ\fJ\x0EJ\u0385\vJ\x03J\x05J\u0388\nJ\x03K\x03K\x03K\x03K\x03" +
-		"L\x03L\x05L\u0390\nL\x03L\x05L\u0393\nL\x03M\x03M\x03M\x03M\x03M\x03M" +
-		"\x03M\x03M\x05M\u039D\nM\x03N\x03N\x06N\u03A1\nN\rN\x0EN\u03A2\x03O\x03" +
-		"O\x03O\x03P\x03P\x03P\x03P\x03P\x03P\x03P\x03P\x03P\x03P\x03P\x05P\u03B3" +
-		"\nP\x03Q\x03Q\x03Q\x07Q\u03B8\nQ\fQ\x0EQ\u03BB\vQ\x03R\x03R\x03R\x07R" +
-		"\u03C0\nR\fR\x0ER\u03C3\vR\x03S\x03S\x03S\x07S\u03C8\nS\fS\x0ES\u03CB" +
-		"\vS\x03T\x03T\x03T\x03T\x03U\x03U\x05U\u03D3\nU\x03V\x06V\u03D6\nV\rV" +
-		"\x0EV\u03D7\x03W\x03W\x03W\x02\x02\x05\x12f\x8CX\x02\x02\x04\x02\x06\x02" +
-		"\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A" +
-		"\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02&\x02(\x02*\x02,\x02.\x020\x022\x02" +
-		"4\x026\x028\x02:\x02<\x02>\x02@\x02B\x02D\x02F\x02H\x02J\x02L\x02N\x02" +
-		"P\x02R\x02T\x02V\x02X\x02Z\x02\\\x02^\x02`\x02b\x02d\x02f\x02h\x02j\x02" +
-		"l\x02n\x02p\x02r\x02t\x02v\x02x\x02z\x02|\x02~\x02\x80\x02\x82\x02\x84" +
-		"\x02\x86\x02\x88\x02\x8A\x02\x8C\x02\x8E\x02\x90\x02\x92\x02\x94\x02\x96" +
-		"\x02\x98\x02\x9A\x02\x9C\x02\x9E\x02\xA0\x02\xA2\x02\xA4\x02\xA6\x02\xA8" +
-		"\x02\xAA\x02\xAC\x02\x02\n\b\x0288<<>>@@BBDD\x05\x02--;;==\x05\x02??A" +
-		"ACC\x04\x02;;==\x03\x02EH\x03\x029:\x03\x02NO\x05\x02\x03\x06\n\x1C\x1E" +
-		"\"\x02\u042F\x02\xAF\x03\x02\x02\x02\x04\xBC\x03\x02\x02\x02\x06\xBF\x03" +
-		"\x02\x02\x02\b\xCD\x03\x02\x02\x02\n\xD5\x03\x02\x02\x02\f\xDD\x03\x02" +
-		"\x02\x02\x0E\xED\x03\x02\x02\x02\x10\xF5\x03\x02\x02\x02\x12\u010D\x03" +
-		"\x02\x02\x02\x14\u0117\x03\x02\x02\x02\x16\u0120\x03\x02\x02\x02\x18\u0136" +
-		"\x03\x02\x02\x02\x1A\u0145\x03\x02\x02\x02\x1C\u0148\x03\x02\x02\x02\x1E" +
-		"\u014D\x03\x02\x02\x02 \u0158\x03\x02\x02\x02\"\u015D\x03\x02\x02\x02" +
-		"$\u0162\x03\x02\x02\x02&\u016D\x03\x02\x02\x02(\u017B\x03\x02\x02\x02" +
-		"*\u017D\x03\x02\x02\x02,\u018F\x03\x02\x02\x02.\u0191\x03\x02\x02\x02" +
-		"0\u0195\x03\x02\x02\x022\u019B\x03\x02\x02\x024\u019F\x03\x02\x02\x02" +
-		"6\u01A9\x03\x02\x02\x028\u01B3\x03\x02\x02\x02:\u01BB\x03\x02\x02\x02" +
-		"<\u01C0\x03\x02\x02\x02>\u01CB\x03\x02\x02\x02@\u01D0\x03\x02\x02\x02" +
-		"B\u01D5\x03\x02\x02\x02D\u01E0\x03\x02\x02\x02F\u01E5\x03\x02\x02\x02" +
-		"H\u01EA\x03\x02\x02\x02J\u01F5\x03\x02\x02\x02L\u01FA\x03\x02\x02\x02" +
-		"N\u01FF\x03\x02\x02\x02P\u020A\x03\x02\x02\x02R\u020F\x03\x02\x02\x02" +
-		"T\u0219\x03\x02\x02\x02V\u0223\x03\x02\x02\x02X\u0225\x03\x02\x02\x02" +
-		"Z\u022A\x03\x02\x02\x02\\\u022D\x03\x02\x02\x02^\u022F\x03\x02\x02\x02" +
-		"`\u023A\x03\x02\x02\x02b\u0247\x03\x02\x02\x02d\u0258\x03\x02\x02\x02" +
-		"f\u0271\x03\x02\x02\x02h\u0282\x03\x02\x02\x02j\u028D\x03\x02\x02\x02" +
-		"l\u0296\x03\x02\x02\x02n\u029D\x03\x02\x02\x02p\u02A0\x03\x02\x02\x02" +
-		"r\u02A6\x03\x02\x02\x02t\u02BB\x03\x02\x02\x02v\u02BE\x03\x02\x02\x02" +
-		"x\u02C5\x03\x02\x02\x02z\u02CA\x03\x02\x02\x02|\u02D1\x03\x02\x02\x02" +
-		"~\u02D4\x03\x02\x02\x02\x80\u02DA\x03\x02\x02\x02\x82\u02E2\x03\x02\x02" +
-		"\x02\x84\u02F3\x03\x02\x02\x02\x86\u0305\x03\x02\x02\x02\x88\u0307\x03" +
-		"\x02\x02\x02\x8A\u0326\x03\x02\x02\x02\x8C\u0333\x03\x02\x02\x02\x8E\u0375" +
-		"\x03\x02\x02\x02\x90\u0377\x03\x02\x02\x02\x92\u037E\x03\x02\x02\x02\x94" +
-		"\u0389\x03\x02\x02\x02\x96\u038D\x03\x02\x02\x02\x98\u039C\x03\x02\x02" +
-		"\x02\x9A\u03A0\x03\x02\x02\x02\x9C\u03A4\x03\x02\x02\x02\x9E\u03B2\x03" +
-		"\x02\x02\x02\xA0\u03B4\x03\x02\x02\x02\xA2\u03BC\x03\x02\x02\x02\xA4\u03C4" +
-		"\x03\x02\x02\x02\xA6\u03CC\x03\x02\x02\x02\xA8\u03D2\x03\x02\x02\x02\xAA" +
-		"\u03D5\x03\x02\x02\x02\xAC\u03D9\x03\x02\x02\x02\xAE\xB0\x05\xAAV\x02" +
-		"\xAF\xAE\x03\x02\x02\x02\xAF\xB0\x03\x02\x02\x02\xB0\xB4\x03\x02\x02\x02" +
-		"\xB1\xB3\x05\x04\x03\x02\xB2\xB1\x03\x02\x02\x02\xB3\xB6\x03\x02\x02\x02" +
-		"\xB4\xB2\x03\x02\x02\x02\xB4\xB5\x03\x02\x02\x02\xB5\xB7\x03\x02\x02\x02" +
-		"\xB6\xB4\x03\x02\x02\x02\xB7\xB8\x07\x02\x02\x03\xB8\x03\x03\x02\x02\x02" +
-		"\xB9\xBD\x05\x06\x04\x02\xBA\xBD\x05\f\x07\x02\xBB\xBD\x05\x0E\b\x02\xBC" +
-		"\xB9\x03\x02\x02\x02\xBC\xBA\x03\x02\x02\x02\xBC\xBB\x03\x02\x02\x02\xBD" +
-		"\x05\x03\x02\x02\x02\xBE\xC0\x05\xAAV\x02\xBF\xBE\x03\x02\x02\x02\xBF" +
-		"\xC0\x03\x02\x02\x02\xC0\xC1\x03\x02\x02\x02\xC1\xC2\x07\x03\x02\x02\xC2" +
-		"\xC5\x05\xA8U\x02\xC3\xC4\x07\n\x02\x02\xC4\xC6\x05\xA0Q\x02\xC5\xC3\x03" +
-		"\x02\x02\x02\xC5\xC6\x03\x02\x02\x02\xC6\xC9\x03\x02\x02\x02\xC7\xC8\x07" +
-		"\x06\x02\x02\xC8\xCA\x05\b\x05\x02\xC9\xC7\x03\x02\x02\x02\xC9\xCA\x03" +
-		"\x02\x02\x02\xCA\xCB\x03\x02\x02\x02\xCB\xCC\x05\x14\v\x02\xCC\x07\x03" +
-		"\x02\x02\x02\xCD\xD2\x05\n\x06\x02\xCE\xCF\x07+\x02\x02\xCF\xD1\x05\n" +
-		"\x06\x02\xD0\xCE\x03\x02\x02\x02\xD1\xD4\x03\x02\x02\x02\xD2\xD0\x03\x02" +
-		"\x02\x02\xD2\xD3\x03\x02\x02\x02\xD3\t\x03\x02\x02\x02\xD4\xD2\x03\x02" +
-		"\x02\x02\xD5\xDA\x05\xA8U\x02\xD6\xD7\x07&\x02\x02\xD7\xD8\x05\xA0Q\x02" +
-		"\xD8\xD9\x07\'\x02\x02\xD9\xDB\x03\x02\x02\x02\xDA\xD6\x03\x02\x02\x02" +
-		"\xDA\xDB\x03\x02\x02\x02\xDB\v\x03\x02\x02\x02\xDC\xDE\x05\xAAV\x02\xDD" +
-		"\xDC\x03\x02\x02\x02\xDD\xDE\x03\x02\x02\x02\xDE\xDF\x03\x02\x02\x02\xDF" +
-		"\xE0\x07\x04\x02\x02\xE0\xE5\x05\xA8U\x02\xE1\xE2\x07&\x02\x02\xE2\xE3" +
-		"\x05\xA8U\x02\xE3\xE4\x07\'\x02\x02\xE4\xE6\x03\x02\x02\x02\xE5\xE1\x03" +
-		"\x02\x02\x02\xE5\xE6\x03\x02\x02\x02\xE6\xE9\x03\x02\x02\x02\xE7\xE8\x07" +
-		"\n\x02\x02\xE8\xEA\x05\b\x05\x02\xE9\xE7\x03\x02\x02\x02\xE9\xEA\x03\x02" +
-		"\x02\x02\xEA\xEB\x03\x02\x02\x02\xEB\xEC\x05\x16\f\x02\xEC\r\x03\x02\x02" +
-		"\x02\xED\xF0\x07\x05\x02\x02\xEE\xF1\x05\x10\t\x02\xEF\xF1\x07?\x02\x02" +
-		"\xF0\xEE\x03\x02\x02\x02\xF0\xEF\x03\x02\x02\x02\xF0\xF1\x03\x02\x02\x02" +
-		"\xF1\xF2\x03\x02\x02\x02\xF2\xF3\x07\x13\x02\x02\xF3\xF4\x07K\x02\x02" +
-		"\xF4\x0F\x03\x02\x02\x02\xF5\xFA\x05\x12\n\x02\xF6\xF7\x07+\x02\x02\xF7" +
-		"\xF9\x05\x12\n\x02\xF8\xF6\x03\x02\x02\x02\xF9\xFC\x03\x02\x02\x02\xFA" +
-		"\xF8\x03\x02\x02\x02\xFA\xFB\x03\x02\x02\x02\xFB\x11\x03\x02\x02\x02\xFC" +
-		"\xFA\x03\x02\x02\x02\xFD\xFE\b\n\x01\x02\xFE\xFF\x07$\x02\x02\xFF\u0100" +
-		"\x05\x10\t\x02\u0100\u0101\x07%\x02\x02\u0101\u010E\x03\x02\x02\x02\u0102" +
-		"\u010E\x05l7\x02\u0103\u0104\x05l7\x02\u0104\u0105\x07/\x02\x02\u0105" +
-		"\u0106\x07(\x02\x02\u0106\u0107\x05\x10\t\x02\u0107\u0108\x07)\x02\x02" +
-		"\u0108\u010E\x03\x02\x02\x02\u0109\u010A\x05l7\x02\u010A\u010B\x07/\x02" +
-		"\x02\u010B\u010C\x07?\x02\x02\u010C\u010E\x03\x02\x02\x02\u010D\xFD\x03" +
-		"\x02\x02\x02\u010D\u0102\x03\x02\x02\x02\u010D\u0103\x03\x02\x02\x02\u010D" +
-		"\u0109\x03\x02\x02\x02\u010E\u0114\x03\x02\x02\x02\u010F\u0110\f\x03\x02" +
-		"\x02\u0110\u0111\x07#\x02\x02\u0111\u0113\x05\xA8U\x02\u0112\u010F\x03" +
-		"\x02\x02\x02\u0113\u0116\x03\x02\x02\x02\u0114\u0112\x03\x02\x02\x02\u0114" +
-		"\u0115\x03\x02\x02\x02\u0115\x13\x03\x02\x02\x02\u0116\u0114\x03\x02\x02" +
-		"\x02\u0117\u011B\x07(\x02\x02\u0118\u011A\x05\x18\r\x02\u0119\u0118\x03" +
-		"\x02\x02\x02\u011A\u011D\x03\x02\x02\x02\u011B\u0119\x03\x02\x02\x02\u011B" +
-		"\u011C\x03\x02\x02\x02\u011C\u011E\x03\x02\x02\x02\u011D\u011B\x03\x02" +
-		"\x02\x02\u011E\u011F\x07)\x02\x02\u011F\x15\x03\x02\x02\x02\u0120\u0124" +
-		"\x07(\x02\x02\u0121\u0123\x05\x1A\x0E\x02\u0122\u0121\x03\x02\x02\x02" +
-		"\u0123\u0126\x03\x02\x02\x02\u0124\u0122\x03\x02\x02\x02\u0124\u0125\x03" +
-		"\x02\x02\x02\u0125\u0127\x03\x02\x02\x02\u0126\u0124\x03\x02\x02\x02\u0127" +
-		"\u0128\x07)\x02\x02\u0128\x17\x03\x02\x02\x02\u0129\u0137\x05n8\x02\u012A" +
-		"\u0137\x05\x1C\x0F\x02\u012B\u0137\x05\x1E\x10\x02\u012C\u0137\x05\"\x12" +
-		"\x02\u012D\u0137\x05$\x13\x02\u012E\u0137\x05(\x15\x02\u012F\u0137\x05" +
-		"*\x16\x02\u0130\u0137\x056\x1C\x02\u0131\u0137\x05:\x1E\x02\u0132\u0137" +
-		"\x05<\x1F\x02\u0133\u0137\x05F$\x02\u0134\u0137\x05H%\x02\u0135\u0137" +
-		"\x05R*\x02\u0136\u0129\x03\x02\x02\x02\u0136\u012A\x03\x02\x02\x02\u0136" +
-		"\u012B\x03\x02\x02\x02\u0136\u012C\x03\x02\x02\x02\u0136\u012D\x03\x02" +
-		"\x02\x02\u0136\u012E\x03\x02\x02\x02\u0136\u012F\x03\x02\x02\x02\u0136" +
-		"\u0130\x03\x02\x02\x02\u0136\u0131\x03\x02\x02\x02\u0136\u0132\x03\x02" +
-		"\x02\x02\u0136\u0133\x03\x02\x02\x02\u0136\u0134\x03\x02\x02\x02\u0136" +
-		"\u0135\x03\x02\x02\x02\u0137\x19\x03\x02\x02\x02\u0138\u0146\x05n8\x02" +
-		"\u0139\u0146\x05\x1C\x0F\x02\u013A\u0146\x05\x1E\x10\x02\u013B\u0146\x05" +
-		"\"\x12\x02\u013C\u0146\x05$\x13\x02\u013D\u0146\x05(\x15\x02\u013E\u0146" +
-		"\x05*\x16\x02\u013F\u0146\x058\x1D\x02\u0140\u0146\x05@!\x02\u0141\u0146" +
-		"\x05B\"\x02\u0142\u0146\x05L\'\x02\u0143\u0146\x05N(\x02\u0144\u0146\x05" +
-		"T+\x02\u0145\u0138\x03\x02\x02\x02\u0145\u0139\x03\x02\x02\x02\u0145\u013A" +
-		"\x03\x02\x02\x02\u0145\u013B\x03\x02\x02\x02\u0145\u013C\x03\x02\x02\x02" +
-		"\u0145\u013D\x03\x02\x02\x02\u0145\u013E\x03\x02\x02\x02\u0145\u013F\x03" +
-		"\x02\x02\x02\u0145\u0140\x03\x02\x02\x02\u0145\u0141\x03\x02\x02\x02\u0145" +
-		"\u0142\x03\x02\x02\x02\u0145\u0143\x03\x02\x02\x02\u0145\u0144\x03\x02" +
-		"\x02\x02\u0146\x1B\x03\x02\x02\x02\u0147\u0149\x05\xAAV\x02\u0148\u0147" +
-		"\x03\x02\x02\x02\u0148\u0149\x03\x02\x02\x02\u0149\u014A\x03\x02\x02\x02" +
-		"\u014A\u014B\x07\v\x02\x02\u014B\u014C\x05V,\x02\u014C\x1D\x03\x02\x02" +
-		"\x02\u014D\u014E\x07\v\x02\x02\u014E\u0152\x07(\x02\x02\u014F\u0151\x05" +
-		" \x11\x02\u0150\u014F\x03\x02\x02\x02\u0151\u0154\x03\x02\x02\x02\u0152" +
-		"\u0150\x03\x02\x02\x02\u0152\u0153\x03\x02\x02\x02\u0153\u0155\x03\x02" +
-		"\x02\x02\u0154\u0152\x03\x02\x02\x02\u0155\u0156\x07)\x02\x02\u0156\x1F" +
-		"\x03\x02\x02\x02\u0157\u0159\x05\xAAV\x02\u0158\u0157\x03\x02\x02\x02" +
-		"\u0158\u0159\x03\x02\x02\x02\u0159\u015A\x03\x02\x02\x02\u015A\u015B\x05" +
-		"V,\x02\u015B!\x03\x02\x02\x02\u015C\u015E\x05\xAAV\x02\u015D\u015C\x03" +
-		"\x02\x02\x02\u015D\u015E\x03\x02\x02\x02\u015E\u015F\x03\x02\x02\x02\u015F" +
-		"\u0160\x07\f\x02\x02\u0160\u0161\x05V,\x02\u0161#\x03\x02\x02\x02\u0162" +
-		"\u0163\x07\f\x02\x02\u0163\u0167\x07(\x02\x02\u0164\u0166\x05&\x14\x02" +
-		"\u0165\u0164\x03\x02\x02\x02\u0166\u0169\x03\x02\x02\x02\u0167\u0165\x03" +
-		"\x02\x02\x02\u0167\u0168\x03\x02\x02\x02\u0168\u016A\x03\x02\x02\x02\u0169" +
-		"\u0167\x03\x02\x02\x02\u016A\u016B\x07)\x02\x02\u016B%\x03\x02\x02\x02" +
-		"\u016C\u016E\x05\xAAV\x02\u016D\u016C\x03\x02\x02\x02\u016D\u016E\x03" +
-		"\x02\x02\x02\u016E\u016F\x03\x02\x02\x02\u016F\u0170\x05V,\x02\u0170\'" +
-		"\x03\x02\x02\x02\u0171\u0173\x05\xAAV\x02\u0172\u0171\x03\x02\x02\x02" +
-		"\u0172\u0173\x03\x02\x02\x02\u0173\u0174\x03\x02\x02\x02\u0174\u0175\x07" +
-		"\x14\x02\x02\u0175\u017C\x05.\x18\x02\u0176\u0178\x05\xAAV\x02\u0177\u0176" +
-		"\x03\x02\x02\x02\u0177\u0178\x03\x02\x02\x02\u0178\u0179\x03\x02\x02\x02" +
-		"\u0179\u017A\x07\x14\x02\x02\u017A\u017C\x050\x19\x02\u017B\u0172\x03" +
-		"\x02\x02\x02\u017B\u0177\x03\x02\x02\x02\u017C)\x03\x02\x02\x02\u017D" +
-		"\u017E\x07\x14\x02\x02\u017E\u0182\x07(\x02\x02\u017F\u0181\x05,\x17\x02" +
-		"\u0180\u017F\x03\x02\x02\x02\u0181\u0184\x03\x02\x02\x02\u0182\u0180\x03" +
-		"\x02\x02\x02\u0182\u0183\x03\x02\x02\x02\u0183\u0185\x03\x02\x02\x02\u0184" +
-		"\u0182\x03\x02\x02\x02\u0185\u0186\x07)\x02\x02\u0186+\x03\x02\x02\x02" +
-		"\u0187\u0189\x05\xAAV\x02\u0188\u0187\x03\x02\x02\x02\u0188\u0189\x03" +
-		"\x02\x02\x02\u0189\u018A\x03\x02\x02\x02\u018A\u0190\x05.\x18\x02\u018B" +
-		"\u018D\x05\xAAV\x02\u018C\u018B\x03\x02\x02\x02\u018C\u018D\x03\x02\x02" +
-		"\x02\u018D\u018E\x03\x02\x02\x02\u018E\u0190\x050\x19\x02\u018F\u0188" +
-		"\x03\x02\x02\x02\u018F\u018C\x03\x02\x02\x02\u0190-\x03\x02\x02\x02\u0191" +
-		"\u0192\x05\xA8U\x02\u0192\u0193\x07.\x02\x02\u0193\u0194\x05f4\x02\u0194" +
-		"/\x03\x02\x02\x02\u0195\u0196\x05\xA8U\x02\u0196\u0197\x052\x1A\x02\u0197" +
-		"\u0198\x07.\x02\x02\u0198\u0199\x05f4\x02\u01991\x03\x02\x02\x02\u019A" +
-		"\u019C\x054\x1B\x02\u019B\u019A\x03\x02\x02\x02\u019C\u019D\x03\x02\x02" +
-		"\x02\u019D\u019B\x03\x02\x02\x02\u019D\u019E\x03\x02\x02\x02\u019E3\x03" +
-		"\x02\x02\x02\u019F\u01A3\x07&\x02\x02\u01A0\u01A1\x05\xA8U\x02\u01A1\u01A2" +
-		"\x07.\x02\x02\u01A2\u01A4\x03\x02\x02\x02\u01A3\u01A0\x03\x02\x02\x02" +
-		"\u01A3\u01A4\x03\x02\x02\x02\u01A4\u01A5\x03\x02\x02\x02\u01A5\u01A6\x05" +
-		"f4\x02\u01A6\u01A7\x07\'\x02\x02\u01A75\x03\x02\x02\x02\u01A8\u01AA\x05" +
-		"\xAAV\x02\u01A9\u01A8\x03\x02\x02\x02\u01A9\u01AA\x03\x02\x02\x02\u01AA" +
-		"\u01AB\x03\x02\x02\x02\u01AB\u01AC\x07\r\x02\x02\u01AC\u01AE\x05~@\x02" +
-		"\u01AD\u01AF\x05|?\x02\u01AE\u01AD\x03\x02\x02\x02\u01AE\u01AF\x03\x02" +
-		"\x02\x02\u01AF\u01B0\x03\x02\x02\x02\u01B0\u01B1\x05\x84C\x02\u01B17\x03" +
-		"\x02\x02\x02\u01B2\u01B4\x05\xAAV\x02\u01B3\u01B2\x03\x02\x02\x02\u01B3" +
-		"\u01B4\x03\x02\x02\x02\u01B4\u01B5\x03\x02\x02\x02\u01B5\u01B6\x07\r\x02" +
-		"\x02\u01B6\u01B8\x05~@\x02\u01B7\u01B9\x05|?\x02\u01B8\u01B7\x03\x02\x02" +
-		"\x02\u01B8\u01B9\x03\x02\x02\x02\u01B99\x03\x02\x02\x02\u01BA\u01BC\x05" +
-		"\xAAV\x02\u01BB\u01BA\x03\x02\x02\x02\u01BB\u01BC\x03\x02\x02\x02\u01BC" +
-		"\u01BD\x03\x02\x02\x02\u01BD\u01BE\x07\x0E\x02\x02\u01BE\u01BF\x05z>\x02" +
-		"\u01BF;\x03\x02\x02\x02\u01C0\u01C1\x07\x0E\x02\x02\u01C1\u01C5\x07(\x02" +
-		"\x02\u01C2\u01C4\x05> \x02\u01C3\u01C2\x03\x02\x02\x02\u01C4\u01C7\x03" +
-		"\x02\x02\x02\u01C5\u01C3\x03\x02\x02\x02\u01C5\u01C6\x03\x02\x02\x02\u01C6" +
-		"\u01C8\x03\x02\x02\x02\u01C7\u01C5\x03\x02\x02\x02\u01C8\u01C9\x07)\x02" +
-		"\x02\u01C9=\x03\x02\x02\x02\u01CA\u01CC\x05\xAAV\x02\u01CB\u01CA\x03\x02" +
-		"\x02\x02\u01CB\u01CC\x03\x02\x02\x02\u01CC\u01CD\x03\x02\x02";
+		"G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x03G\x05G\u034D\n" +
+		"G\x03G\x03G\x03G\x03G\x05G\u0353\nG\x03G\x07G\u0356\nG\fG\x0EG\u0359\v" +
+		"G\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03H\x03" +
+		"H\x03H\x03H\x03H\x03H\x05H\u036D\nH\x03I\x03I\x03I\x05I\u0372\nI\x03I" +
+		"\x03I\x03J\x03J\x03J\x07J\u0379\nJ\fJ\x0EJ\u037C\vJ\x03J\x05J\u037F\n" +
+		"J\x03K\x03K\x03K\x03K\x03L\x03L\x05L\u0387\nL\x03L\x05L\u038A\nL\x03M" +
+		"\x03M\x03M\x03M\x03M\x03M\x03M\x03M\x05M\u0394\nM\x03N\x03N\x06N\u0398" +
+		"\nN\rN\x0EN\u0399\x03O\x03O\x03O\x03P\x03P\x03P\x03P\x03P\x03P\x03P\x03" +
+		"P\x03P\x03P\x03P\x05P\u03AA\nP\x03Q\x03Q\x03Q\x07Q\u03AF\nQ\fQ\x0EQ\u03B2" +
+		"\vQ\x03R\x03R\x03R\x07R\u03B7\nR\fR\x0ER\u03BA\vR\x03S\x03S\x03S\x07S" +
+		"\u03BF\nS\fS\x0ES\u03C2\vS\x03T\x03T\x03T\x03T\x03U\x03U\x05U\u03CA\n" +
+		"U\x03V\x06V\u03CD\nV\rV\x0EV\u03CE\x03W\x03W\x03W\x02\x02\x04f\x8CX\x02" +
+		"\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x14\x02" +
+		"\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02&\x02(\x02*\x02" +
+		",\x02.\x020\x022\x024\x026\x028\x02:\x02<\x02>\x02@\x02B\x02D\x02F\x02" +
+		"H\x02J\x02L\x02N\x02P\x02R\x02T\x02V\x02X\x02Z\x02\\\x02^\x02`\x02b\x02" +
+		"d\x02f\x02h\x02j\x02l\x02n\x02p\x02r\x02t\x02v\x02x\x02z\x02|\x02~\x02" +
+		"\x80\x02\x82\x02\x84\x02\x86\x02\x88\x02\x8A\x02\x8C\x02\x8E\x02\x90\x02" +
+		"\x92\x02\x94\x02\x96\x02\x98\x02\x9A\x02\x9C\x02\x9E\x02\xA0\x02\xA2\x02" +
+		"\xA4\x02\xA6\x02\xA8\x02\xAA\x02\xAC\x02\x02\n\b\x0288<<>>@@BBDD\x05\x02" +
+		"--;;==\x05\x02??AACC\x04\x02;;==\x03\x02EH\x03\x029:\x03\x02NO\x05\x02" +
+		"\x03\x06\n\x1C\x1E\"\x02\u0424\x02\xAF\x03\x02\x02\x02\x04\xBC\x03\x02" +
+		"\x02\x02\x06\xBF\x03\x02\x02\x02\b\xCD\x03\x02\x02\x02\n\xD5\x03\x02\x02" +
+		"\x02\f\xDD\x03\x02\x02\x02\x0E\xFF\x03\x02\x02\x02\x10\u0101\x03\x02\x02" +
+		"\x02\x12\u0109\x03\x02\x02\x02\x14\u010E\x03\x02\x02\x02\x16\u0117\x03" +
+		"\x02\x02\x02\x18\u012D\x03\x02\x02\x02\x1A\u013C\x03\x02\x02\x02\x1C\u013F" +
+		"\x03\x02\x02\x02\x1E\u0144\x03\x02\x02\x02 \u014F\x03\x02\x02\x02\"\u0154" +
+		"\x03\x02\x02\x02$\u0159\x03\x02\x02\x02&\u0164\x03\x02\x02\x02(\u0172" +
+		"\x03\x02\x02\x02*\u0174\x03\x02\x02\x02,\u0186\x03\x02\x02\x02.\u0188" +
+		"\x03\x02\x02\x020\u018C\x03\x02\x02\x022\u0192\x03\x02\x02\x024\u0196" +
+		"\x03\x02\x02\x026\u01A0\x03\x02\x02\x028\u01AA\x03\x02\x02\x02:\u01B2" +
+		"\x03\x02\x02\x02<\u01B7\x03\x02\x02\x02>\u01C2\x03\x02\x02\x02@\u01C7" +
+		"\x03\x02\x02\x02B\u01CC\x03\x02\x02\x02D\u01D7\x03\x02\x02\x02F\u01DC" +
+		"\x03\x02\x02\x02H\u01E1\x03\x02\x02\x02J\u01EC\x03\x02\x02\x02L\u01F1" +
+		"\x03\x02\x02\x02N\u01F6\x03\x02\x02\x02P\u0201\x03\x02\x02\x02R\u0206" +
+		"\x03\x02\x02\x02T\u0210\x03\x02\x02\x02V\u021A\x03\x02\x02\x02X\u021C" +
+		"\x03\x02\x02\x02Z\u0221\x03\x02\x02\x02\\\u0224\x03\x02\x02\x02^\u0226" +
+		"\x03\x02\x02\x02`\u0231\x03\x02\x02\x02b\u023E\x03\x02\x02\x02d\u024F" +
+		"\x03\x02\x02\x02f\u0268\x03\x02\x02\x02h\u0279\x03\x02\x02\x02j\u0284" +
+		"\x03\x02\x02\x02l\u028D\x03\x02\x02\x02n\u0294\x03\x02\x02\x02p\u0297" +
+		"\x03\x02\x02\x02r\u029D\x03\x02\x02\x02t\u02B2\x03\x02\x02\x02v\u02B5" +
+		"\x03\x02\x02\x02x\u02BC\x03\x02\x02\x02z\u02C1\x03\x02\x02\x02|\u02C8" +
+		"\x03\x02\x02\x02~\u02CB\x03\x02\x02\x02\x80\u02D1\x03\x02\x02\x02\x82" +
+		"\u02D9\x03\x02\x02\x02\x84\u02EA\x03\x02\x02\x02\x86\u02FC\x03\x02\x02" +
+		"\x02\x88\u02FE\x03\x02\x02\x02\x8A\u031D\x03\x02\x02\x02\x8C\u032A\x03" +
+		"\x02\x02\x02\x8E\u036C\x03\x02\x02\x02\x90\u036E\x03\x02\x02\x02\x92\u0375" +
+		"\x03\x02\x02\x02\x94\u0380\x03\x02\x02\x02\x96\u0384\x03\x02\x02\x02\x98" +
+		"\u0393\x03\x02\x02\x02\x9A\u0397\x03\x02\x02\x02\x9C\u039B\x03\x02\x02" +
+		"\x02\x9E\u03A9\x03\x02\x02\x02\xA0\u03AB\x03\x02\x02\x02\xA2\u03B3\x03" +
+		"\x02\x02\x02\xA4\u03BB\x03\x02\x02\x02\xA6\u03C3\x03\x02\x02\x02\xA8\u03C9" +
+		"\x03\x02\x02\x02\xAA\u03CC\x03\x02\x02\x02\xAC\u03D0\x03\x02\x02\x02\xAE" +
+		"\xB0\x05\xAAV\x02\xAF\xAE\x03\x02\x02\x02\xAF\xB0\x03\x02\x02\x02\xB0" +
+		"\xB4\x03\x02\x02\x02\xB1\xB3\x05\x04\x03\x02\xB2\xB1\x03\x02\x02\x02\xB3" +
+		"\xB6\x03\x02\x02\x02\xB4\xB2\x03\x02\x02\x02\xB4\xB5\x03\x02\x02\x02\xB5" +
+		"\xB7\x03\x02\x02\x02\xB6\xB4\x03\x02\x02\x02\xB7\xB8\x07\x02\x02\x03\xB8" +
+		"\x03\x03\x02\x02\x02\xB9\xBD\x05\x06\x04\x02\xBA\xBD\x05\f\x07\x02\xBB" +
+		"\xBD\x05\x0E\b\x02\xBC\xB9\x03\x02\x02\x02\xBC\xBA\x03\x02\x02\x02\xBC" +
+		"\xBB\x03\x02\x02\x02\xBD\x05\x03\x02\x02\x02\xBE\xC0\x05\xAAV\x02\xBF" +
+		"\xBE\x03\x02\x02\x02\xBF\xC0\x03\x02\x02\x02\xC0\xC1\x03\x02\x02\x02\xC1" +
+		"\xC2\x07\x03\x02\x02\xC2\xC5\x05\xA8U\x02\xC3\xC4\x07\n\x02\x02\xC4\xC6" +
+		"\x05\xA0Q\x02\xC5\xC3\x03\x02\x02\x02\xC5\xC6\x03\x02\x02\x02\xC6\xC9" +
+		"\x03\x02\x02\x02\xC7\xC8\x07\x06\x02\x02\xC8\xCA\x05\b\x05\x02\xC9\xC7" +
+		"\x03\x02\x02\x02\xC9\xCA\x03\x02\x02\x02\xCA\xCB\x03\x02\x02\x02\xCB\xCC" +
+		"\x05\x14\v\x02\xCC\x07\x03\x02\x02\x02\xCD\xD2\x05\n\x06\x02\xCE\xCF\x07" +
+		"+\x02\x02\xCF\xD1\x05\n\x06\x02\xD0\xCE\x03\x02\x02\x02\xD1\xD4\x03\x02" +
+		"\x02\x02\xD2\xD0\x03\x02\x02\x02\xD2\xD3\x03\x02\x02\x02\xD3\t\x03\x02" +
+		"\x02\x02\xD4\xD2\x03\x02\x02\x02\xD5\xDA\x05\xA8U\x02\xD6\xD7\x07&\x02" +
+		"\x02\xD7\xD8\x05\xA0Q\x02\xD8\xD9\x07\'\x02\x02\xD9\xDB\x03\x02\x02\x02" +
+		"\xDA\xD6\x03\x02\x02\x02\xDA\xDB\x03\x02\x02\x02\xDB\v\x03\x02\x02\x02" +
+		"\xDC\xDE\x05\xAAV\x02\xDD\xDC\x03\x02\x02\x02\xDD\xDE\x03\x02\x02\x02" +
+		"\xDE\xDF\x03\x02\x02\x02\xDF\xE0\x07\x04\x02\x02\xE0\xE5\x05\xA8U\x02" +
+		"\xE1\xE2\x07&\x02\x02\xE2\xE3\x05\xA8U\x02\xE3\xE4\x07\'\x02\x02\xE4\xE6" +
+		"\x03\x02\x02\x02\xE5\xE1\x03\x02\x02\x02\xE5\xE6\x03\x02\x02\x02\xE6\xE9" +
+		"\x03\x02\x02\x02\xE7\xE8\x07\n\x02\x02\xE8\xEA\x05\b\x05\x02\xE9\xE7\x03" +
+		"\x02\x02\x02\xE9\xEA\x03\x02\x02\x02\xEA\xEB\x03\x02\x02\x02\xEB\xEC\x05" +
+		"\x16\f\x02\xEC\r\x03\x02\x02\x02\xED\xEE\x07\x05\x02\x02\xEE\xEF\x07?" +
+		"\x02\x02\xEF\xF0\x07\x13\x02\x02\xF0\u0100\x07K\x02\x02\xF1\xFA\x07\x05" +
+		"\x02\x02\xF2\xF3\x07$\x02\x02\xF3\xF5\x05\x10\t\x02\xF4\xF6\x07+\x02\x02" +
+		"\xF5\xF4\x03\x02\x02\x02\xF5\xF6\x03\x02\x02\x02\xF6\xF7\x03\x02\x02\x02" +
+		"\xF7\xF8\x07%\x02\x02\xF8\xFB\x03\x02\x02\x02\xF9\xFB\x05\x10\t\x02\xFA" +
+		"\xF2\x03\x02\x02\x02\xFA\xF9\x03\x02\x02\x02\xFB\xFC\x03\x02\x02\x02\xFC" +
+		"\xFD\x07\x13\x02\x02\xFD\xFE\x07K\x02\x02\xFE\u0100\x03\x02\x02\x02\xFF" +
+		"\xED\x03\x02\x02\x02\xFF\xF1\x03\x02\x02\x02\u0100\x0F\x03\x02\x02\x02" +
+		"\u0101\u0106\x05\x12\n\x02\u0102\u0103\x07+\x02\x02\u0103\u0105\x05\x12" +
+		"\n\x02\u0104\u0102\x03\x02\x02\x02\u0105\u0108\x03\x02\x02\x02\u0106\u0104" +
+		"\x03\x02\x02\x02\u0106\u0107\x03\x02\x02\x02\u0107\x11\x03\x02\x02\x02" +
+		"\u0108\u0106\x03\x02\x02\x02\u0109\u010C\x05\xA8U\x02\u010A\u010B\x07" +
+		"#\x02\x02\u010B\u010D\x05\xA8U\x02\u010C\u010A\x03\x02\x02\x02\u010C\u010D" +
+		"\x03\x02\x02\x02\u010D\x13\x03\x02\x02\x02\u010E\u0112\x07(\x02\x02\u010F" +
+		"\u0111\x05\x18\r\x02\u0110\u010F\x03\x02\x02\x02\u0111\u0114\x03\x02\x02" +
+		"\x02\u0112\u0110\x03\x02\x02\x02\u0112\u0113\x03\x02\x02\x02\u0113\u0115" +
+		"\x03\x02\x02\x02\u0114\u0112\x03\x02\x02\x02\u0115\u0116\x07)\x02\x02" +
+		"\u0116\x15\x03\x02\x02\x02\u0117\u011B\x07(\x02\x02\u0118\u011A\x05\x1A" +
+		"\x0E\x02\u0119\u0118\x03\x02\x02\x02\u011A\u011D\x03\x02\x02\x02\u011B" +
+		"\u0119\x03\x02\x02\x02\u011B\u011C\x03\x02\x02\x02\u011C\u011E\x03\x02" +
+		"\x02\x02\u011D\u011B\x03\x02\x02\x02\u011E\u011F\x07)\x02\x02\u011F\x17" +
+		"\x03\x02\x02\x02\u0120\u012E\x05n8\x02\u0121\u012E\x05\x1C\x0F\x02\u0122" +
+		"\u012E\x05\x1E\x10\x02\u0123\u012E\x05\"\x12\x02\u0124\u012E\x05$\x13" +
+		"\x02\u0125\u012E\x05(\x15\x02\u0126\u012E\x05*\x16\x02\u0127\u012E\x05" +
+		"6\x1C\x02\u0128\u012E\x05:\x1E\x02\u0129\u012E\x05<\x1F\x02\u012A\u012E" +
+		"\x05F$\x02\u012B\u012E\x05H%\x02\u012C\u012E\x05R*\x02\u012D\u0120\x03" +
+		"\x02\x02\x02\u012D\u0121\x03\x02\x02\x02\u012D\u0122\x03\x02\x02\x02\u012D" +
+		"\u0123\x03\x02\x02\x02\u012D\u0124\x03\x02\x02\x02\u012D\u0125\x03\x02" +
+		"\x02\x02\u012D\u0126\x03\x02\x02\x02\u012D\u0127\x03\x02\x02\x02\u012D" +
+		"\u0128\x03\x02\x02\x02\u012D\u0129\x03\x02\x02\x02\u012D\u012A\x03\x02" +
+		"\x02\x02\u012D\u012B\x03\x02\x02\x02\u012D\u012C\x03\x02\x02\x02\u012E" +
+		"\x19\x03\x02\x02\x02\u012F\u013D\x05n8\x02\u0130\u013D\x05\x1C\x0F\x02" +
+		"\u0131\u013D\x05\x1E\x10\x02\u0132\u013D\x05\"\x12\x02\u0133\u013D\x05" +
+		"$\x13\x02\u0134\u013D\x05(\x15\x02\u0135\u013D\x05*\x16\x02\u0136\u013D" +
+		"\x058\x1D\x02\u0137\u013D\x05@!\x02\u0138\u013D\x05B\"\x02\u0139\u013D" +
+		"\x05L\'\x02\u013A\u013D\x05N(\x02\u013B\u013D\x05T+\x02\u013C\u012F\x03" +
+		"\x02\x02\x02\u013C\u0130\x03\x02\x02\x02\u013C\u0131\x03\x02\x02\x02\u013C" +
+		"\u0132\x03\x02\x02\x02\u013C\u0133\x03\x02\x02\x02\u013C\u0134\x03\x02" +
+		"\x02\x02\u013C\u0135\x03\x02\x02\x02\u013C\u0136\x03\x02\x02\x02\u013C" +
+		"\u0137\x03\x02\x02\x02\u013C\u0138\x03\x02\x02\x02\u013C\u0139\x03\x02" +
+		"\x02\x02\u013C\u013A\x03\x02\x02\x02\u013C\u013B\x03\x02\x02\x02\u013D" +
+		"\x1B\x03\x02\x02\x02\u013E\u0140\x05\xAAV\x02\u013F\u013E\x03\x02\x02" +
+		"\x02\u013F\u0140\x03\x02\x02\x02\u0140\u0141\x03\x02\x02\x02\u0141\u0142" +
+		"\x07\v\x02\x02\u0142\u0143\x05V,\x02\u0143\x1D\x03\x02\x02\x02\u0144\u0145" +
+		"\x07\v\x02\x02\u0145\u0149\x07(\x02\x02\u0146\u0148\x05 \x11\x02\u0147" +
+		"\u0146\x03\x02\x02\x02\u0148\u014B\x03\x02\x02\x02\u0149\u0147\x03\x02" +
+		"\x02\x02\u0149\u014A\x03\x02\x02\x02\u014A\u014C\x03\x02\x02\x02\u014B" +
+		"\u0149\x03\x02\x02\x02\u014C\u014D\x07)\x02\x02\u014D\x1F\x03\x02\x02" +
+		"\x02\u014E\u0150\x05\xAAV\x02\u014F\u014E\x03\x02\x02\x02\u014F\u0150" +
+		"\x03\x02\x02\x02\u0150\u0151\x03\x02\x02\x02\u0151\u0152\x05V,\x02\u0152" +
+		"!\x03\x02\x02\x02\u0153\u0155\x05\xAAV\x02\u0154\u0153\x03\x02\x02\x02" +
+		"\u0154\u0155\x03\x02\x02\x02\u0155\u0156\x03\x02\x02\x02\u0156\u0157\x07" +
+		"\f\x02\x02\u0157\u0158\x05V,\x02\u0158#\x03\x02\x02\x02\u0159\u015A\x07" +
+		"\f\x02\x02\u015A\u015E\x07(\x02\x02\u015B\u015D\x05&\x14\x02\u015C\u015B" +
+		"\x03\x02\x02\x02\u015D\u0160\x03\x02\x02\x02\u015E\u015C\x03\x02\x02\x02" +
+		"\u015E\u015F\x03\x02\x02\x02\u015F\u0161\x03\x02\x02\x02\u0160\u015E\x03" +
+		"\x02\x02\x02\u0161\u0162\x07)\x02\x02\u0162%\x03\x02\x02\x02\u0163\u0165" +
+		"\x05\xAAV\x02\u0164\u0163\x03\x02\x02\x02\u0164\u0165\x03\x02\x02\x02" +
+		"\u0165\u0166\x03\x02\x02\x02\u0166\u0167\x05V,\x02\u0167\'\x03\x02\x02" +
+		"\x02\u0168\u016A\x05\xAAV\x02\u0169\u0168\x03\x02\x02\x02\u0169\u016A" +
+		"\x03\x02\x02\x02\u016A\u016B\x03\x02\x02\x02\u016B\u016C\x07\x14\x02\x02" +
+		"\u016C\u0173\x05.\x18\x02\u016D\u016F\x05\xAAV\x02\u016E\u016D\x03\x02" +
+		"\x02\x02\u016E\u016F\x03\x02\x02\x02\u016F\u0170\x03\x02\x02\x02\u0170" +
+		"\u0171\x07\x14\x02\x02\u0171\u0173\x050\x19\x02\u0172\u0169\x03\x02\x02" +
+		"\x02\u0172\u016E\x03\x02\x02\x02\u0173)\x03\x02\x02\x02\u0174\u0175\x07" +
+		"\x14\x02\x02\u0175\u0179\x07(\x02\x02\u0176\u0178\x05,\x17\x02\u0177\u0176" +
+		"\x03\x02\x02\x02\u0178\u017B\x03\x02\x02\x02\u0179\u0177\x03\x02\x02\x02" +
+		"\u0179\u017A\x03\x02\x02\x02\u017A\u017C\x03\x02\x02\x02\u017B\u0179\x03" +
+		"\x02\x02\x02\u017C\u017D\x07)\x02\x02\u017D+\x03\x02\x02\x02\u017E\u0180" +
+		"\x05\xAAV\x02\u017F\u017E\x03\x02\x02\x02\u017F\u0180\x03\x02\x02\x02" +
+		"\u0180\u0181\x03\x02\x02\x02\u0181\u0187\x05.\x18\x02\u0182\u0184\x05" +
+		"\xAAV\x02\u0183\u0182\x03\x02\x02\x02\u0183\u0184\x03\x02\x02\x02\u0184" +
+		"\u0185\x03\x02\x02\x02\u0185\u0187\x050\x19\x02\u0186\u017F\x03\x02\x02" +
+		"\x02\u0186\u0183\x03\x02\x02\x02\u0187-\x03\x02\x02\x02\u0188\u0189\x05" +
+		"\xA8U\x02\u0189\u018A\x07.\x02\x02\u018A\u018B\x05f4\x02\u018B/\x03\x02" +
+		"\x02\x02\u018C\u018D\x05\xA8U\x02\u018D\u018E\x052\x1A\x02\u018E\u018F" +
+		"\x07.\x02\x02\u018F\u0190\x05f4\x02\u01901\x03\x02\x02\x02\u0191\u0193" +
+		"\x054\x1B\x02\u0192\u0191\x03\x02\x02\x02\u0193\u0194\x03\x02\x02\x02" +
+		"\u0194\u0192\x03\x02\x02\x02\u0194\u0195\x03\x02\x02\x02\u01953\x03\x02" +
+		"\x02\x02\u0196\u019A\x07&\x02\x02\u0197\u0198\x05\xA8U\x02\u0198\u0199" +
+		"\x07.\x02\x02\u0199\u019B\x03\x02\x02\x02\u019A\u0197\x03\x02\x02\x02" +
+		"\u019A\u019B\x03\x02\x02\x02\u019B\u019C\x03\x02\x02\x02\u019C\u019D\x05" +
+		"f4\x02\u019D\u019E\x07\'\x02\x02\u019E5\x03\x02\x02\x02\u019F\u01A1\x05" +
+		"\xAAV\x02\u01A0\u019F\x03\x02\x02\x02\u01A0\u01A1\x03\x02\x02\x02\u01A1" +
+		"\u01A2\x03\x02\x02\x02\u01A2\u01A3\x07\r\x02\x02\u01A3\u01A5\x05~@\x02" +
+		"\u01A4\u01A6\x05|?\x02\u01A5\u01A4\x03\x02\x02\x02\u01A5\u01A6\x03\x02" +
+		"\x02\x02\u01A6\u01A7\x03\x02\x02\x02\u01A7\u01A8\x05\x84C\x02\u01A87\x03" +
+		"\x02\x02\x02\u01A9\u01AB\x05\xAAV\x02\u01AA\u01A9\x03\x02\x02\x02\u01AA" +
+		"\u01AB\x03\x02\x02\x02\u01AB\u01AC\x03\x02\x02\x02\u01AC\u01AD\x07\r\x02" +
+		"\x02\u01AD\u01AF\x05~@\x02\u01AE\u01B0\x05|?\x02\u01AF\u01AE\x03\x02\x02" +
+		"\x02\u01AF\u01B0\x03\x02\x02\x02\u01B09\x03\x02\x02\x02\u01B1\u01B3\x05" +
+		"\xAAV\x02\u01B2\u01B1\x03\x02\x02\x02\u01B2\u01B3\x03\x02\x02\x02\u01B3" +
+		"\u01B4\x03\x02\x02\x02\u01B4\u01B5\x07\x0E\x02\x02\u01B5\u01B6\x05z>\x02" +
+		"\u01B6;\x03\x02\x02\x02\u01B7\u01B8\x07\x0E\x02\x02\u01B8\u01BC\x07(\x02" +
+		"\x02\u01B9\u01BB\x05> \x02\u01BA\u01B9\x03\x02\x02\x02\u01BB\u01BE\x03" +
+		"\x02\x02\x02\u01BC\u01BA\x03\x02\x02\x02\u01BC\u01BD\x03\x02\x02\x02\u01BD" +
+		"\u01BF\x03\x02\x02\x02\u01BE\u01BC\x03\x02\x02\x02\u01BF\u01C0\x07)\x02" +
+		"\x02\u01C0=\x03\x02\x02\x02\u01C1\u01C3\x05\xAAV\x02\u01C2\u01C1\x03\x02" +
+		"\x02\x02\u01C2\u01C3\x03\x02\x02\x02\u01C3\u01C4\x03\x02\x02\x02\u01C4" +
+		"\u01C5\x05z>\x02\u01C5?\x03\x02\x02\x02\u01C6\u01C8\x05\xAAV\x02\u01C7" +
+		"\u01C6\x03\x02\x02\x02\u01C7\u01C8\x03\x02\x02\x02\u01C8\u01C9\x03\x02" +
+		"\x02\x02\u01C9\u01CA\x07\x0E\x02\x02\u01CA\u01CB\x05x=\x02\u01CBA\x03" +
+		"\x02\x02\x02\u01CC\u01CD\x07\x0E\x02\x02\u01CD\u01D1\x07(\x02\x02\u01CE" +
+		"\u01D0\x05D#\x02\u01CF\u01CE\x03\x02\x02\x02\u01D0\u01D3\x03\x02\x02\x02";
 	private static readonly _serializedATNSegment1: string =
-		"\x02\u01CD\u01CE\x05z>\x02\u01CE?\x03\x02\x02\x02\u01CF\u01D1\x05\xAA" +
-		"V\x02\u01D0\u01CF\x03\x02\x02\x02\u01D0\u01D1\x03\x02\x02\x02\u01D1\u01D2" +
-		"\x03\x02\x02\x02\u01D2\u01D3\x07\x0E\x02\x02\u01D3\u01D4\x05x=\x02\u01D4" +
-		"A\x03\x02\x02\x02\u01D5\u01D6\x07\x0E\x02\x02\u01D6\u01DA\x07(\x02\x02" +
-		"\u01D7\u01D9\x05D#\x02\u01D8\u01D7\x03\x02\x02\x02\u01D9\u01DC\x03\x02" +
-		"\x02\x02\u01DA\u01D8\x03\x02\x02\x02\u01DA\u01DB\x03\x02\x02\x02\u01DB" +
-		"\u01DD\x03\x02\x02\x02\u01DC\u01DA\x03\x02\x02\x02\u01DD\u01DE\x07)\x02" +
-		"\x02\u01DEC\x03\x02\x02\x02\u01DF\u01E1\x05\xAAV\x02\u01E0\u01DF\x03\x02" +
-		"\x02\x02\u01E0\u01E1\x03\x02\x02\x02\u01E1\u01E2\x03\x02\x02\x02\u01E2" +
-		"\u01E3\x05x=\x02\u01E3E\x03\x02\x02\x02\u01E4\u01E6\x05\xAAV\x02\u01E5" +
-		"\u01E4\x03\x02\x02\x02\u01E5\u01E6\x03\x02\x02\x02\u01E6\u01E7\x03\x02" +
-		"\x02\x02\u01E7\u01E8\x07\x0F\x02\x02\u01E8\u01E9\x05z>\x02\u01E9G\x03" +
-		"\x02\x02\x02\u01EA\u01EB\x07\x0F\x02\x02\u01EB\u01EF\x07(\x02\x02\u01EC" +
-		"\u01EE\x05J&\x02\u01ED\u01EC\x03\x02\x02\x02\u01EE\u01F1\x03\x02\x02\x02" +
-		"\u01EF\u01ED\x03\x02\x02\x02\u01EF\u01F0\x03\x02\x02\x02\u01F0\u01F2\x03" +
-		"\x02\x02\x02\u01F1\u01EF\x03\x02\x02\x02\u01F2\u01F3\x07)\x02\x02\u01F3" +
-		"I\x03\x02\x02\x02\u01F4\u01F6\x05\xAAV\x02\u01F5\u01F4\x03\x02\x02\x02" +
-		"\u01F5\u01F6\x03\x02\x02\x02\u01F6\u01F7\x03\x02\x02\x02\u01F7\u01F8\x05" +
-		"z>\x02\u01F8K\x03\x02\x02\x02\u01F9\u01FB\x05\xAAV\x02\u01FA\u01F9\x03" +
-		"\x02\x02\x02\u01FA\u01FB\x03\x02\x02\x02\u01FB\u01FC\x03\x02\x02\x02\u01FC" +
-		"\u01FD\x07\x0F\x02\x02\u01FD\u01FE\x05x=\x02\u01FEM\x03\x02\x02\x02\u01FF" +
-		"\u0200\x07\x0F\x02\x02\u0200\u0204\x07(\x02\x02\u0201\u0203\x05P)\x02" +
-		"\u0202\u0201\x03\x02\x02\x02\u0203\u0206\x03\x02\x02\x02\u0204\u0202\x03" +
-		"\x02\x02\x02\u0204\u0205\x03\x02\x02\x02\u0205\u0207\x03\x02\x02\x02\u0206" +
-		"\u0204\x03\x02\x02\x02\u0207\u0208\x07)\x02\x02\u0208O\x03\x02\x02\x02" +
-		"\u0209\u020B\x05\xAAV\x02\u020A\u0209\x03\x02\x02\x02\u020A\u020B\x03" +
-		"\x02\x02\x02\u020B\u020C\x03\x02\x02\x02\u020C\u020D\x05x=\x02\u020DQ" +
-		"\x03\x02\x02\x02\u020E\u0210\x05\xAAV\x02\u020F\u020E\x03\x02\x02\x02" +
-		"\u020F\u0210\x03\x02\x02\x02\u0210\u0211\x03\x02\x02\x02\u0211\u0212\x07" +
-		"\x10\x02\x02\u0212\u0214\x05~@\x02\u0213\u0215\x05|?\x02\u0214\u0213\x03" +
-		"\x02\x02\x02\u0214\u0215\x03\x02\x02\x02\u0215\u0216\x03\x02\x02\x02\u0216" +
-		"\u0217\x05\x84C\x02\u0217S\x03\x02\x02\x02\u0218\u021A\x05\xAAV\x02\u0219" +
-		"\u0218\x03\x02\x02\x02\u0219\u021A\x03\x02\x02\x02\u021A\u021B\x03\x02" +
-		"\x02\x02\u021B\u021C\x07\x10\x02\x02\u021C\u021E\x05~@\x02\u021D\u021F" +
-		"\x05|?\x02\u021E\u021D\x03\x02\x02\x02\u021E\u021F\x03\x02\x02\x02\u021F" +
-		"U\x03\x02\x02\x02\u0220\u0224\x05X-\x02\u0221\u0224\x05Z.\x02\u0222\u0224" +
-		"\x05\\/\x02\u0223\u0220\x03\x02\x02\x02\u0223\u0221\x03\x02\x02\x02\u0223" +
-		"\u0222\x03\x02\x02\x02\u0224W\x03\x02\x02\x02\u0225\u0228\x05\xA8U\x02" +
-		"\u0226\u0229\x05`1\x02\u0227\u0229\x05b2\x02\u0228\u0226\x03\x02\x02\x02" +
-		"\u0228\u0227\x03\x02\x02\x02\u0229Y\x03\x02\x02\x02\u022A\u022B\x05\xA8" +
-		"U\x02\u022B\u022C\x05^0\x02\u022C[\x03\x02\x02\x02\u022D\u022E\x05\xA8" +
-		"U\x02\u022E]\x03\x02\x02\x02\u022F\u0230\x07$\x02\x02\u0230\u0235\x05" +
-		"f4\x02\u0231\u0232\x07+\x02\x02\u0232\u0234\x05f4\x02\u0233\u0231\x03" +
-		"\x02\x02\x02\u0234\u0237\x03\x02\x02\x02\u0235\u0233\x03\x02\x02\x02\u0235" +
-		"\u0236\x03\x02\x02\x02\u0236\u0238\x03\x02\x02\x02\u0237\u0235\x03\x02" +
-		"\x02\x02\u0238\u0239\x07%\x02\x02\u0239_\x03\x02\x02\x02\u023A\u0243\x07" +
-		"$\x02\x02\u023B\u0240\x05d3\x02\u023C\u023D\x07+\x02\x02\u023D\u023F\x05" +
-		"d3\x02\u023E\u023C\x03\x02\x02\x02\u023F\u0242\x03\x02\x02\x02\u0240\u023E" +
-		"\x03\x02\x02\x02\u0240\u0241\x03\x02\x02\x02\u0241\u0244\x03\x02\x02\x02" +
-		"\u0242\u0240\x03\x02\x02\x02\u0243\u023B\x03\x02\x02\x02\u0243\u0244\x03" +
-		"\x02\x02\x02\u0244\u0245\x03\x02\x02\x02\u0245\u0246\x07%\x02\x02\u0246" +
-		"a\x03\x02\x02\x02\u0247\u0253\x07(\x02\x02\u0248\u024D\x05d3\x02\u0249" +
-		"\u024A\x07+\x02\x02\u024A\u024C\x05d3\x02\u024B\u0249\x03\x02\x02\x02" +
-		"\u024C\u024F\x03\x02\x02\x02\u024D\u024B\x03\x02\x02\x02\u024D\u024E\x03" +
-		"\x02\x02\x02\u024E\u0251\x03\x02\x02\x02\u024F\u024D\x03\x02\x02\x02\u0250" +
-		"\u0252\x07+\x02\x02\u0251\u0250\x03\x02\x02\x02\u0251\u0252\x03\x02\x02" +
-		"\x02\u0252\u0254\x03\x02\x02\x02\u0253\u0248\x03\x02\x02\x02\u0253\u0254" +
-		"\x03\x02\x02\x02\u0254\u0255\x03\x02\x02\x02\u0255\u0256\x07)\x02\x02" +
-		"\u0256c\x03\x02\x02\x02\u0257\u0259\x05\xAAV\x02\u0258\u0257\x03\x02\x02" +
-		"\x02\u0258\u0259\x03\x02\x02\x02\u0259\u025A\x03\x02\x02\x02\u025A\u025C" +
-		"\x05\xA8U\x02\u025B\u025D\x07,\x02\x02\u025C\u025B\x03\x02\x02\x02\u025C" +
-		"\u025D\x03\x02\x02\x02\u025D\u025E\x03\x02\x02\x02\u025E\u025F\x07.\x02" +
-		"\x02\u025F\u0260\x05f4\x02\u0260e\x03\x02\x02\x02\u0261\u0262\b4\x01\x02" +
-		"\u0262\u0272\x05l7\x02\u0263\u0264\x07$\x02\x02\u0264\u0269\x05f4\x02" +
-		"\u0265\u0266\x07+\x02\x02\u0266\u0268\x05f4\x02\u0267\u0265\x03\x02\x02" +
-		"\x02\u0268\u026B\x03\x02\x02\x02\u0269\u0267\x03\x02\x02\x02\u0269\u026A" +
-		"\x03\x02\x02\x02\u026A\u026C\x03\x02\x02\x02\u026B\u0269\x03\x02\x02\x02" +
-		"\u026C\u026D\x07%\x02\x02\u026D\u0272\x03\x02\x02\x02\u026E\u026F\x07" +
-		"3\x02\x02\u026F\u0272\x05f4\x05\u0270\u0272\x05n8\x02\u0271\u0261\x03" +
-		"\x02\x02\x02\u0271\u0263\x03\x02\x02\x02\u0271\u026E\x03\x02\x02\x02\u0271" +
-		"\u0270\x03\x02\x02\x02\u0272\u027F\x03\x02\x02\x02\u0273\u0274\f\t\x02" +
-		"\x02\u0274\u027E\x05h5\x02\u0275\u0276\f\x07\x02\x02\u0276\u027E\x07," +
-		"\x02\x02\u0277\u0278\f\x06\x02\x02\u0278\u0279\x07&\x02\x02\u0279\u027E" +
-		"\x07\'\x02\x02\u027A\u027B\f\x04\x02\x02\u027B\u027C\x070\x02\x02\u027C" +
-		"\u027E\x05\xA8U\x02\u027D\u0273\x03\x02\x02\x02\u027D\u0275\x03\x02\x02" +
-		"\x02\u027D\u0277\x03\x02\x02\x02\u027D\u027A\x03\x02\x02\x02\u027E\u0281" +
-		"\x03\x02\x02\x02\u027F\u027D\x03\x02\x02\x02\u027F\u0280\x03\x02\x02\x02" +
-		"\u0280g\x03\x02\x02\x02\u0281\u027F\x03\x02\x02\x02\u0282\u0283\x07E\x02" +
-		"\x02\u0283\u0288\x05f4\x02\u0284\u0285\x07+\x02\x02\u0285\u0287\x05f4" +
-		"\x02\u0286\u0284\x03\x02\x02\x02\u0287\u028A\x03\x02\x02\x02\u0288\u0286" +
-		"\x03\x02\x02\x02\u0288\u0289\x03\x02\x02\x02\u0289\u028B\x03\x02\x02\x02" +
-		"\u028A\u0288\x03\x02\x02\x02\u028B\u028C\x07G\x02\x02\u028Ci\x03\x02\x02" +
-		"\x02\u028D\u0292\x05\xA8U\x02\u028E\u028F\x07/\x02\x02\u028F\u0291\x05" +
-		"\xA8U\x02\u0290\u028E\x03\x02\x02\x02\u0291\u0294\x03\x02\x02\x02\u0292" +
-		"\u0290\x03\x02\x02\x02\u0292\u0293\x03\x02\x02\x02\u0293k\x03\x02\x02" +
-		"\x02\u0294\u0292\x03\x02\x02\x02\u0295\u0297\x07/\x02\x02\u0296\u0295" +
-		"\x03\x02\x02\x02\u0296\u0297\x03\x02\x02\x02\u0297\u0298\x03\x02\x02\x02" +
-		"\u0298\u0299\x05j6\x02\u0299m\x03\x02\x02\x02\u029A\u029E\x05p9\x02\u029B" +
-		"\u029E\x05r:\x02\u029C\u029E\x05v<\x02\u029D\u029A\x03\x02\x02\x02\u029D" +
-		"\u029B\x03\x02\x02\x02\u029D\u029C\x03\x02\x02\x02\u029Eo\x03\x02\x02" +
-		"\x02\u029F\u02A1\x05\xAAV\x02\u02A0\u029F\x03\x02\x02\x02\u02A0\u02A1" +
-		"\x03\x02\x02\x02\u02A1\u02A2\x03\x02\x02\x02\u02A2\u02A3\x07\x1F\x02\x02" +
-		"\u02A3\u02A4\x05V,\x02\u02A4q\x03\x02\x02\x02\u02A5\u02A7\x05\xAAV\x02" +
-		"\u02A6\u02A5\x03\x02\x02\x02\u02A6\u02A7\x03\x02\x02\x02\u02A7\u02A8\x03" +
-		"\x02\x02\x02\u02A8\u02A9\x07 \x02\x02\u02A9\u02AA\x05\xA8U\x02\u02AA\u02AB" +
-		"\x07(\x02\x02\u02AB\u02AC\x05t;\x02\u02AC\u02AD\x07)\x02\x02\u02ADs\x03" +
-		"\x02\x02\x02\u02AE\u02B5\x05V,\x02\u02AF\u02B1\x07+\x02\x02\u02B0\u02AF" +
-		"\x03\x02\x02\x02\u02B0\u02B1\x03\x02\x02\x02\u02B1\u02B2\x03\x02\x02\x02" +
-		"\u02B2\u02B4\x05V,\x02\u02B3\u02B0\x03\x02\x02\x02\u02B4\u02B7\x03\x02" +
-		"\x02\x02\u02B5\u02B3\x03\x02\x02\x02\u02B5\u02B6\x03\x02\x02\x02\u02B6" +
-		"\u02B9\x03\x02\x02\x02\u02B7\u02B5\x03\x02\x02\x02\u02B8\u02BA\x07+\x02" +
-		"\x02\u02B9\u02B8\x03\x02\x02\x02\u02B9\u02BA\x03\x02\x02\x02\u02BA\u02BC" +
-		"\x03\x02\x02\x02\u02BB\u02AE\x03\x02\x02\x02\u02BB\u02BC\x03\x02\x02\x02" +
-		"\u02BCu\x03\x02\x02\x02\u02BD\u02BF\x05\xAAV\x02\u02BE\u02BD\x03\x02\x02" +
-		"\x02\u02BE\u02BF\x03\x02\x02\x02\u02BF\u02C0\x03\x02\x02\x02\u02C0\u02C1" +
-		"\x07!\x02\x02\u02C1\u02C2\x05\xA8U\x02\u02C2\u02C3\x078\x02\x02\u02C3" +
-		"\u02C4\x05f4\x02\u02C4w\x03\x02\x02\x02\u02C5\u02C6\x05\xA8U\x02\u02C6" +
-		"\u02C8\x05~@\x02\u02C7\u02C9\x05|?\x02\u02C8\u02C7\x03\x02\x02\x02\u02C8" +
-		"\u02C9\x03\x02\x02\x02\u02C9y\x03\x02\x02\x02\u02CA\u02CB\x05\xA8U\x02" +
-		"\u02CB\u02CD\x05~@\x02\u02CC\u02CE\x05|?\x02\u02CD\u02CC\x03\x02\x02\x02" +
-		"\u02CD\u02CE\x03\x02\x02\x02\u02CE\u02CF\x03\x02\x02\x02\u02CF\u02D0\x05" +
-		"\x84C\x02\u02D0{\x03\x02\x02\x02\u02D1\u02D2\x074\x02\x02\u02D2\u02D3" +
-		"\x05f4\x02\u02D3}\x03\x02\x02\x02\u02D4\u02D6\x07$\x02\x02\u02D5\u02D7" +
-		"\x05\x80A\x02\u02D6\u02D5\x03\x02\x02\x02\u02D6\u02D7\x03\x02\x02\x02" +
-		"\u02D7\u02D8\x03\x02\x02\x02\u02D8\u02D9\x07%\x02\x02\u02D9\x7F\x03\x02" +
-		"\x02\x02\u02DA\u02DF\x05\x82B\x02\u02DB\u02DC\x07+\x02\x02\u02DC\u02DE" +
-		"\x05\x82B\x02\u02DD\u02DB\x03\x02\x02\x02\u02DE\u02E1\x03\x02\x02\x02" +
-		"\u02DF\u02DD\x03\x02\x02\x02\u02DF\u02E0\x03\x02\x02\x02\u02E0\x81\x03" +
-		"\x02\x02\x02\u02E1\u02DF\x03\x02\x02\x02\u02E2\u02E4\x05\xA8U\x02\u02E3" +
-		"\u02E5\x07,\x02\x02\u02E4\u02E3\x03\x02\x02\x02\u02E4\u02E5\x03\x02\x02" +
-		"\x02\u02E5\u02E6\x03\x02\x02\x02\u02E6\u02E7\x07.\x02\x02\u02E7\u02E8" +
-		"\x05f4\x02\u02E8\x83\x03\x02\x02\x02\u02E9\u02ED\x07(\x02\x02\u02EA\u02EC" +
-		"\x05\x86D\x02\u02EB\u02EA\x03\x02\x02\x02\u02EC\u02EF\x03\x02\x02\x02" +
-		"\u02ED\u02EB\x03\x02\x02\x02\u02ED\u02EE\x03\x02\x02\x02\u02EE\u02F0\x03" +
-		"\x02\x02\x02\u02EF\u02ED\x03\x02\x02\x02\u02F0\u02F4\x07)\x02\x02\u02F1" +
-		"\u02F2\x075\x02\x02\u02F2\u02F4\x05\x86D\x02\u02F3\u02E9\x03\x02\x02\x02" +
-		"\u02F3\u02F1\x03\x02\x02\x02\u02F4\x85\x03\x02\x02\x02\u02F5\u0306\x05" +
-		"\x88E\x02\u02F6\u02F7\x05\x8CG\x02\u02F7\u02F8\t\x02\x02\x02\u02F8\u02F9" +
-		"\x05\x8CG\x02\u02F9\u0306\x03\x02\x02\x02\u02FA\u0306\x05\x96L\x02\u02FB" +
-		"\u0306\x05\x9EP\x02\u02FC\u02FD\x07\x0E\x02\x02\u02FD\u0306\x05\x8CG\x02" +
-		"\u02FE\u02FF\x07\"\x02\x02\u02FF\u0306\x05\x8CG\x02\u0300\u0301\x07\x1E" +
-		"\x02\x02\u0301\u0306\x05\x8CG\x02\u0302\u0303\x07\x1D\x02\x02\u0303\u0306" +
-		"\x05\x8CG\x02\u0304\u0306\x05\x8CG\x02\u0305\u02F5\x03\x02\x02\x02\u0305" +
-		"\u02F6\x03\x02\x02\x02\u0305\u02FA\x03\x02\x02\x02\u0305\u02FB\x03\x02" +
-		"\x02\x02\u0305\u02FC\x03\x02\x02\x02\u0305\u02FE\x03\x02\x02\x02\u0305" +
-		"\u0300\x03\x02\x02\x02\u0305\u0302\x03\x02\x02\x02\u0305\u0304\x03\x02" +
-		"\x02\x02\u0306\x87\x03\x02\x02\x02\u0307\u0308\x07\x1C\x02\x02\u0308\u0309" +
-		"\x05\x8AF\x02\u0309\u030A\x078\x02\x02\u030A\u030B\x05\x8CG\x02\u030B" +
-		"\x89\x03\x02\x02\x02\u030C\u030F\x05\xA8U\x02\u030D\u030E\x07.\x02\x02" +
-		"\u030E\u0310\x05f4\x02\u030F\u030D\x03\x02\x02\x02\u030F\u0310\x03\x02" +
-		"\x02\x02\u0310\u0327\x03\x02\x02\x02\u0311\u0312\x07(\x02\x02\u0312\u0313" +
-		"\x05\xA0Q\x02\u0313\u0314\x07)\x02\x02\u0314\u0327\x03\x02\x02\x02\u0315" +
-		"\u0316\x07$\x02\x02\u0316\u031C\x05\xA0Q\x02\u0317\u0318\x07+\x02\x02" +
-		"\u0318\u0319\x07*\x02\x02\u0319\u031A\x07*\x02\x02\u031A\u031B\x07*\x02" +
-		"\x02\u031B\u031D\x05\xA0Q\x02\u031C\u0317\x03\x02\x02\x02\u031C\u031D" +
-		"\x03\x02\x02\x02\u031D\u031E\x03\x02\x02\x02\u031E\u031F\x07)\x02\x02" +
-		"\u031F\u0327\x03\x02\x02\x02\u0320\u0321\x07$\x02\x02\u0321\u0322\x07" +
-		"+\x02\x02\u0322\u0323\x07*\x02\x02\u0323\u0324\x07*\x02\x02\u0324\u0325" +
-		"\x07*\x02\x02\u0325\u0327\x05\xA0Q\x02\u0326\u030C\x03\x02\x02\x02\u0326" +
-		"\u0311\x03\x02\x02\x02\u0326\u0315\x03\x02\x02\x02\u0326\u0320\x03\x02" +
-		"\x02\x02\u0327\x8B\x03\x02\x02\x02\u0328\u0329\bG\x01\x02\u0329\u032A" +
-		"\x07$\x02\x02\u032A\u032B\x05\x8CG\x02\u032B\u032C\x07%\x02\x02\u032C" +
-		"\u0334\x03\x02\x02\x02\u032D\u032E\t\x03\x02\x02\u032E\u0334\x05\x8CG" +
-		"\r\u032F\u0334\x05\x96L\x02\u0330\u0331\x07\x0F\x02\x02\u0331\u0334\x05" +
-		"\x8CG\x04\u0332\u0334\x05\x8EH\x02\u0333\u0328\x03\x02\x02\x02\u0333\u032D" +
-		"\x03\x02\x02\x02\u0333\u032F\x03\x02\x02\x02\u0333\u0330\x03\x02\x02\x02" +
-		"\u0333\u0332\x03\x02\x02\x02\u0334\u0360\x03\x02\x02\x02\u0335\u0336\f" +
-		"\f\x02\x02\u0336\u0337\x07I\x02\x02\u0337\u035F\x05\x8CG\r\u0338\u0339" +
-		"\f\v\x02\x02\u0339\u033A\t\x04\x02\x02\u033A\u035F\x05\x8CG\f\u033B\u033C" +
-		"\f\n\x02\x02\u033C\u033D\t\x05\x02\x02\u033D\u035F\x05\x8CG\v\u033E\u033F" +
-		"\f\t\x02\x02\u033F\u0340\t\x06\x02\x02\u0340\u035F\x05\x8CG\n\u0341\u0342" +
-		"\f\b\x02\x02\u0342\u0343\t\x07\x02\x02\u0343\u035F\x05\x8CG\t\u0344\u0345" +
-		"\f\x07\x02\x02\u0345\u0346\x07\x18\x02\x02\u0346\u035F\x05\x8CG\b\u0347" +
-		"\u0348\f\x06\x02\x02\u0348\u0349\x07\x19\x02\x02\u0349\u035F\x05\x8CG" +
-		"\x07\u034A\u034B\f\x11\x02\x02\u034B\u034C\x07*\x02\x02\u034C\u035F\x05" +
-		"\xA8U\x02\u034D\u034E\f\x10\x02\x02\u034E\u034F\x07&\x02\x02\u034F\u0350" +
-		"\x05\x8CG\x02\u0350\u0351\x07\'\x02\x02\u0351\u035F\x03\x02\x02\x02\u0352" +
-		"\u0353\f\x0F\x02\x02\u0353\u0355\x07$\x02\x02\u0354\u0356\x05\xA2R\x02" +
-		"\u0355\u0354\x03\x02\x02\x02\u0355\u0356\x03\x02\x02\x02\u0356\u0357\x03" +
-		"\x02\x02\x02\u0357\u035F\x07%\x02\x02\u0358\u0359\f\x0E\x02\x02\u0359" +
-		"\u035B\x07$\x02\x02\u035A\u035C\x05\xA4S\x02\u035B\u035A\x03\x02\x02\x02" +
-		"\u035B\u035C\x03\x02\x02\x02\u035C\u035D\x03\x02\x02\x02\u035D\u035F\x07" +
-		"%\x02\x02\u035E\u0335\x03\x02\x02\x02\u035E\u0338\x03\x02\x02\x02\u035E" +
-		"\u033B\x03\x02\x02\x02\u035E\u033E\x03\x02\x02\x02\u035E\u0341\x03\x02" +
-		"\x02\x02\u035E\u0344\x03\x02\x02\x02\u035E\u0347\x03\x02\x02\x02\u035E" +
-		"\u034A\x03\x02\x02\x02\u035E\u034D\x03\x02\x02\x02\u035E\u0352\x03\x02" +
-		"\x02\x02\u035E\u0358\x03\x02\x02\x02\u035F\u0362\x03\x02\x02\x02\u0360" +
-		"\u035E\x03\x02\x02\x02\u0360\u0361\x03\x02\x02\x02\u0361\x8D\x03\x02\x02" +
-		"\x02\u0362\u0360\x03\x02\x02\x02\u0363\u0364\x07$\x02\x02\u0364\u0376" +
-		"\x07%\x02\x02\u0365\u0376\x05\x90I\x02\u0366\u0367\x05l7\x02\u0367\u0368" +
-		"\x07$\x02\x02\u0368\u0369\x05\xA2R\x02\u0369\u036A\x07%\x02\x02\u036A" +
-		"\u0376\x03\x02\x02\x02\u036B\u036C\x07&\x02\x02\u036C\u036D\x05\xA2R\x02" +
-		"\u036D\u036E\x07\'\x02\x02\u036E\u0376\x03\x02\x02\x02\u036F\u0376\x07" +
-		"K\x02\x02\u0370\u0376\x07L\x02\x02\u0371\u0376\x07M\x02\x02\u0372\u0376" +
-		"\x07\x1A\x02\x02\u0373\u0376\x07\x1B\x02\x02\u0374\u0376\x05\xA8U\x02" +
-		"\u0375\u0363\x03\x02\x02\x02\u0375\u0365\x03\x02\x02\x02\u0375\u0366\x03" +
-		"\x02\x02\x02\u0375\u036B\x03\x02\x02\x02\u0375\u036F\x03\x02\x02\x02\u0375" +
-		"\u0370\x03\x02\x02\x02\u0375\u0371\x03\x02\x02\x02\u0375\u0372\x03\x02" +
-		"\x02\x02\u0375\u0373\x03\x02\x02\x02\u0375\u0374\x03\x02\x02\x02\u0376" +
-		"\x8F\x03\x02\x02\x02\u0377\u0378\x05l7\x02\u0378\u037A\x07(\x02\x02\u0379" +
-		"\u037B\x05\x92J\x02\u037A\u0379\x03\x02\x02\x02\u037A\u037B\x03\x02\x02" +
-		"\x02\u037B\u037C\x03\x02\x02\x02\u037C\u037D\x07)\x02\x02\u037D\x91\x03" +
-		"\x02\x02\x02\u037E\u0383\x05\x94K\x02\u037F\u0380\x07+\x02\x02\u0380\u0382" +
-		"\x05\x94K\x02\u0381\u037F\x03\x02\x02\x02\u0382\u0385\x03\x02\x02\x02" +
-		"\u0383\u0381\x03\x02\x02\x02\u0383\u0384\x03\x02\x02\x02\u0384\u0387\x03" +
-		"\x02\x02\x02\u0385\u0383\x03\x02\x02\x02\u0386\u0388\x07+\x02\x02\u0387" +
-		"\u0386\x03\x02\x02\x02\u0387\u0388\x03\x02\x02\x02\u0388\x93\x03\x02\x02" +
-		"\x02\u0389\u038A\x05\xA8U\x02\u038A\u038B\x07.\x02\x02\u038B\u038C\x05" +
-		"\x8CG\x02\u038C\x95\x03\x02\x02\x02\u038D\u038F\x05\x98M\x02\u038E\u0390" +
-		"\x05\x9AN\x02\u038F\u038E\x03\x02\x02\x02\u038F\u0390\x03\x02\x02\x02" +
-		"\u0390\u0392\x03\x02\x02\x02\u0391\u0393\x05\x9CO\x02\u0392\u0391\x03" +
-		"\x02\x02\x02\u0392\u0393\x03\x02\x02\x02\u0393\x97\x03\x02\x02\x02\u0394" +
-		"\u0395\x07\x16\x02\x02\u0395\u0396\x05\x8CG\x02\u0396\u0397\x05\x84C\x02" +
-		"\u0397\u039D\x03\x02\x02\x02\u0398\u0399\x07\x16\x02\x02\u0399\u039A\x05" +
-		"\x88E\x02\u039A\u039B\x05\x84C\x02\u039B\u039D\x03\x02\x02\x02\u039C\u0394" +
-		"\x03\x02\x02\x02\u039C\u0398\x03\x02\x02\x02\u039D\x99\x03\x02\x02\x02" +
-		"\u039E\u039F\x07\x17\x02\x02\u039F\u03A1\x05\x98M\x02\u03A0\u039E\x03" +
-		"\x02\x02\x02\u03A1\u03A2\x03\x02\x02\x02\u03A2\u03A0\x03\x02\x02\x02\u03A2" +
-		"\u03A3\x03\x02\x02\x02\u03A3\x9B\x03\x02\x02\x02\u03A4\u03A5\x07\x17\x02" +
-		"\x02\u03A5\u03A6\x05\x84C\x02\u03A6\x9D\x03\x02\x02\x02\u03A7\u03A8\x07" +
-		"\x11\x02\x02\u03A8\u03A9\x05\x8AF\x02\u03A9\u03AA\x07\x12\x02\x02\u03AA" +
-		"\u03AB\x05\x8CG\x02\u03AB\u03AC\x05\x84C\x02\u03AC\u03B3\x03\x02\x02\x02" +
-		"\u03AD\u03AE\x07\x11\x02\x02\u03AE\u03AF\x05\x8CG\x02\u03AF\u03B0\x07" +
-		"\x15\x02\x02\u03B0\u03B1\x05\x84C\x02\u03B1\u03B3\x03\x02\x02\x02\u03B2" +
-		"\u03A7\x03\x02\x02\x02\u03B2\u03AD\x03\x02\x02\x02\u03B3\x9F\x03\x02\x02" +
-		"\x02\u03B4\u03B9\x05\xA8U\x02\u03B5\u03B6\x07+\x02\x02\u03B6\u03B8\x05" +
-		"\xA8U\x02\u03B7\u03B5\x03\x02\x02\x02\u03B8\u03BB\x03\x02\x02\x02\u03B9" +
-		"\u03B7\x03\x02\x02\x02\u03B9\u03BA\x03\x02\x02\x02\u03BA\xA1\x03\x02\x02" +
-		"\x02\u03BB\u03B9\x03\x02\x02\x02\u03BC\u03C1\x05\x8CG\x02\u03BD\u03BE" +
-		"\x07+\x02\x02\u03BE\u03C0\x05\x8CG\x02\u03BF\u03BD\x03\x02\x02\x02\u03C0" +
-		"\u03C3\x03\x02\x02\x02\u03C1\u03BF\x03\x02\x02\x02\u03C1\u03C2\x03\x02" +
-		"\x02\x02\u03C2\xA3\x03\x02\x02\x02\u03C3\u03C1\x03\x02\x02\x02\u03C4\u03C9" +
-		"\x05\xA6T\x02\u03C5\u03C6\x07+\x02\x02\u03C6\u03C8\x05\xA6T\x02\u03C7" +
-		"\u03C5\x03\x02\x02\x02\u03C8\u03CB\x03\x02\x02\x02\u03C9\u03C7\x03\x02" +
-		"\x02\x02\u03C9\u03CA\x03\x02\x02\x02\u03CA\xA5\x03\x02\x02\x02\u03CB\u03C9" +
-		"\x03\x02\x02\x02\u03CC\u03CD\x05\xA8U\x02\u03CD\u03CE\x07.\x02\x02\u03CE" +
-		"\u03CF\x05\x8CG\x02\u03CF\xA7\x03\x02\x02\x02\u03D0\u03D3\x07J\x02\x02" +
-		"\u03D1\u03D3\x05\xACW\x02\u03D2\u03D0\x03\x02\x02\x02\u03D2\u03D1\x03" +
-		"\x02\x02\x02\u03D3\xA9\x03\x02\x02\x02\u03D4\u03D6\t\b\x02\x02\u03D5\u03D4" +
-		"\x03\x02\x02\x02\u03D6\u03D7\x03\x02\x02\x02\u03D7\u03D5\x03\x02\x02\x02" +
-		"\u03D7\u03D8\x03\x02\x02\x02\u03D8\xAB\x03\x02\x02\x02\u03D9\u03DA\t\t" +
-		"\x02\x02\u03DA\xAD\x03\x02\x02\x02o\xAF\xB4\xBC\xBF\xC5\xC9\xD2\xDA\xDD" +
-		"\xE5\xE9\xF0\xFA\u010D\u0114\u011B\u0124\u0136\u0145\u0148\u0152\u0158" +
-		"\u015D\u0167\u016D\u0172\u0177\u017B\u0182\u0188\u018C\u018F\u019D\u01A3" +
-		"\u01A9\u01AE\u01B3\u01B8\u01BB\u01C5\u01CB\u01D0\u01DA\u01E0\u01E5\u01EF" +
-		"\u01F5\u01FA\u0204\u020A\u020F\u0214\u0219\u021E\u0223\u0228\u0235\u0240" +
-		"\u0243\u024D\u0251\u0253\u0258\u025C\u0269\u0271\u027D\u027F\u0288\u0292" +
-		"\u0296\u029D\u02A0\u02A6\u02B0\u02B5\u02B9\u02BB\u02BE\u02C8\u02CD\u02D6" +
-		"\u02DF\u02E4\u02ED\u02F3\u0305\u030F\u031C\u0326\u0333\u0355\u035B\u035E" +
-		"\u0360\u0375\u037A\u0383\u0387\u038F\u0392\u039C\u03A2\u03B2\u03B9\u03C1" +
-		"\u03C9\u03D2\u03D7";
+		"\u01D1\u01CF\x03\x02\x02\x02\u01D1\u01D2\x03\x02\x02\x02\u01D2\u01D4\x03" +
+		"\x02\x02\x02\u01D3\u01D1\x03\x02\x02\x02\u01D4\u01D5\x07)\x02\x02\u01D5" +
+		"C\x03\x02\x02\x02\u01D6\u01D8\x05\xAAV\x02\u01D7\u01D6\x03\x02\x02\x02" +
+		"\u01D7\u01D8\x03\x02\x02\x02\u01D8\u01D9\x03\x02\x02\x02\u01D9\u01DA\x05" +
+		"x=\x02\u01DAE\x03\x02\x02\x02\u01DB\u01DD\x05\xAAV\x02\u01DC\u01DB\x03" +
+		"\x02\x02\x02\u01DC\u01DD\x03\x02\x02\x02\u01DD\u01DE\x03\x02\x02\x02\u01DE" +
+		"\u01DF\x07\x0F\x02\x02\u01DF\u01E0\x05z>\x02\u01E0G\x03\x02\x02\x02\u01E1" +
+		"\u01E2\x07\x0F\x02\x02\u01E2\u01E6\x07(\x02\x02\u01E3\u01E5\x05J&\x02" +
+		"\u01E4\u01E3\x03\x02\x02\x02\u01E5\u01E8\x03\x02\x02\x02\u01E6\u01E4\x03" +
+		"\x02\x02\x02\u01E6\u01E7\x03\x02\x02\x02\u01E7\u01E9\x03\x02\x02\x02\u01E8" +
+		"\u01E6\x03\x02\x02\x02\u01E9\u01EA\x07)\x02\x02\u01EAI\x03\x02\x02\x02" +
+		"\u01EB\u01ED\x05\xAAV\x02\u01EC\u01EB\x03\x02\x02\x02\u01EC\u01ED\x03" +
+		"\x02\x02\x02\u01ED\u01EE\x03\x02\x02\x02\u01EE\u01EF\x05z>\x02\u01EFK" +
+		"\x03\x02\x02\x02\u01F0\u01F2\x05\xAAV\x02\u01F1\u01F0\x03\x02\x02\x02" +
+		"\u01F1\u01F2\x03\x02\x02\x02\u01F2\u01F3\x03\x02\x02\x02\u01F3\u01F4\x07" +
+		"\x0F\x02\x02\u01F4\u01F5\x05x=\x02\u01F5M\x03\x02\x02\x02\u01F6\u01F7" +
+		"\x07\x0F\x02\x02\u01F7\u01FB\x07(\x02\x02\u01F8\u01FA\x05P)\x02\u01F9" +
+		"\u01F8\x03\x02\x02\x02\u01FA\u01FD\x03\x02\x02\x02\u01FB\u01F9\x03\x02" +
+		"\x02\x02\u01FB\u01FC\x03\x02\x02\x02\u01FC\u01FE\x03\x02\x02\x02\u01FD" +
+		"\u01FB\x03\x02\x02\x02\u01FE\u01FF\x07)\x02\x02\u01FFO\x03\x02\x02\x02" +
+		"\u0200\u0202\x05\xAAV\x02\u0201\u0200\x03\x02\x02\x02\u0201\u0202\x03" +
+		"\x02\x02\x02\u0202\u0203\x03\x02\x02\x02\u0203\u0204\x05x=\x02\u0204Q" +
+		"\x03\x02\x02\x02\u0205\u0207\x05\xAAV\x02\u0206\u0205\x03\x02\x02\x02" +
+		"\u0206\u0207\x03\x02\x02\x02\u0207\u0208\x03\x02\x02\x02\u0208\u0209\x07" +
+		"\x10\x02\x02\u0209\u020B\x05~@\x02\u020A\u020C\x05|?\x02\u020B\u020A\x03" +
+		"\x02\x02\x02\u020B\u020C\x03\x02\x02\x02\u020C\u020D\x03\x02\x02\x02\u020D" +
+		"\u020E\x05\x84C\x02\u020ES\x03\x02\x02\x02\u020F\u0211\x05\xAAV\x02\u0210" +
+		"\u020F\x03\x02\x02\x02\u0210\u0211\x03\x02\x02\x02\u0211\u0212\x03\x02" +
+		"\x02\x02\u0212\u0213\x07\x10\x02\x02\u0213\u0215\x05~@\x02\u0214\u0216" +
+		"\x05|?\x02\u0215\u0214\x03\x02\x02\x02\u0215\u0216\x03\x02\x02\x02\u0216" +
+		"U\x03\x02\x02\x02\u0217\u021B\x05X-\x02\u0218\u021B\x05Z.\x02\u0219\u021B" +
+		"\x05\\/\x02\u021A\u0217\x03\x02\x02\x02\u021A\u0218\x03\x02\x02\x02\u021A" +
+		"\u0219\x03\x02\x02\x02\u021BW\x03\x02\x02\x02\u021C\u021F\x05\xA8U\x02" +
+		"\u021D\u0220\x05`1\x02\u021E\u0220\x05b2\x02\u021F\u021D\x03\x02\x02\x02" +
+		"\u021F\u021E\x03\x02\x02\x02\u0220Y\x03\x02\x02\x02\u0221\u0222\x05\xA8" +
+		"U\x02\u0222\u0223\x05^0\x02\u0223[\x03\x02\x02\x02\u0224\u0225\x05\xA8" +
+		"U\x02\u0225]\x03\x02\x02\x02\u0226\u0227\x07$\x02\x02\u0227\u022C\x05" +
+		"f4\x02\u0228\u0229\x07+\x02\x02\u0229\u022B\x05f4\x02\u022A\u0228\x03" +
+		"\x02\x02\x02\u022B\u022E\x03\x02\x02\x02\u022C\u022A\x03\x02\x02\x02\u022C" +
+		"\u022D\x03\x02\x02\x02\u022D\u022F\x03\x02\x02\x02\u022E\u022C\x03\x02" +
+		"\x02\x02\u022F\u0230\x07%\x02\x02\u0230_\x03\x02\x02\x02\u0231\u023A\x07" +
+		"$\x02\x02\u0232\u0237\x05d3\x02\u0233\u0234\x07+\x02\x02\u0234\u0236\x05" +
+		"d3\x02\u0235\u0233\x03\x02\x02\x02\u0236\u0239\x03\x02\x02\x02\u0237\u0235" +
+		"\x03\x02\x02\x02\u0237\u0238\x03\x02\x02\x02\u0238\u023B\x03\x02\x02\x02" +
+		"\u0239\u0237\x03\x02\x02\x02\u023A\u0232\x03\x02\x02\x02\u023A\u023B\x03" +
+		"\x02\x02\x02\u023B\u023C\x03\x02\x02\x02\u023C\u023D\x07%\x02\x02\u023D" +
+		"a\x03\x02\x02\x02\u023E\u024A\x07(\x02\x02\u023F\u0244\x05d3\x02\u0240" +
+		"\u0241\x07+\x02\x02\u0241\u0243\x05d3\x02\u0242\u0240\x03\x02\x02\x02" +
+		"\u0243\u0246\x03\x02\x02\x02\u0244\u0242\x03\x02\x02\x02\u0244\u0245\x03" +
+		"\x02\x02\x02\u0245\u0248\x03\x02\x02\x02\u0246\u0244\x03\x02\x02\x02\u0247" +
+		"\u0249\x07+\x02\x02\u0248\u0247\x03\x02\x02\x02\u0248\u0249\x03\x02\x02" +
+		"\x02\u0249\u024B\x03\x02\x02\x02\u024A\u023F\x03\x02\x02\x02\u024A\u024B" +
+		"\x03\x02\x02\x02\u024B\u024C\x03\x02\x02\x02\u024C\u024D\x07)\x02\x02" +
+		"\u024Dc\x03\x02\x02\x02\u024E\u0250\x05\xAAV\x02\u024F\u024E\x03\x02\x02" +
+		"\x02\u024F\u0250\x03\x02\x02\x02\u0250\u0251\x03\x02\x02\x02\u0251\u0253" +
+		"\x05\xA8U\x02\u0252\u0254\x07,\x02\x02\u0253\u0252\x03\x02\x02\x02\u0253" +
+		"\u0254\x03\x02\x02\x02\u0254\u0255\x03\x02\x02\x02\u0255\u0256\x07.\x02" +
+		"\x02\u0256\u0257\x05f4\x02\u0257e\x03\x02\x02\x02\u0258\u0259\b4\x01\x02" +
+		"\u0259\u0269\x05l7\x02\u025A\u025B\x07$\x02\x02\u025B\u0260\x05f4\x02" +
+		"\u025C\u025D\x07+\x02\x02\u025D\u025F\x05f4\x02\u025E\u025C\x03\x02\x02" +
+		"\x02\u025F\u0262\x03\x02\x02\x02\u0260\u025E\x03\x02\x02\x02\u0260\u0261" +
+		"\x03\x02\x02\x02\u0261\u0263\x03\x02\x02\x02\u0262\u0260\x03\x02\x02\x02" +
+		"\u0263\u0264\x07%\x02\x02\u0264\u0269\x03\x02\x02\x02\u0265\u0266\x07" +
+		"3\x02\x02\u0266\u0269\x05f4\x05\u0267\u0269\x05n8\x02\u0268\u0258\x03" +
+		"\x02\x02\x02\u0268\u025A\x03\x02\x02\x02\u0268\u0265\x03\x02\x02\x02\u0268" +
+		"\u0267\x03\x02\x02\x02\u0269\u0276\x03\x02\x02\x02\u026A\u026B\f\t\x02" +
+		"\x02\u026B\u0275\x05h5\x02\u026C\u026D\f\x07\x02\x02\u026D\u0275\x07," +
+		"\x02\x02\u026E\u026F\f\x06\x02\x02\u026F\u0270\x07&\x02\x02\u0270\u0275" +
+		"\x07\'\x02\x02\u0271\u0272\f\x04\x02\x02\u0272\u0273\x070\x02\x02\u0273" +
+		"\u0275\x05\xA8U\x02\u0274\u026A\x03\x02\x02\x02\u0274\u026C\x03\x02\x02" +
+		"\x02\u0274\u026E\x03\x02\x02\x02\u0274\u0271\x03\x02\x02\x02\u0275\u0278" +
+		"\x03\x02\x02\x02\u0276\u0274\x03\x02\x02\x02\u0276\u0277\x03\x02\x02\x02" +
+		"\u0277g\x03\x02\x02\x02\u0278\u0276\x03\x02\x02\x02\u0279\u027A\x07E\x02" +
+		"\x02\u027A\u027F\x05f4\x02\u027B\u027C\x07+\x02\x02\u027C\u027E\x05f4" +
+		"\x02\u027D\u027B\x03\x02\x02\x02\u027E\u0281\x03\x02\x02\x02\u027F\u027D" +
+		"\x03\x02\x02\x02\u027F\u0280\x03\x02\x02\x02\u0280\u0282\x03\x02\x02\x02" +
+		"\u0281\u027F\x03\x02\x02\x02\u0282\u0283\x07G\x02\x02\u0283i\x03\x02\x02" +
+		"\x02\u0284\u0289\x05\xA8U\x02\u0285\u0286\x07/\x02\x02\u0286\u0288\x05" +
+		"\xA8U\x02\u0287\u0285\x03\x02\x02\x02\u0288\u028B\x03\x02\x02\x02\u0289" +
+		"\u0287\x03\x02\x02\x02\u0289\u028A\x03\x02\x02\x02\u028Ak\x03\x02\x02" +
+		"\x02\u028B\u0289\x03\x02\x02\x02\u028C\u028E\x07/\x02\x02\u028D\u028C" +
+		"\x03\x02\x02\x02\u028D\u028E\x03\x02\x02\x02\u028E\u028F\x03\x02\x02\x02" +
+		"\u028F\u0290\x05j6\x02\u0290m\x03\x02\x02\x02\u0291\u0295\x05p9\x02\u0292" +
+		"\u0295\x05r:\x02\u0293\u0295\x05v<\x02\u0294\u0291\x03\x02\x02\x02\u0294" +
+		"\u0292\x03\x02\x02\x02\u0294\u0293\x03\x02\x02\x02\u0295o\x03\x02\x02" +
+		"\x02\u0296\u0298\x05\xAAV\x02\u0297\u0296\x03\x02\x02\x02\u0297\u0298" +
+		"\x03\x02\x02\x02\u0298\u0299\x03\x02\x02\x02\u0299\u029A\x07\x1F\x02\x02" +
+		"\u029A\u029B\x05V,\x02\u029Bq\x03\x02\x02\x02\u029C\u029E\x05\xAAV\x02" +
+		"\u029D\u029C\x03\x02\x02\x02\u029D\u029E\x03\x02\x02\x02\u029E\u029F\x03" +
+		"\x02\x02\x02\u029F\u02A0\x07 \x02\x02\u02A0\u02A1\x05\xA8U\x02\u02A1\u02A2" +
+		"\x07(\x02\x02\u02A2\u02A3\x05t;\x02\u02A3\u02A4\x07)\x02\x02\u02A4s\x03" +
+		"\x02\x02\x02\u02A5\u02AC\x05V,\x02\u02A6\u02A8\x07+\x02\x02\u02A7\u02A6" +
+		"\x03\x02\x02\x02\u02A7\u02A8\x03\x02\x02\x02\u02A8\u02A9\x03\x02\x02\x02" +
+		"\u02A9\u02AB\x05V,\x02\u02AA\u02A7\x03\x02\x02\x02\u02AB\u02AE\x03\x02" +
+		"\x02\x02\u02AC\u02AA\x03\x02\x02\x02\u02AC\u02AD\x03\x02\x02\x02\u02AD" +
+		"\u02B0\x03\x02\x02\x02\u02AE\u02AC\x03\x02\x02\x02\u02AF\u02B1\x07+\x02" +
+		"\x02\u02B0\u02AF\x03\x02\x02\x02\u02B0\u02B1\x03\x02\x02\x02\u02B1\u02B3" +
+		"\x03\x02\x02\x02\u02B2\u02A5\x03\x02\x02\x02\u02B2\u02B3\x03\x02\x02\x02" +
+		"\u02B3u\x03\x02\x02\x02\u02B4\u02B6\x05\xAAV\x02\u02B5\u02B4\x03\x02\x02" +
+		"\x02\u02B5\u02B6\x03\x02\x02\x02\u02B6\u02B7\x03\x02\x02\x02\u02B7\u02B8" +
+		"\x07!\x02\x02\u02B8\u02B9\x05\xA8U\x02\u02B9\u02BA\x078\x02\x02\u02BA" +
+		"\u02BB\x05f4\x02\u02BBw\x03\x02\x02\x02\u02BC\u02BD\x05\xA8U\x02\u02BD" +
+		"\u02BF\x05~@\x02\u02BE\u02C0\x05|?\x02\u02BF\u02BE\x03\x02\x02\x02\u02BF" +
+		"\u02C0\x03\x02\x02\x02\u02C0y\x03\x02\x02\x02\u02C1\u02C2\x05\xA8U\x02" +
+		"\u02C2\u02C4\x05~@\x02\u02C3\u02C5\x05|?\x02\u02C4\u02C3\x03\x02\x02\x02" +
+		"\u02C4\u02C5\x03\x02\x02\x02\u02C5\u02C6\x03\x02\x02\x02\u02C6\u02C7\x05" +
+		"\x84C\x02\u02C7{\x03\x02\x02\x02\u02C8\u02C9\x074\x02\x02\u02C9\u02CA" +
+		"\x05f4\x02\u02CA}\x03\x02\x02\x02\u02CB\u02CD\x07$\x02\x02\u02CC\u02CE" +
+		"\x05\x80A\x02\u02CD\u02CC\x03\x02\x02\x02\u02CD\u02CE\x03\x02\x02\x02" +
+		"\u02CE\u02CF\x03\x02\x02\x02\u02CF\u02D0\x07%\x02\x02\u02D0\x7F\x03\x02" +
+		"\x02\x02\u02D1\u02D6\x05\x82B\x02\u02D2\u02D3\x07+\x02\x02\u02D3\u02D5" +
+		"\x05\x82B\x02\u02D4\u02D2\x03\x02\x02\x02\u02D5\u02D8\x03\x02\x02\x02" +
+		"\u02D6\u02D4\x03\x02\x02\x02\u02D6\u02D7\x03\x02\x02\x02\u02D7\x81\x03" +
+		"\x02\x02\x02\u02D8\u02D6\x03\x02\x02\x02\u02D9\u02DB\x05\xA8U\x02\u02DA" +
+		"\u02DC\x07,\x02\x02\u02DB\u02DA\x03\x02\x02\x02\u02DB\u02DC\x03\x02\x02" +
+		"\x02\u02DC\u02DD\x03\x02\x02\x02\u02DD\u02DE\x07.\x02\x02\u02DE\u02DF" +
+		"\x05f4\x02\u02DF\x83\x03\x02\x02\x02\u02E0\u02E4\x07(\x02\x02\u02E1\u02E3" +
+		"\x05\x86D\x02\u02E2\u02E1\x03\x02\x02\x02\u02E3\u02E6\x03\x02\x02\x02" +
+		"\u02E4\u02E2\x03\x02\x02\x02\u02E4\u02E5\x03\x02\x02\x02\u02E5\u02E7\x03" +
+		"\x02\x02\x02\u02E6\u02E4\x03\x02\x02\x02\u02E7\u02EB\x07)\x02\x02\u02E8" +
+		"\u02E9\x075\x02\x02\u02E9\u02EB\x05\x86D\x02\u02EA\u02E0\x03\x02\x02\x02" +
+		"\u02EA\u02E8\x03\x02\x02\x02\u02EB\x85\x03\x02\x02\x02\u02EC\u02FD\x05" +
+		"\x88E\x02\u02ED\u02EE\x05\x8CG\x02\u02EE\u02EF\t\x02\x02\x02\u02EF\u02F0" +
+		"\x05\x8CG\x02\u02F0\u02FD\x03\x02\x02\x02\u02F1\u02FD\x05\x96L\x02\u02F2" +
+		"\u02FD\x05\x9EP\x02\u02F3\u02F4\x07\x0E\x02\x02\u02F4\u02FD\x05\x8CG\x02" +
+		"\u02F5\u02F6\x07\"\x02\x02\u02F6\u02FD\x05\x8CG\x02\u02F7\u02F8\x07\x1E" +
+		"\x02\x02\u02F8\u02FD\x05\x8CG\x02\u02F9\u02FA\x07\x1D\x02\x02\u02FA\u02FD" +
+		"\x05\x8CG\x02\u02FB\u02FD\x05\x8CG\x02\u02FC\u02EC\x03\x02\x02\x02\u02FC" +
+		"\u02ED\x03\x02\x02\x02\u02FC\u02F1\x03\x02\x02\x02\u02FC\u02F2\x03\x02" +
+		"\x02\x02\u02FC\u02F3\x03\x02\x02\x02\u02FC\u02F5\x03\x02\x02\x02\u02FC" +
+		"\u02F7\x03\x02\x02\x02\u02FC\u02F9\x03\x02\x02\x02\u02FC\u02FB\x03\x02" +
+		"\x02\x02\u02FD\x87\x03\x02\x02\x02\u02FE\u02FF\x07\x1C\x02\x02\u02FF\u0300" +
+		"\x05\x8AF\x02\u0300\u0301\x078\x02\x02\u0301\u0302\x05\x8CG\x02\u0302" +
+		"\x89\x03\x02\x02\x02\u0303\u0306\x05\xA8U\x02\u0304\u0305\x07.\x02\x02" +
+		"\u0305\u0307\x05f4\x02\u0306\u0304\x03\x02\x02\x02\u0306\u0307\x03\x02" +
+		"\x02\x02\u0307\u031E\x03\x02\x02\x02\u0308\u0309\x07(\x02\x02\u0309\u030A" +
+		"\x05\xA0Q\x02\u030A\u030B\x07)\x02\x02\u030B\u031E\x03\x02\x02\x02\u030C" +
+		"\u030D\x07$\x02\x02\u030D\u0313\x05\xA0Q\x02\u030E\u030F\x07+\x02\x02" +
+		"\u030F\u0310\x07*\x02\x02\u0310\u0311\x07*\x02\x02\u0311\u0312\x07*\x02" +
+		"\x02\u0312\u0314\x05\xA0Q\x02\u0313\u030E\x03\x02\x02\x02\u0313\u0314" +
+		"\x03\x02\x02\x02\u0314\u0315\x03\x02\x02\x02\u0315\u0316\x07)\x02\x02" +
+		"\u0316\u031E\x03\x02\x02\x02\u0317\u0318\x07$\x02\x02\u0318\u0319\x07" +
+		"+\x02\x02\u0319\u031A\x07*\x02\x02\u031A\u031B\x07*\x02\x02\u031B\u031C" +
+		"\x07*\x02\x02\u031C\u031E\x05\xA0Q\x02\u031D\u0303\x03\x02\x02\x02\u031D" +
+		"\u0308\x03\x02\x02\x02\u031D\u030C\x03\x02\x02\x02\u031D\u0317\x03\x02" +
+		"\x02\x02\u031E\x8B\x03\x02\x02\x02\u031F\u0320\bG\x01\x02\u0320\u0321" +
+		"\x07$\x02\x02\u0321\u0322\x05\x8CG\x02\u0322\u0323\x07%\x02\x02\u0323" +
+		"\u032B\x03\x02\x02\x02\u0324\u0325\t\x03\x02\x02\u0325\u032B\x05\x8CG" +
+		"\r\u0326\u032B\x05\x96L\x02\u0327\u0328\x07\x0F\x02\x02\u0328\u032B\x05" +
+		"\x8CG\x04\u0329\u032B\x05\x8EH\x02\u032A\u031F\x03\x02\x02\x02\u032A\u0324" +
+		"\x03\x02\x02\x02\u032A\u0326\x03\x02\x02\x02\u032A\u0327\x03\x02\x02\x02" +
+		"\u032A\u0329\x03\x02\x02\x02\u032B\u0357\x03\x02\x02\x02\u032C\u032D\f" +
+		"\f\x02\x02\u032D\u032E\x07I\x02\x02\u032E\u0356\x05\x8CG\r\u032F\u0330" +
+		"\f\v\x02\x02\u0330\u0331\t\x04\x02\x02\u0331\u0356\x05\x8CG\f\u0332\u0333" +
+		"\f\n\x02\x02\u0333\u0334\t\x05\x02\x02\u0334\u0356\x05\x8CG\v\u0335\u0336" +
+		"\f\t\x02\x02\u0336\u0337\t\x06\x02\x02\u0337\u0356\x05\x8CG\n\u0338\u0339" +
+		"\f\b\x02\x02\u0339\u033A\t\x07\x02\x02\u033A\u0356\x05\x8CG\t\u033B\u033C" +
+		"\f\x07\x02\x02\u033C\u033D\x07\x18\x02\x02\u033D\u0356\x05\x8CG\b\u033E" +
+		"\u033F\f\x06\x02\x02\u033F\u0340\x07\x19\x02\x02\u0340\u0356\x05\x8CG" +
+		"\x07\u0341\u0342\f\x11\x02\x02\u0342\u0343\x07*\x02\x02\u0343\u0356\x05" +
+		"\xA8U\x02\u0344\u0345\f\x10\x02\x02\u0345\u0346\x07&\x02\x02\u0346\u0347" +
+		"\x05\x8CG\x02\u0347\u0348\x07\'\x02\x02\u0348\u0356\x03\x02\x02\x02\u0349" +
+		"\u034A\f\x0F\x02\x02\u034A\u034C\x07$\x02\x02\u034B\u034D\x05\xA2R\x02" +
+		"\u034C\u034B\x03\x02\x02\x02\u034C\u034D\x03\x02\x02\x02\u034D\u034E\x03" +
+		"\x02\x02\x02\u034E\u0356\x07%\x02\x02\u034F\u0350\f\x0E\x02\x02\u0350" +
+		"\u0352\x07$\x02\x02\u0351\u0353\x05\xA4S\x02\u0352\u0351\x03\x02\x02\x02" +
+		"\u0352\u0353\x03\x02\x02\x02\u0353\u0354\x03\x02\x02\x02\u0354\u0356\x07" +
+		"%\x02\x02\u0355\u032C\x03\x02\x02\x02\u0355\u032F\x03\x02\x02\x02\u0355" +
+		"\u0332\x03\x02\x02\x02\u0355\u0335\x03\x02\x02\x02\u0355\u0338\x03\x02" +
+		"\x02\x02\u0355\u033B\x03\x02\x02\x02\u0355\u033E\x03\x02\x02\x02\u0355" +
+		"\u0341\x03\x02\x02\x02\u0355\u0344\x03\x02\x02\x02\u0355\u0349\x03\x02" +
+		"\x02\x02\u0355\u034F\x03\x02\x02\x02\u0356\u0359\x03\x02\x02\x02\u0357" +
+		"\u0355\x03\x02\x02\x02\u0357\u0358\x03\x02\x02\x02\u0358\x8D\x03\x02\x02" +
+		"\x02\u0359\u0357\x03\x02\x02\x02\u035A\u035B\x07$\x02\x02\u035B\u036D" +
+		"\x07%\x02\x02\u035C\u036D\x05\x90I\x02\u035D\u035E\x05l7\x02\u035E\u035F" +
+		"\x07$\x02\x02\u035F\u0360\x05\xA2R\x02\u0360\u0361\x07%\x02\x02\u0361" +
+		"\u036D\x03\x02\x02\x02\u0362\u0363\x07&\x02\x02\u0363\u0364\x05\xA2R\x02" +
+		"\u0364\u0365\x07\'\x02\x02\u0365\u036D\x03\x02\x02\x02\u0366\u036D\x07" +
+		"K\x02\x02\u0367\u036D\x07L\x02\x02\u0368\u036D\x07M\x02\x02\u0369\u036D" +
+		"\x07\x1A\x02\x02\u036A\u036D\x07\x1B\x02\x02\u036B\u036D\x05\xA8U\x02" +
+		"\u036C\u035A\x03\x02\x02\x02\u036C\u035C\x03\x02\x02\x02\u036C\u035D\x03" +
+		"\x02\x02\x02\u036C\u0362\x03\x02\x02\x02\u036C\u0366\x03\x02\x02\x02\u036C" +
+		"\u0367\x03\x02\x02\x02\u036C\u0368\x03\x02\x02\x02\u036C\u0369\x03\x02" +
+		"\x02\x02\u036C\u036A\x03\x02\x02\x02\u036C\u036B\x03\x02\x02\x02\u036D" +
+		"\x8F\x03\x02\x02\x02\u036E\u036F\x05l7\x02\u036F\u0371\x07(\x02\x02\u0370" +
+		"\u0372\x05\x92J\x02\u0371\u0370\x03\x02\x02\x02\u0371\u0372\x03\x02\x02" +
+		"\x02\u0372\u0373\x03\x02\x02\x02\u0373\u0374\x07)\x02\x02\u0374\x91\x03" +
+		"\x02\x02\x02\u0375\u037A\x05\x94K\x02\u0376\u0377\x07+\x02\x02\u0377\u0379" +
+		"\x05\x94K\x02\u0378\u0376\x03\x02\x02\x02\u0379\u037C\x03\x02\x02\x02" +
+		"\u037A\u0378\x03\x02\x02\x02\u037A\u037B\x03\x02\x02\x02\u037B\u037E\x03" +
+		"\x02\x02\x02\u037C\u037A\x03\x02\x02\x02\u037D\u037F\x07+\x02\x02\u037E" +
+		"\u037D\x03\x02\x02\x02\u037E\u037F\x03\x02\x02\x02\u037F\x93\x03\x02\x02" +
+		"\x02\u0380\u0381\x05\xA8U\x02\u0381\u0382\x07.\x02\x02\u0382\u0383\x05" +
+		"\x8CG\x02\u0383\x95\x03\x02\x02\x02\u0384\u0386\x05\x98M\x02\u0385\u0387" +
+		"\x05\x9AN\x02\u0386\u0385\x03\x02\x02\x02\u0386\u0387\x03\x02\x02\x02" +
+		"\u0387\u0389\x03\x02\x02\x02\u0388\u038A\x05\x9CO\x02\u0389\u0388\x03" +
+		"\x02\x02\x02\u0389\u038A\x03\x02\x02\x02\u038A\x97\x03\x02\x02\x02\u038B" +
+		"\u038C\x07\x16\x02\x02\u038C\u038D\x05\x8CG\x02\u038D\u038E\x05\x84C\x02" +
+		"\u038E\u0394\x03\x02\x02\x02\u038F\u0390\x07\x16\x02\x02\u0390\u0391\x05" +
+		"\x88E\x02\u0391\u0392\x05\x84C\x02\u0392\u0394\x03\x02\x02\x02\u0393\u038B" +
+		"\x03\x02\x02\x02\u0393\u038F\x03\x02\x02\x02\u0394\x99\x03\x02\x02\x02" +
+		"\u0395\u0396\x07\x17\x02\x02\u0396\u0398\x05\x98M\x02\u0397\u0395\x03" +
+		"\x02\x02\x02\u0398\u0399\x03\x02\x02\x02\u0399\u0397\x03\x02\x02\x02\u0399" +
+		"\u039A\x03\x02\x02\x02\u039A\x9B\x03\x02\x02\x02\u039B\u039C\x07\x17\x02" +
+		"\x02\u039C\u039D\x05\x84C\x02\u039D\x9D\x03\x02\x02\x02\u039E\u039F\x07" +
+		"\x11\x02\x02\u039F\u03A0\x05\x8AF\x02\u03A0\u03A1\x07\x12\x02\x02\u03A1" +
+		"\u03A2\x05\x8CG\x02\u03A2\u03A3\x05\x84C\x02\u03A3\u03AA\x03\x02\x02\x02" +
+		"\u03A4\u03A5\x07\x11\x02\x02\u03A5\u03A6\x05\x8CG\x02\u03A6\u03A7\x07" +
+		"\x15\x02\x02\u03A7\u03A8\x05\x84C\x02\u03A8\u03AA\x03\x02\x02\x02\u03A9" +
+		"\u039E\x03\x02\x02\x02\u03A9\u03A4\x03\x02\x02\x02\u03AA\x9F\x03\x02\x02" +
+		"\x02\u03AB\u03B0\x05\xA8U\x02\u03AC\u03AD\x07+\x02\x02\u03AD\u03AF\x05" +
+		"\xA8U\x02\u03AE\u03AC\x03\x02\x02\x02\u03AF\u03B2\x03\x02\x02\x02\u03B0" +
+		"\u03AE\x03\x02\x02\x02\u03B0\u03B1\x03\x02\x02\x02\u03B1\xA1\x03\x02\x02" +
+		"\x02\u03B2\u03B0\x03\x02\x02\x02\u03B3\u03B8\x05\x8CG\x02\u03B4\u03B5" +
+		"\x07+\x02\x02\u03B5\u03B7\x05\x8CG\x02\u03B6\u03B4\x03\x02\x02\x02\u03B7" +
+		"\u03BA\x03\x02\x02\x02\u03B8\u03B6\x03\x02\x02\x02\u03B8\u03B9\x03\x02" +
+		"\x02\x02\u03B9\xA3\x03\x02\x02\x02\u03BA\u03B8\x03\x02\x02\x02\u03BB\u03C0" +
+		"\x05\xA6T\x02\u03BC\u03BD\x07+\x02\x02\u03BD\u03BF\x05\xA6T\x02\u03BE" +
+		"\u03BC\x03\x02\x02\x02\u03BF\u03C2\x03\x02\x02\x02\u03C0\u03BE\x03\x02" +
+		"\x02\x02\u03C0\u03C1\x03\x02\x02\x02\u03C1\xA5\x03\x02\x02\x02\u03C2\u03C0" +
+		"\x03\x02\x02\x02\u03C3\u03C4\x05\xA8U\x02\u03C4\u03C5\x07.\x02\x02\u03C5" +
+		"\u03C6\x05\x8CG\x02\u03C6\xA7\x03\x02\x02\x02\u03C7\u03CA\x07J\x02\x02" +
+		"\u03C8\u03CA\x05\xACW\x02\u03C9\u03C7\x03\x02\x02\x02\u03C9\u03C8\x03" +
+		"\x02\x02\x02\u03CA\xA9\x03\x02\x02\x02\u03CB\u03CD\t\b\x02\x02\u03CC\u03CB" +
+		"\x03\x02\x02\x02\u03CD\u03CE\x03\x02\x02\x02\u03CE\u03CC\x03\x02\x02\x02" +
+		"\u03CE\u03CF\x03\x02\x02\x02\u03CF\xAB\x03\x02\x02\x02\u03D0\u03D1\t\t" +
+		"\x02\x02\u03D1\xAD\x03\x02\x02\x02p\xAF\xB4\xBC\xBF\xC5\xC9\xD2\xDA\xDD" +
+		"\xE5\xE9\xF5\xFA\xFF\u0106\u010C\u0112\u011B\u012D\u013C\u013F\u0149\u014F" +
+		"\u0154\u015E\u0164\u0169\u016E\u0172\u0179\u017F\u0183\u0186\u0194\u019A" +
+		"\u01A0\u01A5\u01AA\u01AF\u01B2\u01BC\u01C2\u01C7\u01D1\u01D7\u01DC\u01E6" +
+		"\u01EC\u01F1\u01FB\u0201\u0206\u020B\u0210\u0215\u021A\u021F\u022C\u0237" +
+		"\u023A\u0244\u0248\u024A\u024F\u0253\u0260\u0268\u0274\u0276\u027F\u0289" +
+		"\u028D\u0294\u0297\u029D\u02A7\u02AC\u02B0\u02B2\u02B5\u02BF\u02C4\u02CD" +
+		"\u02D6\u02DB\u02E4\u02EA\u02FC\u0306\u0313\u031D\u032A\u034C\u0352\u0355" +
+		"\u0357\u036C\u0371\u037A\u037E\u0386\u0389\u0393\u0399\u03A9\u03B0\u03B8" +
+		"\u03C0\u03C9\u03CE";
 	public static readonly _serializedATN: string = Utils.join(
 		[
 			CWScriptParser._serializedATNSegment0,
@@ -5707,7 +5681,7 @@ export class TopLevelStmtContext extends ParserRuleContext {
 export class ContractDefnContext extends ParserRuleContext {
 	public _spec!: CwspecContext;
 	public _name!: IdentContext;
-	public _parents!: IdentListContext;
+	public _baseContracts!: IdentListContext;
 	public _interfaces!: InterfaceListContext;
 	public CONTRACT(): TerminalNode { return this.getToken(CWScriptParser.CONTRACT, 0); }
 	public contractBody(): ContractBodyContext {
@@ -5845,7 +5819,7 @@ export class InterfaceDefnContext extends ParserRuleContext {
 	public _spec!: CwspecContext;
 	public _name!: IdentContext;
 	public _mixinName!: IdentContext;
-	public _parents!: InterfaceListContext;
+	public _baseInterfaces!: InterfaceListContext;
 	public INTERFACE(): TerminalNode { return this.getToken(CWScriptParser.INTERFACE, 0); }
 	public interfaceBody(): InterfaceBodyContext {
 		return this.getRuleContext(0, InterfaceBodyContext);
@@ -5897,37 +5871,78 @@ export class InterfaceDefnContext extends ParserRuleContext {
 
 
 export class ImportStmtContext extends ParserRuleContext {
-	public _symbols!: ImportSymbolListContext;
-	public _star!: Token;
-	public _fileName!: Token;
-	public IMPORT(): TerminalNode { return this.getToken(CWScriptParser.IMPORT, 0); }
-	public FROM(): TerminalNode { return this.getToken(CWScriptParser.FROM, 0); }
-	public StringLiteral(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.StringLiteral, 0); }
-	public importSymbolList(): ImportSymbolListContext | undefined {
-		return this.tryGetRuleContext(0, ImportSymbolListContext);
-	}
-	public MUL(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.MUL, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
 	public get ruleIndex(): number { return CWScriptParser.RULE_importStmt; }
+	public copyFrom(ctx: ImportStmtContext): void {
+		super.copyFrom(ctx);
+	}
+}
+export class ImportAllStmtContext extends ImportStmtContext {
+	public _fileName!: Token;
+	public IMPORT(): TerminalNode { return this.getToken(CWScriptParser.IMPORT, 0); }
+	public MUL(): TerminalNode { return this.getToken(CWScriptParser.MUL, 0); }
+	public FROM(): TerminalNode { return this.getToken(CWScriptParser.FROM, 0); }
+	public StringLiteral(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.StringLiteral, 0); }
+	constructor(ctx: ImportStmtContext) {
+		super(ctx.parent, ctx.invokingState);
+		this.copyFrom(ctx);
+	}
 	// @Override
 	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterImportStmt) {
-			listener.enterImportStmt(this);
+		if (listener.enterImportAllStmt) {
+			listener.enterImportAllStmt(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitImportStmt) {
-			listener.exitImportStmt(this);
+		if (listener.exitImportAllStmt) {
+			listener.exitImportAllStmt(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitImportStmt) {
-			return visitor.visitImportStmt(this);
+		if (visitor.visitImportAllStmt) {
+			return visitor.visitImportAllStmt(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+export class ImportItemsStmtContext extends ImportStmtContext {
+	public _items!: ImportListContext;
+	public _fileName!: Token;
+	public IMPORT(): TerminalNode { return this.getToken(CWScriptParser.IMPORT, 0); }
+	public FROM(): TerminalNode { return this.getToken(CWScriptParser.FROM, 0); }
+	public StringLiteral(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.StringLiteral, 0); }
+	public LPAREN(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.LPAREN, 0); }
+	public RPAREN(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.RPAREN, 0); }
+	public importList(): ImportListContext | undefined {
+		return this.tryGetRuleContext(0, ImportListContext);
+	}
+	public COMMA(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.COMMA, 0); }
+	constructor(ctx: ImportStmtContext) {
+		super(ctx.parent, ctx.invokingState);
+		this.copyFrom(ctx);
+	}
+	// @Override
+	public enterRule(listener: CWScriptParserListener): void {
+		if (listener.enterImportItemsStmt) {
+			listener.enterImportItemsStmt(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: CWScriptParserListener): void {
+		if (listener.exitImportItemsStmt) {
+			listener.exitImportItemsStmt(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
+		if (visitor.visitImportItemsStmt) {
+			return visitor.visitImportItemsStmt(this);
 		} else {
 			return visitor.visitChildren(this);
 		}
@@ -5935,16 +5950,16 @@ export class ImportStmtContext extends ParserRuleContext {
 }
 
 
-export class ImportSymbolListContext extends ParserRuleContext {
-	public _importSymbol!: ImportSymbolContext;
-	public _importItems: ImportSymbolContext[] = [];
-	public importSymbol(): ImportSymbolContext[];
-	public importSymbol(i: number): ImportSymbolContext;
-	public importSymbol(i?: number): ImportSymbolContext | ImportSymbolContext[] {
+export class ImportListContext extends ParserRuleContext {
+	public _importItem!: ImportItemContext;
+	public _importItems: ImportItemContext[] = [];
+	public importItem(): ImportItemContext[];
+	public importItem(i: number): ImportItemContext;
+	public importItem(i?: number): ImportItemContext | ImportItemContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(ImportSymbolContext);
+			return this.getRuleContexts(ImportItemContext);
 		} else {
-			return this.getRuleContext(i, ImportSymbolContext);
+			return this.getRuleContext(i, ImportItemContext);
 		}
 	}
 	public COMMA(): TerminalNode[];
@@ -5960,23 +5975,23 @@ export class ImportSymbolListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return CWScriptParser.RULE_importSymbolList; }
+	public get ruleIndex(): number { return CWScriptParser.RULE_importList; }
 	// @Override
 	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterImportSymbolList) {
-			listener.enterImportSymbolList(this);
+		if (listener.enterImportList) {
+			listener.enterImportList(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitImportSymbolList) {
-			listener.exitImportSymbolList(this);
+		if (listener.exitImportList) {
+			listener.exitImportList(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitImportSymbolList) {
-			return visitor.visitImportSymbolList(this);
+		if (visitor.visitImportList) {
+			return visitor.visitImportList(this);
 		} else {
 			return visitor.visitChildren(this);
 		}
@@ -5984,170 +5999,40 @@ export class ImportSymbolListContext extends ParserRuleContext {
 }
 
 
-export class ImportSymbolContext extends ParserRuleContext {
+export class ImportItemContext extends ParserRuleContext {
+	public _symbol!: IdentContext;
+	public _alias!: IdentContext;
+	public ident(): IdentContext[];
+	public ident(i: number): IdentContext;
+	public ident(i?: number): IdentContext | IdentContext[] {
+		if (i === undefined) {
+			return this.getRuleContexts(IdentContext);
+		} else {
+			return this.getRuleContext(i, IdentContext);
+		}
+	}
+	public AS(): TerminalNode | undefined { return this.tryGetToken(CWScriptParser.AS, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return CWScriptParser.RULE_importSymbol; }
-	public copyFrom(ctx: ImportSymbolContext): void {
-		super.copyFrom(ctx);
-	}
-}
-export class GroupedImportSymbolContext extends ImportSymbolContext {
-	public LPAREN(): TerminalNode { return this.getToken(CWScriptParser.LPAREN, 0); }
-	public importSymbolList(): ImportSymbolListContext {
-		return this.getRuleContext(0, ImportSymbolListContext);
-	}
-	public RPAREN(): TerminalNode { return this.getToken(CWScriptParser.RPAREN, 0); }
-	constructor(ctx: ImportSymbolContext) {
-		super(ctx.parent, ctx.invokingState);
-		this.copyFrom(ctx);
-	}
+	public get ruleIndex(): number { return CWScriptParser.RULE_importItem; }
 	// @Override
 	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterGroupedImportSymbol) {
-			listener.enterGroupedImportSymbol(this);
+		if (listener.enterImportItem) {
+			listener.enterImportItem(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitGroupedImportSymbol) {
-			listener.exitGroupedImportSymbol(this);
+		if (listener.exitImportItem) {
+			listener.exitImportItem(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitGroupedImportSymbol) {
-			return visitor.visitGroupedImportSymbol(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
-}
-export class TypePathImportSymbolContext extends ImportSymbolContext {
-	public typePath(): TypePathContext {
-		return this.getRuleContext(0, TypePathContext);
-	}
-	constructor(ctx: ImportSymbolContext) {
-		super(ctx.parent, ctx.invokingState);
-		this.copyFrom(ctx);
-	}
-	// @Override
-	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterTypePathImportSymbol) {
-			listener.enterTypePathImportSymbol(this);
-		}
-	}
-	// @Override
-	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitTypePathImportSymbol) {
-			listener.exitTypePathImportSymbol(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitTypePathImportSymbol) {
-			return visitor.visitTypePathImportSymbol(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
-}
-export class DestructureImportSymbolContext extends ImportSymbolContext {
-	public typePath(): TypePathContext {
-		return this.getRuleContext(0, TypePathContext);
-	}
-	public D_COLON(): TerminalNode { return this.getToken(CWScriptParser.D_COLON, 0); }
-	public LBRACE(): TerminalNode { return this.getToken(CWScriptParser.LBRACE, 0); }
-	public importSymbolList(): ImportSymbolListContext {
-		return this.getRuleContext(0, ImportSymbolListContext);
-	}
-	public RBRACE(): TerminalNode { return this.getToken(CWScriptParser.RBRACE, 0); }
-	constructor(ctx: ImportSymbolContext) {
-		super(ctx.parent, ctx.invokingState);
-		this.copyFrom(ctx);
-	}
-	// @Override
-	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterDestructureImportSymbol) {
-			listener.enterDestructureImportSymbol(this);
-		}
-	}
-	// @Override
-	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitDestructureImportSymbol) {
-			listener.exitDestructureImportSymbol(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitDestructureImportSymbol) {
-			return visitor.visitDestructureImportSymbol(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
-}
-export class AllImportSymbolContext extends ImportSymbolContext {
-	public typePath(): TypePathContext {
-		return this.getRuleContext(0, TypePathContext);
-	}
-	public D_COLON(): TerminalNode { return this.getToken(CWScriptParser.D_COLON, 0); }
-	public MUL(): TerminalNode { return this.getToken(CWScriptParser.MUL, 0); }
-	constructor(ctx: ImportSymbolContext) {
-		super(ctx.parent, ctx.invokingState);
-		this.copyFrom(ctx);
-	}
-	// @Override
-	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterAllImportSymbol) {
-			listener.enterAllImportSymbol(this);
-		}
-	}
-	// @Override
-	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitAllImportSymbol) {
-			listener.exitAllImportSymbol(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitAllImportSymbol) {
-			return visitor.visitAllImportSymbol(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
-}
-export class RenamedImportSymbolContext extends ImportSymbolContext {
-	public importSymbol(): ImportSymbolContext {
-		return this.getRuleContext(0, ImportSymbolContext);
-	}
-	public AS(): TerminalNode { return this.getToken(CWScriptParser.AS, 0); }
-	public ident(): IdentContext {
-		return this.getRuleContext(0, IdentContext);
-	}
-	constructor(ctx: ImportSymbolContext) {
-		super(ctx.parent, ctx.invokingState);
-		this.copyFrom(ctx);
-	}
-	// @Override
-	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterRenamedImportSymbol) {
-			listener.enterRenamedImportSymbol(this);
-		}
-	}
-	// @Override
-	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitRenamedImportSymbol) {
-			listener.exitRenamedImportSymbol(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitRenamedImportSymbol) {
-			return visitor.visitRenamedImportSymbol(this);
+		if (visitor.visitImportItem) {
+			return visitor.visitImportItem(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

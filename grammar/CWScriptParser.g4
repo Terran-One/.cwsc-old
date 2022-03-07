@@ -12,7 +12,7 @@ topLevelStmt: contractDefn | interfaceDefn | importStmt;
 // Contract Block
 contractDefn:
 	(spec = cwspec)? CONTRACT (name = ident) (
-		EXTENDS parents = identList
+		EXTENDS baseContracts = identList
 	)? (IMPLEMENTS (interfaces = interfaceList))? contractBody;
 
 interfaceList: interfaceVal (COMMA interfaceVal)*;
@@ -25,23 +25,21 @@ interfaceVal: (interfaceName = ident) (
 interfaceDefn:
 	(spec = cwspec)? INTERFACE (name = ident) (
 		LBRACK mixinName = ident RBRACK
-	)? (EXTENDS parents = interfaceList)? interfaceBody;
+	)? (EXTENDS baseInterfaces = interfaceList)? interfaceBody;
 
 // Import Statement
 importStmt:
-	IMPORT ((symbols = importSymbolList) | (star = MUL))? FROM (
-		fileName = StringLiteral
-	);
+	IMPORT MUL FROM (fileName = StringLiteral) # ImportAllStmt
+	| IMPORT (
+		(LPAREN (items = importList) COMMA? RPAREN)
+		| (items = importList)
+	) FROM (fileName = StringLiteral) # ImportItemsStmt;
 
-importSymbolList: (importItems += importSymbol) (
-		COMMA (importItems += importSymbol)
+importList: (importItems += importItem) (
+		COMMA (importItems += importItem)
 	)*;
-importSymbol:
-	LPAREN importSymbolList RPAREN						# GroupedImportSymbol
-	| typePath											# TypePathImportSymbol
-	| typePath D_COLON LBRACE importSymbolList RBRACE	# DestructureImportSymbol
-	| typePath D_COLON MUL								# AllImportSymbol
-	| importSymbol AS ident								# RenamedImportSymbol;
+
+importItem: (symbol = ident) (AS alias = ident)?;
 
 contractBody: LBRACE (items = contractItem)* RBRACE;
 interfaceBody: LBRACE (items = interfaceItem)* RBRACE;
