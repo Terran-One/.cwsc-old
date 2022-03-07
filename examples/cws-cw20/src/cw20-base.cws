@@ -79,7 +79,7 @@ contract CW20Base extends CW2 implements
         symbol: String,
         decimals: u8,
         initial_balances: struct Cw20Coin { address: Addr, amount: Uint128 }[],
-        mint?: CW20::query::mint$response
+        mint?: String
     ) {
         let total_supply: Uint128 = Uint128(0)
         for { address, amount } in initial_balances {

@@ -111,6 +111,10 @@ export interface Position {
 export abstract class AST extends Tree<AST> {
   private __position?: Position;
 
+  public details(): string {
+    return `${this.position?.line}:${this.position?.column}`;
+  }
+
   constructor(
     __ctx?: ParserRuleContext,
     __parent?: AST,

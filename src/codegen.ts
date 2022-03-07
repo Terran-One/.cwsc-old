@@ -60,7 +60,7 @@ export class CodegenEnv {
     delete this.data[key];
   }
 
-  lookup(key: string): AST.AST | undefined {
+  lookup(key: string, namespace: boolean = false): AST.AST | undefined {
     let env: CodegenEnv | undefined = this;
     while (env !== undefined) {
       let value = env.get(key);
@@ -153,7 +153,7 @@ export class InterfaceEnv extends CodegenEnv {
     return Object.fromEntries(
       Object.entries(this.data)
         .filter(([k, v]) => v.obj instanceof AST.QueryDecl)
-        .map(([k, v]) => [k.replace(_query(''), ''), v.obj])
+        .map(([k, v]) => [k.replace(_query(''), ''), v])
     );
   }
 
@@ -390,7 +390,7 @@ export class CWScriptCodegen {
       env.set(_exec(x.name!.text), new Namespace(x, execEnv));
     });
     defn.descendantsOfType(AST.QueryDecl).forEach(x => {
-      let queryEnv = env.createChildFnDeclEnv(_query(x));
+      let queryEnv = env.createChildFnDeclEnv(_query(x.name!.text));
       env.set(_query(x.name!.text), new Namespace(x, queryEnv));
     });
   }
@@ -582,6 +582,9 @@ export class CWScriptCodegen {
           base = base.env;
         }
         base = base[path];
+        if (base instanceof Namespace) {
+          base = base.env;
+        }
       }
       return base;
     } else if (type instanceof AST.ParamzdTypeExpr) {
@@ -603,10 +606,16 @@ export class CWScriptCodegen {
       let base = this.translateType(env, type.type);
       let res = (base as any)[type.member.text];
       if (res === undefined) {
-        throw new Error(`${base.toString()} has no member ${type.member.text}`);
+        throw new Error(
+          `${base.constructor.name} has no member ${type.member.text}`
+        );
       }
       if (!(res instanceof IR.Type)) {
-        throw new Error(`${base.toString()}.${type.member.text} is not a type`);
+        throw new Error(
+          `${base.constructor.name}.${
+            type.member.text
+          } = ${res.toString()} is not a type`
+        );
       }
       return res;
     } else if (type instanceof AST.StructDefn) {
@@ -677,6 +686,10 @@ export class CWScriptCodegen {
       );
     }
 
+    if (ast instanceof AST.IntegerVal) {
+      return new IR.IntegerVal(ast.value);
+    }
+
     if (ast instanceof AST.AssignStmt) {
       let lhs = this.translate(env, ast.lhs);
       let rhs = this.translate(env, ast.rhs);
@@ -737,7 +750,7 @@ export class CWScriptCodegen {
     if (ast instanceof AST.Ident) {
       let res = env.lookup(ast.text);
       if (res === undefined) {
-        throw new Error(`${ast.text} is not defined`);
+        throw new Error(`${ast.text} is not defined ${ast.details()}`);
       }
       return res;
     }
@@ -804,6 +817,10 @@ export class CWScriptCodegen {
     if (ast instanceof AST.FnArg) {
       console.log(ast.constructor.name);
       return this.translateFnArg(env, ast);
+    }
+
+    if (ast instanceof AST.List) {
+      return new IR.List(ast.elements.map(x => this.translate(env, x)));
     }
 
     throw new Error(

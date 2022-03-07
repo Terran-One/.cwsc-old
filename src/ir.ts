@@ -284,3 +284,10 @@ export class StructMember extends IR {
     this.setParentForChildren();
   }
 }
+
+export class IntegerVal extends IR {
+  constructor(public value: string) {
+    super();
+    this.setParentForChildren();
+  }
+}
