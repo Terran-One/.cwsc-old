@@ -12,7 +12,7 @@ topLevelStmt: contractDefn | interfaceDefn | importStmt;
 // Contract Block
 contractDefn:
 	(spec = cwspec)? CONTRACT (name = ident) (
-		EXTENDS parents = identList
+		EXTENDS baseContracts = identList
 	)? (IMPLEMENTS (interfaces = interfaceList))? contractBody;
 
 interfaceList: interfaceVal (COMMA interfaceVal)*;
@@ -25,23 +25,21 @@ interfaceVal: (interfaceName = ident) (
 interfaceDefn:
 	(spec = cwspec)? INTERFACE (name = ident) (
 		LBRACK mixinName = ident RBRACK
-	)? (EXTENDS parents = interfaceList)? interfaceBody;
+	)? (EXTENDS baseInterfaces = interfaceList)? interfaceBody;
 
 // Import Statement
 importStmt:
-	IMPORT ((symbols = importSymbolList) | (star = MUL))? FROM (
-		fileName = StringLiteral
-	);
+	IMPORT MUL FROM (fileName = StringLiteral) # ImportAllStmt
+	| IMPORT (
+		(LPAREN (items = importList) COMMA? RPAREN)
+		| (items = importList)
+	) FROM (fileName = StringLiteral) # ImportItemsStmt;
 
-importSymbolList: (importItem += importSymbol) (
-		COMMA (importItem += importSymbol)
+importList: (importItems += importItem) (
+		COMMA (importItems += importItem)
 	)*;
-importSymbol:
-	LPAREN importSymbolList RPAREN						# GroupedImportSymbol
-	| typePath											# TypePathImportSymbol
-	| typePath D_COLON LBRACE importSymbolList RBRACE	# DestructureImportSymbol
-	| typePath D_COLON MUL								# AllImportSymbol
-	| importSymbol AS ident								# RenamedImportSymbol;
+
+importItem: (symbol = ident) (AS alias = ident)?;
 
 contractBody: LBRACE (items = contractItem)* RBRACE;
 interfaceBody: LBRACE (items = interfaceItem)* RBRACE;
@@ -197,50 +195,62 @@ fnBody: (LBRACE (stmt)* RBRACE)	# NormalFnBody
 
 // Statements
 stmt:
-	letStmt_															# LetStmt
-	| expr (EQ | PLUS_EQ | MINUS_EQ | MUL_EQ | DIV_EQ | MOD_EQ) expr	# AssignStmt
-	| ifExpr_															# IfStmt
-	| forStmt_															# ForStmt
-	| EXEC expr															# ExecStmt
-	| EMIT expr															# EmitStmt
-	| RETURN expr														# ReturnStmt
-	| FAIL expr															# FailStmt
-	| expr																# ExprStmt;
+	letStmt_ # LetStmt
+	| expr assignOp = (
+		EQ
+		| PLUS_EQ
+		| MINUS_EQ
+		| MUL_EQ
+		| DIV_EQ
+		| MOD_EQ
+	) expr			# AssignStmt
+	| ifExpr_		# IfStmt
+	| forStmt_		# ForStmt
+	| EXEC expr		# ExecStmt
+	| EMIT expr		# EmitStmt
+	| RETURN expr	# ReturnStmt
+	| FAIL expr		# FailStmt
+	| expr			# ExprStmt;
 
 letStmt_: LET letLHS EQ expr;
-letLHS: ident (COLON typeExpr)? | LBRACE identList RBRACE;
+letLHS:
+	ident (COLON varType = typeExpr)?	# IdentLHS
+	| LBRACE identList RBRACE			# StructUnpackLHS
+	| LPAREN (front = identList) (
+		COMMA DOT DOT DOT back = identList
+	)? RBRACE									# TupleUnpackLHSFrontBack
+	| LPAREN COMMA DOT DOT DOT back = identList	# TupleUnpackLHSBack;
 
 // Expressions
 expr:
-	LPAREN expr RPAREN						# GroupedExpr
-	| expr DOT ident						# MemberAccessExpr
-	| expr LBRACK expr RBRACK				# TableLookupExpr
-	| expr LPAREN (exprList)? RPAREN		# PosArgsFnCallExpr
-	| expr LPAREN (namedExprList)? RPAREN	# NamedArgsFnCallExpr
-	| (PLUS | MINUS) expr					# UnarySignExpr
-	| EXCLAM expr							# UnaryNotExpr
-	| expr POW expr							# ExpExpr
-	| expr (MUL | DIV | MOD) expr			# MultDivModExpr
-	| expr (PLUS | MINUS) expr				# AddSubExpr
-	| expr (LT | GT | LT_EQ | GT_EQ) expr	# CompExpr
-	| expr (EQEQ | NEQ) expr				# EqExpr
-	| expr AND expr							# AndExpr
-	| expr OR expr							# OrExpr
-	| ifExpr_								# IfExp
-	| QUERY expr							# QueryExpr
-	| val									# ValExpr;
+	LPAREN expr RPAREN							# GroupedExpr
+	| expr DOT ident							# MemberAccessExpr
+	| expr LBRACK expr RBRACK					# TableLookupExpr
+	| expr LPAREN (exprList)? RPAREN			# PosArgsFnCallExpr
+	| expr LPAREN (namedExprList)? RPAREN		# NamedArgsFnCallExpr
+	| op = (PLUS | MINUS | EXCLAM) expr			# UnaryExpr
+	| expr POW expr								# ExpExpr
+	| expr op = (MUL | DIV | MOD) expr			# MultDivModExpr
+	| expr op = (PLUS | MINUS) expr				# AddSubExpr
+	| expr op = (LT | GT | LT_EQ | GT_EQ) expr	# CompExpr
+	| expr op = (EQEQ | NEQ) expr				# EqExpr
+	| expr AND expr								# AndExpr
+	| expr OR expr								# OrExpr
+	| ifExpr_									# IfExp
+	| QUERY expr								# QueryExpr
+	| val										# ValExpr;
 
 val: // Values
-	LPAREN RPAREN				# UnitVal
-	| structVal_				# StructVal
-	| LPAREN exprList RPAREN	# TupleStructVal
-	| LBRACK exprList RBRACK	# VecVal
-	| StringLiteral				# StringVal
-	| IntegerLiteral			# IntegerVal
-	| DecimalLiteral			# DecimalVal
-	| TRUE						# TrueVal
-	| FALSE						# FalseVal
-	| ident						# IdentVal;
+	LPAREN RPAREN									# UnitVal
+	| structVal_									# StructVal
+	| tupleType = typePath LPAREN exprList RPAREN	# TupleVal
+	| LBRACK exprList RBRACK						# VecVal
+	| StringLiteral									# StringVal
+	| IntegerLiteral								# IntegerVal
+	| DecimalLiteral								# DecimalVal
+	| TRUE											# TrueVal
+	| FALSE											# FalseVal
+	| ident											# IdentVal;
 
 // Struct Val
 structVal_: (structType = typePath) LBRACE (
@@ -261,10 +271,9 @@ elseClause: ELSE fnBody;
 
 // For Loops
 forStmt_:
-	FOR item = forItem IN iterItems = expr fnBody	# ForInStmt
+	FOR item = letLHS IN iterItems = expr fnBody	# ForInStmt
 	| FOR expr TIMES fnBody							# ForTimesStmt;
 
-forItem: ident | (LBRACE identList RBRACE);
 identList: (symbols += ident) (COMMA (symbols += ident))*;
 
 // Function Calls

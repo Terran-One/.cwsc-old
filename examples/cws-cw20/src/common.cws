@@ -1,0 +1,3 @@
+import * from "./cw20.cws"
+
+contract Common {}

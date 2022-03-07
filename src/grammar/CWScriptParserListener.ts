@@ -13,7 +13,7 @@ import { StateItemDefnContext } from "./CWScriptParser";
 import { StateMapDefnContext } from "./CWScriptParser";
 import { UnitValContext } from "./CWScriptParser";
 import { StructValContext } from "./CWScriptParser";
-import { TupleStructValContext } from "./CWScriptParser";
+import { TupleValContext } from "./CWScriptParser";
 import { VecValContext } from "./CWScriptParser";
 import { StringValContext } from "./CWScriptParser";
 import { IntegerValContext } from "./CWScriptParser";
@@ -21,20 +21,20 @@ import { DecimalValContext } from "./CWScriptParser";
 import { TrueValContext } from "./CWScriptParser";
 import { FalseValContext } from "./CWScriptParser";
 import { IdentValContext } from "./CWScriptParser";
+import { ImportAllStmtContext } from "./CWScriptParser";
+import { ImportItemsStmtContext } from "./CWScriptParser";
 import { NormalFnBodyContext } from "./CWScriptParser";
 import { ArrowFnBodyContext } from "./CWScriptParser";
-import { GroupedImportSymbolContext } from "./CWScriptParser";
-import { TypePathImportSymbolContext } from "./CWScriptParser";
-import { DestructureImportSymbolContext } from "./CWScriptParser";
-import { AllImportSymbolContext } from "./CWScriptParser";
-import { RenamedImportSymbolContext } from "./CWScriptParser";
+import { IdentLHSContext } from "./CWScriptParser";
+import { StructUnpackLHSContext } from "./CWScriptParser";
+import { TupleUnpackLHSFrontBackContext } from "./CWScriptParser";
+import { TupleUnpackLHSBackContext } from "./CWScriptParser";
 import { GroupedExprContext } from "./CWScriptParser";
 import { MemberAccessExprContext } from "./CWScriptParser";
 import { TableLookupExprContext } from "./CWScriptParser";
 import { PosArgsFnCallExprContext } from "./CWScriptParser";
 import { NamedArgsFnCallExprContext } from "./CWScriptParser";
-import { UnarySignExprContext } from "./CWScriptParser";
-import { UnaryNotExprContext } from "./CWScriptParser";
+import { UnaryExprContext } from "./CWScriptParser";
 import { ExpExprContext } from "./CWScriptParser";
 import { MultDivModExprContext } from "./CWScriptParser";
 import { AddSubExprContext } from "./CWScriptParser";
@@ -69,8 +69,8 @@ import { InterfaceListContext } from "./CWScriptParser";
 import { InterfaceValContext } from "./CWScriptParser";
 import { InterfaceDefnContext } from "./CWScriptParser";
 import { ImportStmtContext } from "./CWScriptParser";
-import { ImportSymbolListContext } from "./CWScriptParser";
-import { ImportSymbolContext } from "./CWScriptParser";
+import { ImportListContext } from "./CWScriptParser";
+import { ImportItemContext } from "./CWScriptParser";
 import { ContractBodyContext } from "./CWScriptParser";
 import { InterfaceBodyContext } from "./CWScriptParser";
 import { ContractItemContext } from "./CWScriptParser";
@@ -141,7 +141,6 @@ import { IfClause_Context } from "./CWScriptParser";
 import { ElseIfClausesContext } from "./CWScriptParser";
 import { ElseClauseContext } from "./CWScriptParser";
 import { ForStmt_Context } from "./CWScriptParser";
-import { ForItemContext } from "./CWScriptParser";
 import { IdentListContext } from "./CWScriptParser";
 import { ExprListContext } from "./CWScriptParser";
 import { NamedExprListContext } from "./CWScriptParser";
@@ -287,17 +286,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitStructVal?: (ctx: StructValContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `TupleStructVal`
+	 * Enter a parse tree produced by the `TupleVal`
 	 * labeled alternative in `CWScriptParser.val`.
 	 * @param ctx the parse tree
 	 */
-	enterTupleStructVal?: (ctx: TupleStructValContext) => void;
+	enterTupleVal?: (ctx: TupleValContext) => void;
 	/**
-	 * Exit a parse tree produced by the `TupleStructVal`
+	 * Exit a parse tree produced by the `TupleVal`
 	 * labeled alternative in `CWScriptParser.val`.
 	 * @param ctx the parse tree
 	 */
-	exitTupleStructVal?: (ctx: TupleStructValContext) => void;
+	exitTupleVal?: (ctx: TupleValContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `VecVal`
@@ -391,6 +390,32 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitIdentVal?: (ctx: IdentValContext) => void;
 
 	/**
+	 * Enter a parse tree produced by the `ImportAllStmt`
+	 * labeled alternative in `CWScriptParser.importStmt`.
+	 * @param ctx the parse tree
+	 */
+	enterImportAllStmt?: (ctx: ImportAllStmtContext) => void;
+	/**
+	 * Exit a parse tree produced by the `ImportAllStmt`
+	 * labeled alternative in `CWScriptParser.importStmt`.
+	 * @param ctx the parse tree
+	 */
+	exitImportAllStmt?: (ctx: ImportAllStmtContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `ImportItemsStmt`
+	 * labeled alternative in `CWScriptParser.importStmt`.
+	 * @param ctx the parse tree
+	 */
+	enterImportItemsStmt?: (ctx: ImportItemsStmtContext) => void;
+	/**
+	 * Exit a parse tree produced by the `ImportItemsStmt`
+	 * labeled alternative in `CWScriptParser.importStmt`.
+	 * @param ctx the parse tree
+	 */
+	exitImportItemsStmt?: (ctx: ImportItemsStmtContext) => void;
+
+	/**
 	 * Enter a parse tree produced by the `NormalFnBody`
 	 * labeled alternative in `CWScriptParser.fnBody`.
 	 * @param ctx the parse tree
@@ -417,69 +442,56 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitArrowFnBody?: (ctx: ArrowFnBodyContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `GroupedImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Enter a parse tree produced by the `IdentLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	enterGroupedImportSymbol?: (ctx: GroupedImportSymbolContext) => void;
+	enterIdentLHS?: (ctx: IdentLHSContext) => void;
 	/**
-	 * Exit a parse tree produced by the `GroupedImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Exit a parse tree produced by the `IdentLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	exitGroupedImportSymbol?: (ctx: GroupedImportSymbolContext) => void;
+	exitIdentLHS?: (ctx: IdentLHSContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `TypePathImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Enter a parse tree produced by the `StructUnpackLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	enterTypePathImportSymbol?: (ctx: TypePathImportSymbolContext) => void;
+	enterStructUnpackLHS?: (ctx: StructUnpackLHSContext) => void;
 	/**
-	 * Exit a parse tree produced by the `TypePathImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Exit a parse tree produced by the `StructUnpackLHS`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	exitTypePathImportSymbol?: (ctx: TypePathImportSymbolContext) => void;
+	exitStructUnpackLHS?: (ctx: StructUnpackLHSContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `DestructureImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Enter a parse tree produced by the `TupleUnpackLHSFrontBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	enterDestructureImportSymbol?: (ctx: DestructureImportSymbolContext) => void;
+	enterTupleUnpackLHSFrontBack?: (ctx: TupleUnpackLHSFrontBackContext) => void;
 	/**
-	 * Exit a parse tree produced by the `DestructureImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Exit a parse tree produced by the `TupleUnpackLHSFrontBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	exitDestructureImportSymbol?: (ctx: DestructureImportSymbolContext) => void;
+	exitTupleUnpackLHSFrontBack?: (ctx: TupleUnpackLHSFrontBackContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `AllImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Enter a parse tree produced by the `TupleUnpackLHSBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	enterAllImportSymbol?: (ctx: AllImportSymbolContext) => void;
+	enterTupleUnpackLHSBack?: (ctx: TupleUnpackLHSBackContext) => void;
 	/**
-	 * Exit a parse tree produced by the `AllImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
+	 * Exit a parse tree produced by the `TupleUnpackLHSBack`
+	 * labeled alternative in `CWScriptParser.letLHS`.
 	 * @param ctx the parse tree
 	 */
-	exitAllImportSymbol?: (ctx: AllImportSymbolContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `RenamedImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
-	 * @param ctx the parse tree
-	 */
-	enterRenamedImportSymbol?: (ctx: RenamedImportSymbolContext) => void;
-	/**
-	 * Exit a parse tree produced by the `RenamedImportSymbol`
-	 * labeled alternative in `CWScriptParser.importSymbol`.
-	 * @param ctx the parse tree
-	 */
-	exitRenamedImportSymbol?: (ctx: RenamedImportSymbolContext) => void;
+	exitTupleUnpackLHSBack?: (ctx: TupleUnpackLHSBackContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `GroupedExpr`
@@ -547,30 +559,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitNamedArgsFnCallExpr?: (ctx: NamedArgsFnCallExprContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `UnarySignExpr`
+	 * Enter a parse tree produced by the `UnaryExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 */
-	enterUnarySignExpr?: (ctx: UnarySignExprContext) => void;
+	enterUnaryExpr?: (ctx: UnaryExprContext) => void;
 	/**
-	 * Exit a parse tree produced by the `UnarySignExpr`
+	 * Exit a parse tree produced by the `UnaryExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 */
-	exitUnarySignExpr?: (ctx: UnarySignExprContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `UnaryNotExpr`
-	 * labeled alternative in `CWScriptParser.expr`.
-	 * @param ctx the parse tree
-	 */
-	enterUnaryNotExpr?: (ctx: UnaryNotExprContext) => void;
-	/**
-	 * Exit a parse tree produced by the `UnaryNotExpr`
-	 * labeled alternative in `CWScriptParser.expr`.
-	 * @param ctx the parse tree
-	 */
-	exitUnaryNotExpr?: (ctx: UnaryNotExprContext) => void;
+	exitUnaryExpr?: (ctx: UnaryExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `ExpExpr`
@@ -1001,26 +1000,26 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitImportStmt?: (ctx: ImportStmtContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CWScriptParser.importSymbolList`.
+	 * Enter a parse tree produced by `CWScriptParser.importList`.
 	 * @param ctx the parse tree
 	 */
-	enterImportSymbolList?: (ctx: ImportSymbolListContext) => void;
+	enterImportList?: (ctx: ImportListContext) => void;
 	/**
-	 * Exit a parse tree produced by `CWScriptParser.importSymbolList`.
+	 * Exit a parse tree produced by `CWScriptParser.importList`.
 	 * @param ctx the parse tree
 	 */
-	exitImportSymbolList?: (ctx: ImportSymbolListContext) => void;
+	exitImportList?: (ctx: ImportListContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CWScriptParser.importSymbol`.
+	 * Enter a parse tree produced by `CWScriptParser.importItem`.
 	 * @param ctx the parse tree
 	 */
-	enterImportSymbol?: (ctx: ImportSymbolContext) => void;
+	enterImportItem?: (ctx: ImportItemContext) => void;
 	/**
-	 * Exit a parse tree produced by `CWScriptParser.importSymbol`.
+	 * Exit a parse tree produced by `CWScriptParser.importItem`.
 	 * @param ctx the parse tree
 	 */
-	exitImportSymbol?: (ctx: ImportSymbolContext) => void;
+	exitImportItem?: (ctx: ImportItemContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CWScriptParser.contractBody`.
@@ -1791,17 +1790,6 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitForStmt_?: (ctx: ForStmt_Context) => void;
-
-	/**
-	 * Enter a parse tree produced by `CWScriptParser.forItem`.
-	 * @param ctx the parse tree
-	 */
-	enterForItem?: (ctx: ForItemContext) => void;
-	/**
-	 * Exit a parse tree produced by `CWScriptParser.forItem`.
-	 * @param ctx the parse tree
-	 */
-	exitForItem?: (ctx: ForItemContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CWScriptParser.identList`.

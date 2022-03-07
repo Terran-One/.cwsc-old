@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 
 import * as commander from 'commander';
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import util from 'util';
+
+import { parseCWScript } from './parser';
+import { ImportAllStmt, ImportStmt } from './ast';
+import { CompilationRequestBuilder, CompilationRequest } from './compiler';
+import { CodegenEnv, CWScriptCodegen } from './codegen';
 
 const program = new commander.Command();
 
@@ -18,3 +24,43 @@ program.parse(process.argv);
 const options = program.opts();
 const files = program.args;
 const destination = options.outputDir || '.';
+
+function resolveFileImport(fromFile: string, importedPath: string) {
+  let baseDir = path.parse(fromFile).dir;
+  const resolvedPath = path.resolve(baseDir, importedPath);
+  return resolvedPath;
+}
+
+let sources: any[] = [];
+
+function addSourceFile(file: string) {
+  const sourceFileText = fs.readFileSync(file).toString();
+  const ast = parseCWScript(sourceFileText);
+  sources.push({
+    file: path.resolve(file),
+    ast: ast,
+  });
+  ast.descendants
+    .filter(x => x instanceof ImportStmt)
+    .map(x => x as ImportStmt)
+    .forEach(i => {
+      const resolvedPath = resolveFileImport(file, i.fileName);
+      i.fileName = resolvedPath;
+      if (sources.findIndex(x => x.file === resolvedPath) === -1) {
+        addSourceFile(resolvedPath);
+      }
+    });
+}
+
+files.forEach(file => {
+  addSourceFile(file);
+});
+
+let cr = new CompilationRequestBuilder();
+sources.forEach(s => {
+  cr.addSource(s);
+});
+
+let codegen = new CWScriptCodegen(sources);
+let contract = codegen.compileContract('CW20Base');
+console.log(util.inspect(contract.exec.mint.body, { depth: null }));
