@@ -1,0 +1,23 @@
+$type: StateMapSave
+key: 'balances'
+mapKey:
+  $type: MemberAccess
+  lhs:
+    $type: Ident
+    name: 'msg'
+  member: 'sender'
+value:
+  $type: BinaryOp
+  op: '-'
+  lhs:
+    $type: StateMapLoad
+    key: 'balances'
+    mapKey:
+      $type: MemberAccess
+      lhs:
+        $type: Ident
+        name: 'msg'
+      member: 'sender'
+  rhs:
+    $type: Ident
+    name: '1'

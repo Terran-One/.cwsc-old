@@ -8,7 +8,7 @@ export interface StateMapSave {
   $type: 'StateMapSave';
   key: string;
   mapKey: IR;
-  value: any;
+  value: IR;
 }
 
 export interface MemberAccess {
@@ -19,7 +19,7 @@ export interface MemberAccess {
 
 export interface Ident {
   $type: 'Ident';
-  text: string;
+  name: string;
 }
 
 export interface BinaryOp {
@@ -82,7 +82,7 @@ export class TranspilerCtx {
         return this.output(i0, '.', e.member, '.clone()');
       }
       case 'Ident': {
-        return this.output(e.text);
+        return this.output(e.name);
       }
       case 'BinaryOp': {
         let i0 = this.eval(e.lhs);
@@ -95,38 +95,10 @@ export class TranspilerCtx {
   }
 }
 
-const tree = {
-  $type: 'StateMapSave',
-  key: 'balances',
-  mapKey: {
-    $type: 'MemberAccess',
-    lhs: {
-      $type: 'Ident',
-      text: 'msg',
-    },
-    member: 'sender',
-  },
-  value: {
-    $type: 'BinaryOp',
-    op: '-',
-    lhs: {
-      $type: 'StateMapLoad',
-      key: 'balances',
-      mapKey: {
-        $type: 'MemberAccess',
-        lhs: {
-          $type: 'Ident',
-          text: 'msg',
-        },
-        member: 'sender',
-      },
-    },
-    rhs: {
-      $type: 'Ident',
-      text: '1',
-    },
-  },
-};
+import * as fs from 'fs';
+import * as yaml from 'yaml';
+let tree = fs.readFileSync('ir-code.yml');
+tree = yaml.parse(tree.toString());
 
 const ctx = new TranspilerCtx();
 console.log(ctx.transpile(tree as any));
