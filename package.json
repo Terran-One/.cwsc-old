@@ -14,6 +14,7 @@
     "parse": "ts-node src/parser.ts",
     "viz": "ts-node src/vizserver.ts",
     "cwsc": "ts-node src/cli.ts",
+    "ir": "ts-node src/ir.ts",
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test",
