@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { parseCWScript } from './parser';
-import { CWScriptCodegen } from './codegen';
+import { CWScriptCodegen } from './old_codegen';
 import { transformAST } from './ir';
 
 let source = fs

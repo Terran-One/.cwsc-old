@@ -461,6 +461,15 @@ export class AssignStmt extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  toIR() {
+    let { lhs, assignOp, rhs } = this;
+    if (lhs instanceof MemberAccessExpr) {
+      if (lhs.isState()) {
+        return 
+      }
+    }
+  }
 }
 
 //@Node()
@@ -870,6 +879,24 @@ export class TypeAliasDefn extends AST {
 }
 
 export class EmptyAST extends AST {}
+
+export namespace Ext {
+
+  export class ExtAST extends AST {}
+  export class State extends ExtAST {
+    constructor(public key: string) {
+      super();
+      this.setParentForChildren();
+    }
+  }
+
+  export class SpecialVariable extends ExtAST {
+    constructor(public ns: string, public member: string) {
+      super();
+      this.setParentForChildren();
+    }
+  }
+}
 
 export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   implements CWScriptParserVisitor<AST> {
@@ -1527,9 +1554,22 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     return new TableLookupExpr(ctx, table, key);
   }
 
-  visitMemberAccessExpr(ctx: MemberAccessExprContext): MemberAccessExpr {
+  visitMemberAccessExpr(ctx: MemberAccessExprContext): MemberAccessExpr | Ext.State  |Ext.SpecialVariable {
     let obj = this.visit(ctx.expr());
     let member = this.visitIdent(ctx.ident());
+
+    if (obj instanceof Ident) {
+      switch (obj.text) {
+        case 'state': 
+          return new Ext.State(member.text);
+        case 'msg':
+        case 'api':
+        case 'env':
+          return new Ext.SpecialVariable(obj.text, member.text)
+        default:
+          break; 
+      }
+    }
     return new MemberAccessExpr(ctx, obj, member);
   }
 

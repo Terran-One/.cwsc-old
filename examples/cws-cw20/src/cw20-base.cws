@@ -9,8 +9,6 @@ contract CW20Base extends CW2 implements
     CW20[Mintable, Allowances, Enumerable, Marketing]
 {    
 
-    struct Item{a: sdfsdf, b?: sdfsdf<sdfsdf>, sdfd: sdfsd}
-
     /// When 0 tokens is provided as amount
     /// @note {sdfsdf} sdfsdf
     /// @tip { sdfsd } sdfsdf

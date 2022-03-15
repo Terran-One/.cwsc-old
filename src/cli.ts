@@ -2,14 +2,13 @@
 
 import * as commander from 'commander';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import util from 'util';
 
 import { parseCWScript } from './parser';
 import { ImportAllStmt, ImportStmt } from './ast';
 import { CompilationRequestBuilder, CompilationRequest } from './compiler';
-import { CodegenEnv, CWScriptCodegen } from './codegen';
+import { IR2Rust, CWScriptCodegen } from './codegen';
 
 const program = new commander.Command();
 
@@ -61,6 +60,6 @@ sources.forEach(s => {
   cr.addSource(s);
 });
 
-let codegen = new CWScriptCodegen(sources);
-let contract = codegen.compileContract('CW20Base');
-console.log(util.inspect(contract.exec.mint.body, { depth: null }));
+let cg = new CWScriptCodegen(sources);
+let ct = cg.generateContract('CW20Base');
+console.log(util.inspect(ct, { depth: null }));
