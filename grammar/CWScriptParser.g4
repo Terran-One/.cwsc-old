@@ -212,6 +212,9 @@ stmt:
 	| FAIL expr		# FailStmt
 	| expr			# ExprStmt;
 
+// assignLHS: (ident) # IdentLHS | (expr) DOT ident # MemberLHS | STATE DOT ident (LBRACK expr
+// RBRACK)* # StateItemLHS;
+
 letStmt_: LET letLHS EQ expr;
 letLHS:
 	ident (COLON varType = typeExpr)?	# IdentLHS

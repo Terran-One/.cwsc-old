@@ -210,13 +210,3 @@ export class TranspilerCtx {
     }
   }
 }
-
-import * as fs from 'fs';
-import * as yaml from 'yaml';
-let tree = fs.readFileSync('ir-code.yml');
-tree = yaml.parse(tree.toString());
-
-const ctx = new TranspilerCtx();
-console.log('fn main() {\n');
-console.log(ctx.transpile(tree as any));
-console.log('}');

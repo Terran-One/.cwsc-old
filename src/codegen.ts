@@ -52,42 +52,43 @@ export class CWScriptCodegen {
 }
 
 export class AST2IR {
-  translate(ast: AST.AST): IR.IR {
-    if (ast instanceof AST.AssignStmt) {
+  translateAssignStmt(ast: AST.AssignStmt): any {
+    if (ast.lhs instanceof AST.Ident) {
       return {
-        $type: ast.constructor.name,
-        name: 'hi',
-      };
-    }
-    if (ast instanceof AST.EmitStmt) {
-      return {
-        $type: ast.constructor.name,
-        name: 'hi',
-      };
-    }
-    if (ast instanceof AST.IfExpr) {
-      return {
-        $type: ast.constructor.name,
-        name: 'hi',
-      };
-    }
-    if (ast instanceof AST.LetStmt) {
-      return {
-        $type: ast.constructor.name,
-        name: 'hi',
+        $type: 'AssignIdent',
+        name: ast.lhs.text,
+        rhs: this.translate(ast.rhs),
       };
     }
 
-    if (ast instanceof AST.ExecStmt) {
+    if (ast.lhs instanceof AST.MemberAccessExpr) {
       return {
-        $type: 'Ident',
-        name: 'hi',
+        $type: 'AssignMember',
+        object: this.translate(ast.lhs.lhs),
+        member: ast.lhs.member.text,
+        rhs: this.translate(ast.rhs),
       };
     }
 
-    throw new Error(
-      `unsuppored AST -> IR translation (${ast.constructor.name})`
-    );
+    if (ast.lhs instanceof AST.TableLookupExpr) {
+      if (ast.lhs.lhs instanceof AST.Ext.State)
+        return {
+          $type: 'StateMapSave',
+          key: ast.lhs.lhs.key,
+          mapKey: ast.lhs.key,
+          value: this.translate(ast.rhs),
+        };
+    }
+  }
+
+  translate(ast: AST.AST): any {
+    if (`translate${ast.constructor.name}` in AST2IR.prototype) {
+      return (AST2IR.prototype as any)[`translate${ast.constructor.name}`](ast);
+    }
+    return ast.constructor.name;
+    // throw new Error(
+    //   `unsuppored AST -> IR translation (${ast.constructor.name})`
+    // );
   }
 }
 export class IR2Rust {
