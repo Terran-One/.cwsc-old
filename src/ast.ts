@@ -202,12 +202,23 @@ export class TypePath extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toString(): string {
+    let res = this.root ? '::' : '';
+    return this.paths.map(x => x.text).join('::');
+  }
 }
 
 export class ParamzdTypeExpr extends AST {
   constructor(ctx: any, public type: TypeExpr, public params: List<TypeExpr>) {
     super(ctx);
     this.setParentForChildren();
+  }
+
+  public toString(): string {
+    return `${this.type.toString()}<${this.params
+      .map(x => x.toString())
+      .join(', ')}>`;
   }
 }
 
@@ -216,12 +227,20 @@ export class TupleTypeExpr extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toString(): string {
+    return `(${this.members.map(x => x.toString()).join(', ')})`;
+  }
 }
 
 export class ShortOptionTypeExpr extends AST {
   constructor(ctx: any, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
+  }
+
+  public toString(): string {
+    return `::std::option::Option<${this.type.toString()}>`;
   }
 }
 
@@ -230,6 +249,10 @@ export class ShortVecTypeExpr extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toString(): string {
+    return `::std::vec::Vec<${this.type.toString()}>`;
+  }
 }
 
 export class RefTypeExpr extends AST {
@@ -237,12 +260,20 @@ export class RefTypeExpr extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toString(): string {
+    return `&${this.type.toString()}`;
+  }
 }
 
 export class ReflectiveTypeExpr extends AST {
   constructor(ctx: any, public type: TypeExpr, public member: Ident) {
     super(ctx);
     this.setParentForChildren();
+  }
+
+  public toString(): string {
+    throw new Error('not implemented');
   }
 }
 
@@ -255,6 +286,10 @@ export class StructDefn extends AST {
   ) {
     super(ctx);
     this.setParentForChildren();
+  }
+
+  public toString(): string {
+    return `${this.name.text}`;
   }
 }
 

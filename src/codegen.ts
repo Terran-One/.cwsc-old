@@ -200,6 +200,8 @@ export class IR2Rust {
     } else if (e instanceof IR.Fail) {
       // TODO: implement
       this.output('return Err(', e.typeName, ' {})');
+    } else {
+      throw new Error('eval() not implemented for ' + e.constructor.name);
     }
     return this.lastVar();
   }

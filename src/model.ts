@@ -1,86 +1,166 @@
 import * as AST from './ast';
+import { AST2IR, IR2Rust } from './codegen';
+import * as IR from './ir';
 
 export interface StructMember {
   name: string;
   type: string;
 }
+
+export function toStructMember(x: any): StructMember {
+  return {
+    name: x.name.text,
+    type: x.type.toString(),
+  };
+}
+
 export class StructModel {
   constructor(public name: string, public members: StructMember[]) {}
 
   public static fromAST(ast: AST.StructDefn): StructModel {
     let name = ast.name.text;
-    let members: StructMember[] = ast.members.map(
-      (x: AST.StructMember): StructMember => ({
-        name: x.name.text,
-        type: 'x',
-      })
-    );
-    return new ErrorModel(name, members);
+    let members: StructMember[] = ast.members.map(x => toStructMember(x));
+    return new StructModel(name, members);
   }
 }
 
-export class ErrorModel extends StructModel {}
-export class EventModel extends StructModel {}
+export class ErrorModel extends StructModel {
+  public static fromAST(ast: AST.ErrorDefn): ErrorModel {
+    return super.fromAST(ast) as ErrorModel;
+  }
+}
+
+export class EventModel extends StructModel {
+  public static fromAST(ast: AST.EventDefn): EventModel {
+    return super.fromAST(ast) as EventModel;
+  }
+}
+export class FnModel {
+  constructor(
+    public name: string | undefined,
+    public args: StructMember[],
+    public returnType: string | undefined,
+    public body: IR.IR[]
+  ) {}
+
+  public static fromAST(ast: AST.FnDefn): FnModel {
+    let a2i = new AST2IR();
+    return new FnModel(
+      ast.name?.text,
+      ast.args.map(x => toStructMember(x)),
+      ast.returnType ? '0' : undefined,
+      ast.body.map(x => a2i.translate(x))
+    );
+  }
+}
+export class InstantiateFnModel extends FnModel {
+  constructor(
+    public args: StructMember[],
+    public returnType: string,
+    public body: IR.IR[]
+  ) {
+    super('instantiate', args, returnType, body);
+  }
+
+  public static fromAST(ast: AST.InstantiateDefn): InstantiateFnModel {
+    let a2i = new AST2IR();
+    return new InstantiateFnModel(
+      ast.args.map(x => toStructMember(x)),
+      '0',
+      ast.body.map(x => a2i.translate(x))
+    );
+  }
+}
+
+export class ExecFnModel extends FnModel {
+  public static fromAST(ast: AST.ExecDefn): ExecFnModel {
+    return super.fromAST(ast) as ExecFnModel;
+  }
+}
+
+export class QueryFnModel extends FnModel {
+  public static fromAST(ast: AST.QueryDefn): QueryFnModel {
+    return super.fromAST(ast) as QueryFnModel;
+  }
+}
+
+export class StateItemModel {
+  constructor(public key: string, public valueType: string) {}
+
+  public static fromAST(ast: AST.ItemDefn): StateItemModel {
+    return new StateItemModel(ast.key.text, ast.type.toString());
+  }
+}
+export class StateMapModel {
+  constructor(
+    public key: string,
+    public mapKeys: string[],
+    public valueType: string
+  ) {}
+
+  public static fromAST(ast: AST.MapDefn): StateMapModel {
+    return new StateMapModel(
+      ast.key.text,
+      ast.mapKeys.map(x => x.type.toString()),
+      ast.type.toString()
+    );
+  }
+}
+
 export class ContractModel {
   constructor(
     public name: string,
-    public events: any,
-    public errors: any,
+    public events: EventModel[],
+    public errors: ErrorModel[],
     public typedefns: any,
-    public state: any,
-    public instantiate: any,
-    public exec: any,
-    public query: any,
-    public fns: any
+    public state: (StateItemModel | StateMapModel)[],
+    public instantiate: InstantiateFnModel,
+    public exec: ExecFnModel[],
+    public query: QueryFnModel[],
+    public fns: FnModel[]
   ) {}
 
   public static fromAST(ast: AST.ContractDefn): ContractModel {
     let name = ast.name.text;
 
-    let events = {} as any;
-    ast.descendantsOfType(AST.EventDefn).forEach(x => {
-      events[x.name.text] = {
-        args: x.members.map((m: any): any => {
-          return {
-            name: m.name.text,
-            type: m.type.toString(),
-          };
-        }),
-      };
-    });
+    let events = ast
+      .descendantsOfType(AST.EventDefn)
+      .map(x => EventModel.fromAST(x));
 
-    let errors = {} as any;
-    ast.descendantsOfType(AST.ErrorDefn).forEach(x => {
-      errors[x.name.text] = {
-        args: x.members.map((m: any): any => {
-          return {
-            name: m.name.text,
-            type: m.type.toString(),
-          };
-        }),
-      };
-    });
+    let errors = ast
+      .descendantsOfType(AST.ErrorDefn)
+      .map(x => ErrorModel.fromAST(x));
 
-    let instantiate = ast.descendantsOfType(AST.InstantiateDefn)[0];
+    let state_items = ast
+      .descendantsOfType(AST.ItemDefn)
+      .map(x => StateItemModel.fromAST(x));
 
-    let exec = {} as any;
-    ast.descendantsOfType(AST.ExecDefn).forEach(x => {
-      exec[x.name!.text] = x;
-    });
+    let state_maps = ast
+      .descendantsOfType(AST.MapDefn)
+      .map(x => StateMapModel.fromAST(x));
 
-    let query = {} as any;
-    ast.descendantsOfType(AST.QueryDefn).forEach(x => {
-      query[x.name!.text] = x;
-    });
+    let state = [...state_items, ...state_maps];
 
-    let fns = {};
+    let instantiate = InstantiateFnModel.fromAST(
+      ast.descendantsOfType(AST.InstantiateDefn)[0]
+    );
+
+    let exec = ast
+      .descendantsOfType(AST.ExecDefn)
+      .map(x => ExecFnModel.fromAST(x));
+
+    let query = ast
+      .descendantsOfType(AST.QueryDefn)
+      .map(x => QueryFnModel.fromAST(x));
+
+    let fns = ast.descendantsOfType(AST.FnDefn).map(x => FnModel.fromAST(x));
 
     return new ContractModel(
       name,
       events,
       errors,
       {},
-      {}, // state
+      state,
       instantiate,
       exec,
       query,
@@ -104,8 +184,8 @@ export class ContractModel {
     // build instantiate msg
     res += `#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]\n`;
     res += `pub struct InstantiateMsg {\n`;
-    this.instantiate.args.elements.forEach((arg: any) => {
-      res += `\t${arg.name.text}: ${arg.type.text},\n`;
+    this.instantiate.args.forEach((arg: any) => {
+      res += `\t${arg.name}: ${arg.type.toString()},\n`;
     });
     res += `}\n\n`; /* instantiate msg */
 
@@ -113,15 +193,15 @@ export class ContractModel {
     res += `\n#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]\n`;
     res += `#[serde(rename_all = "snake_case")]\n`;
     res += `pub enum ExecuteMsg {\n`;
-    for (let execFn in this.exec) {
+    for (let execFn of this.exec) {
       // turn snake-case to pascal case
-      let execFn_pascal = execFn
-        .split('_')
+      let name_pascal = execFn
+        .name!.split('_')
         .map(s => s.charAt(0).toUpperCase() + s.slice(1))
         .join('');
-      res += `\t${execFn_pascal} {\n`;
-      this.exec[execFn].args.elements.forEach((arg: any) => {
-        res += `\t\t${arg.name.text}: ${arg.type.text},\n`;
+      res += `\t${name_pascal} {\n`;
+      execFn.args.forEach((arg: any) => {
+        res += `\t\t${arg.name}: ${arg.type.toString()},\n`;
       });
       res += `\t},\n`; /* exec fn */
     }
@@ -131,15 +211,15 @@ export class ContractModel {
     res += `\n#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]\n`;
     res += `#[serde(rename_all = "snake_case")]\n`;
     res += `pub enum QueryMsg {\n`;
-    for (let queryFn in this.query) {
+    for (let queryFn of this.query) {
       // turn snake-case to pascal case
-      let queryFn_pascal = queryFn
-        .split('_')
+      let name_pascal = queryFn
+        .name!.split('_')
         .map(s => s.charAt(0).toUpperCase() + s.slice(1))
         .join('');
-      res += `\t${queryFn_pascal} {\n`;
-      this.query[queryFn].args.elements.forEach((arg: any) => {
-        res += `\t\t${arg.name.text}: ${arg.type.text},\n`;
+      res += `\t${name_pascal} {\n`;
+      queryFn.args.forEach((arg: any) => {
+        res += `\t\t${arg.name}: ${arg.type.toString()},\n`;
       });
       res += `\t},\n`; /* query fn */
     }
@@ -155,17 +235,15 @@ export class ContractModel {
     res += `use cosmwasm_std::*;\n`;
     res += `use cw_storage_plus::{Item, Map};\n`;
 
-    for (let key in this.state) {
-      let defn = this.state[key];
-
-      if (defn.type === 'item') {
-        res += `pub const ${key.toUpperCase()}: Item<${
-          defn.type
-        }> = Item::new("${key}");\n`;
-      } else if (defn.type === 'map') {
-        res += `pub const ${key.toUpperCase()}: Map<${defn.key}, ${
-          defn.valueType
-        }> = Map::new("${key}");\n`;
+    for (let defn of this.state) {
+      if (defn instanceof StateItemModel) {
+        res += `pub const ${defn.key.toUpperCase()}: Item<${defn.valueType.toString()}> = Item::new("${
+          defn.key
+        }");\n`;
+      } else if (defn instanceof StateMapModel) {
+        res += `pub const ${defn.key.toUpperCase()}: Map<${defn.mapKeys[0].toString()}, ${defn.valueType.toString()}> = Map::new("${
+          defn.key
+        }");\n`;
       }
     }
 
@@ -182,13 +260,12 @@ export class ContractModel {
     res += `#[error("{0}")]\n`;
     res += `Std(#[from] StdError),\n\n`;
 
-    for (let key in this.errors) {
-      let defn = this.errors[key];
-      res += `#[error("${key}")]\n`;
-      res += `${key} {\n`;
+    for (let err of this.errors) {
+      res += `#[error("${err.name}")]\n`;
+      res += `${err.name} {\n`;
 
-      defn.args.forEach((arg: any) => {
-        res += `\t${arg.name}: ${arg.type},\n`;
+      err.members.forEach((m: any) => {
+        res += `\t${m.name}: ${m.type.toString()},\n`;
       });
       res += `},\n`; /* error */
     }
@@ -198,8 +275,25 @@ export class ContractModel {
   }
 
   protected buildModContract(): string {
-    let res = `pub mod contract {\n`;
-    res += '}\n';
+    let res = `pub mod contract {\n
+#[cfg(not(feature = "library"))]
+use cosmwasm_std::entry_point;
+use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+
+use crate::error::ContractError;
+use crate::msg::{CountResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use crate::state::{State, STATE};`;
+    res += `\n\n`;
+
+    // build instantiate
+    res += `#[cfg(not(feature = "library"), entry_point)]\n`;
+    res += `pub fn instantiate(__deps: DepsMut, __env: Env, __info: MessageInfo, __msg: InstantiateMsg) -> Result<Response, ContractError> {\n`;
+
+    let i2r = new IR2Rust();
+    res += i2r.translate(this.instantiate.body);
+    res += `\n}\n\n`; /* instantiate */
+
+    res += '}\n'; /* mod contract */
     return res;
   }
 }
