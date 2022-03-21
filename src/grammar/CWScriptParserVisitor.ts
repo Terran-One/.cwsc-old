@@ -3,6 +3,11 @@
 
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
+import { StateItemAssignLHSContext } from "./CWScriptParser";
+import { StateMapAssignLHSContext } from "./CWScriptParser";
+import { IdentAssignLHSContext } from "./CWScriptParser";
+import { MemberAssignLHSContext } from "./CWScriptParser";
+import { TableAssignLHSContext } from "./CWScriptParser";
 import { StateBlockItemDefnContext } from "./CWScriptParser";
 import { StateBlockMapDefnContext } from "./CWScriptParser";
 import { ForInStmtContext } from "./CWScriptParser";
@@ -27,9 +32,9 @@ import { NormalFnBodyContext } from "./CWScriptParser";
 import { ArrowFnBodyContext } from "./CWScriptParser";
 import { IdentLHSContext } from "./CWScriptParser";
 import { StructUnpackLHSContext } from "./CWScriptParser";
-import { TupleUnpackLHSFrontBackContext } from "./CWScriptParser";
-import { TupleUnpackLHSBackContext } from "./CWScriptParser";
 import { GroupedExprContext } from "./CWScriptParser";
+import { StateItemAccessExprContext } from "./CWScriptParser";
+import { StateMapAccessExprContext } from "./CWScriptParser";
 import { MemberAccessExprContext } from "./CWScriptParser";
 import { TableLookupExprContext } from "./CWScriptParser";
 import { PosArgsFnCallExprContext } from "./CWScriptParser";
@@ -65,8 +70,6 @@ import { ExprStmtContext } from "./CWScriptParser";
 import { SourceFileContext } from "./CWScriptParser";
 import { TopLevelStmtContext } from "./CWScriptParser";
 import { ContractDefnContext } from "./CWScriptParser";
-import { InterfaceListContext } from "./CWScriptParser";
-import { InterfaceValContext } from "./CWScriptParser";
 import { InterfaceDefnContext } from "./CWScriptParser";
 import { ImportStmtContext } from "./CWScriptParser";
 import { ImportListContext } from "./CWScriptParser";
@@ -131,6 +134,10 @@ import { FnBodyContext } from "./CWScriptParser";
 import { StmtContext } from "./CWScriptParser";
 import { LetStmt_Context } from "./CWScriptParser";
 import { LetLHSContext } from "./CWScriptParser";
+import { AssignStmt_Context } from "./CWScriptParser";
+import { AssignLHSContext } from "./CWScriptParser";
+import { InnerAssignContext } from "./CWScriptParser";
+import { InnerPathContext } from "./CWScriptParser";
 import { ExprContext } from "./CWScriptParser";
 import { ValContext } from "./CWScriptParser";
 import { StructVal_Context } from "./CWScriptParser";
@@ -158,6 +165,46 @@ import { ReservedKeywordContext } from "./CWScriptParser";
  * operations with no return type.
  */
 export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> {
+	/**
+	 * Visit a parse tree produced by the `StateItemAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStateItemAssignLHS?: (ctx: StateItemAssignLHSContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `StateMapAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStateMapAssignLHS?: (ctx: StateMapAssignLHSContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `IdentAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIdentAssignLHS?: (ctx: IdentAssignLHSContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `MemberAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitMemberAssignLHS?: (ctx: MemberAssignLHSContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `TableAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTableAssignLHS?: (ctx: TableAssignLHSContext) => Result;
+
 	/**
 	 * Visit a parse tree produced by the `StateBlockItemDefn`
 	 * labeled alternative in `CWScriptParser.stateDefnBlock_item`.
@@ -351,28 +398,28 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitStructUnpackLHS?: (ctx: StructUnpackLHSContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `TupleUnpackLHSFrontBack`
-	 * labeled alternative in `CWScriptParser.letLHS`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitTupleUnpackLHSFrontBack?: (ctx: TupleUnpackLHSFrontBackContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `TupleUnpackLHSBack`
-	 * labeled alternative in `CWScriptParser.letLHS`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitTupleUnpackLHSBack?: (ctx: TupleUnpackLHSBackContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by the `GroupedExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitGroupedExpr?: (ctx: GroupedExprContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `StateItemAccessExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStateItemAccessExpr?: (ctx: StateItemAccessExprContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `StateMapAccessExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStateMapAccessExpr?: (ctx: StateMapAccessExprContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `MemberAccessExpr`
@@ -650,20 +697,6 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitContractDefn?: (ctx: ContractDefnContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CWScriptParser.interfaceList`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitInterfaceList?: (ctx: InterfaceListContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by `CWScriptParser.interfaceVal`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitInterfaceVal?: (ctx: InterfaceValContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CWScriptParser.interfaceDefn`.
@@ -1112,6 +1145,34 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitLetLHS?: (ctx: LetLHSContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CWScriptParser.assignStmt_`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAssignStmt_?: (ctx: AssignStmt_Context) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAssignLHS?: (ctx: AssignLHSContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CWScriptParser.innerAssign`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitInnerAssign?: (ctx: InnerAssignContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CWScriptParser.innerPath`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitInnerPath?: (ctx: InnerPathContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CWScriptParser.expr`.

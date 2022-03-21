@@ -1,0 +1,11 @@
+/Users/william/t1/cwsc/test-cws-runtime/target/debug/deps/libthiserror_impl-3f28d9ed417b7475.dylib: /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/lib.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/ast.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/attr.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/expand.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/fmt.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/prop.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/valid.rs
+
+/Users/william/t1/cwsc/test-cws-runtime/target/debug/deps/thiserror_impl-3f28d9ed417b7475.d: /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/lib.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/ast.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/attr.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/expand.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/fmt.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/prop.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/valid.rs
+
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/lib.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/ast.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/attr.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/expand.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/fmt.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/prop.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.26/src/valid.rs:

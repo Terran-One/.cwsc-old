@@ -52,33 +52,49 @@ export class CWScriptCodegen {
 }
 
 export class AST2IR {
+  translateIdent(ast: AST.Ident): any {
+    new IR.GetRustSymbol(ast.text);
+  }
+
+  translateSpecialVariable(ast: AST.Ext.SpecialVariable): any {
+    new IR.GetRustSymbol(ast.ns + '.' + ast.member);
+  }
+
   translateAssignStmt(ast: AST.AssignStmt): any {
-    if (ast.lhs instanceof AST.Ident) {
-      return {
-        $type: 'AssignIdent',
-        name: ast.lhs.text,
-        rhs: this.translate(ast.rhs),
-      };
+    if (ast.lhs instanceof AST.StateItemAssignLHS) {
+      return new IR.AssignStateItem(ast.lhs.key.text, this.translate(ast.rhs));
     }
 
-    if (ast.lhs instanceof AST.MemberAccessExpr) {
-      return {
-        $type: 'AssignMember',
-        object: this.translate(ast.lhs.lhs),
-        member: ast.lhs.member.text,
-        rhs: this.translate(ast.rhs),
-      };
+    if (ast.lhs instanceof AST.StateMapAssignLHS) {
+      return new IR.AssignStateMap(
+        ast.lhs.key.text,
+        ast.lhs.mapKeys.map(x => this.translate(x)),
+        this.translate(ast.rhs)
+      );
     }
 
-    if (ast.lhs instanceof AST.TableLookupExpr) {
-      if (ast.lhs.lhs instanceof AST.Ext.State)
-        return {
-          $type: 'StateMapSave',
-          key: ast.lhs.lhs.key,
-          mapKey: ast.lhs.key,
-          value: this.translate(ast.rhs),
-        };
+    if (ast.lhs instanceof AST.IdentAssignLHS) {
+      return new IR.AssignIdent(ast.lhs.ident.text, this.translate(ast.rhs));
     }
+
+    if (ast.lhs instanceof AST.MemberAssignLHS) {
+      return new IR.AssignMember(
+        this.translate(ast.lhs.obj),
+        ast.lhs.member.text,
+        this.translate(ast.rhs)
+      );
+    }
+
+    if (ast.lhs instanceof AST.TableAssignLHS) {
+      return new IR.AssignTable(
+        this.translate(ast.lhs.table),
+        this.translate(ast.lhs.key),
+        this.translate(ast.rhs)
+      );
+    }
+
+    // @ts-ignore
+    throw new Error(`unsupported lhs: ${ast.lhs.constructor.name}`);
   }
 
   translate(ast: AST.AST): any {
@@ -127,85 +143,90 @@ export class IR2Rust {
   }
 
   eval(e: IR.IR) {
-    switch (e.$type) {
-      case 'StateMapLoad': {
-        let skUpper = e.key.toUpperCase();
-        let i0 = this.eval(e.mapKey);
-        this.output(skUpper, '.load(&__deps.storage,', '&', i0, ')?');
-        break;
-      }
-      case 'StateMapSave': {
-        let skUpper = e.key.toUpperCase();
-        let i0 = this.eval(e.mapKey);
-        let i1 = this.eval(e.value);
-        this.output(
-          skUpper,
-          '.save(&mut __deps.storage,',
-          '&',
-          i0,
-          ',',
-          '&',
-          i1,
-          ')?'
-        );
-        break;
-      }
-      case 'StateItemLoad': {
-        let skUpper = e.key.toUpperCase();
-        this.output(skUpper, '.load(&deps.storage)?');
-        break;
-      }
-      case 'StateItemSave': {
-        let skUpper = e.key.toUpperCase();
-        let i0 = this.eval(e.value);
-        this.output(skUpper, `.load(&mut deps.storage, &${i0})?`);
-        break;
-      }
-      case 'MemberAccess': {
-        let i0 = this.eval(e.lhs);
-        this.output(i0, '.', e.member, '.clone()');
-        break;
-      }
-      case 'Ident': {
-        this.output('&', e.name);
-        break;
-      }
-      case 'BinaryOp': {
-        let i0 = this.eval(e.lhs);
-        let i1 = this.eval(e.rhs);
-        this.output(i0, ` ${e.op} `, i1);
-        break;
-      }
-      case 'Condition': {
-        let i0 = this.eval(e.predicate);
-        this.cond(i0, e.true_branch, e.false_branch);
-        break;
-      }
-      case 'NoneVal': {
-        this.output('None');
-        break;
-      }
-      case 'Fail': {
-        this.items.push(`return Err(${e.error_type} {});`);
-        break;
-      }
-      case 'MemberAssign': {
-        let i0 = this.eval(e.lhs);
-        let i1 = this.eval(e.rhs);
-        this.items.push(`${i0}.${e.member} = ${i1};`);
-        break;
-      }
-      case 'FnCall': {
-        let i0 = this.eval(e.function);
-        let args = e.args.map(arg => this.eval(arg));
-        this.output(`${i0}(`, args.join(', '), `)`);
-        break;
-      }
-      default:
-        // @ts-ignore
-        throw new Error(`not implemented ${e.$type}`);
+    if (e instanceof IR.GetRustSymbol) {
+      this.output(e.symbol);
+      return;
     }
 
-    return this.lastVar();
+    if (e instanceof IR.AssignStateItem) {
+      let skUpper = e.key.toUpperCase();
+      let i0 = this.eval(e.rhs);
+      this.output(skUpper, `.load(&mut deps.storage, &${i0})?`);
+      return;
+    }
+
+    // case 'StateMapLoad': {
+    //   let skUpper = e.key.toUpperCase();
+    //   let i0 = this.eval(e.mapKey);
+    //   this.output(skUpper, '.load(&__deps.storage,', '&', i0, ')?');
+    //   break;
+    // }
+    // case 'StateMapSave': {
+    //   let skUpper = e.key.toUpperCase();
+    //   let i0 = this.eval(e.mapKey);
+    //   let i1 = this.eval(e.value);
+    //   this.output(
+    //     skUpper,
+    //     '.save(&mut __deps.storage,',
+    //     '&',
+    //     i0,
+    //     ',',
+    //     '&',
+    //     i1,
+    //     ')?'
+    //   );
+    //   break;
+    // }
+    // case 'StateItemLoad': {
+    //   let skUpper = e.key.toUpperCase();
+    //   this.output(skUpper, '.load(&deps.storage)?');
+    //   break;
+    // }
+    // case 'StateItemSave': {
+    //   let skUpper = e.key.toUpperCase();
+    //   let i0 = this.eval(e.value);
+    //   this.output(skUpper, `.load(&mut deps.storage, &${i0})?`);
+    //   break;
+    // }
+    // case 'MemberAccess': {
+    //   let i0 = this.eval(e.lhs);
+    //   this.output(i0, '.', e.member, '.clone()');
+    //   break;
+    // }
+    // case 'Ident': {
+    //   this.output('&', e.name);
+    //   break;
+    // }
+    // case 'BinaryOp': {
+    //   let i0 = this.eval(e.lhs);
+    //   let i1 = this.eval(e.rhs);
+    //   this.output(i0, ` ${e.op} `, i1);
+    //   break;
+    // }
+    // case 'Condition': {
+    //   let i0 = this.eval(e.predicate);
+    //   this.cond(i0, e.true_branch, e.false_branch);
+    //   break;
+    // }
+    // case 'NoneVal': {
+    //   this.output('None');
+    //   break;
+    // }
+    // case 'Fail': {
+    //   this.items.push(`return Err(${e.error_type} {});`);
+    //   break;
+    // }
+    // case 'MemberAssign': {
+    //   let i0 = this.eval(e.lhs);
+    //   let i1 = this.eval(e.rhs);
+    //   this.items.push(`${i0}.${e.member} = ${i1};`);
+    //   break;
+    // }
+    // case 'FnCall': {
+    //   let i0 = this.eval(e.function);
+    //   let args = e.args.map(arg => this.eval(arg));
+    //   this.output(`${i0}(`, args.join(', '), `)`);
+    //   break;
+    // }
   }
 }

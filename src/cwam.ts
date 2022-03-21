@@ -1,5 +1,3 @@
-import { binaryOptions } from 'yaml/types';
-
 let contract = {
   name: 'Cw20Base',
   error: {
@@ -39,13 +37,39 @@ let contract = {
     },
     balances: {
       map: {
-        mapKeys: [{ type: 'Addr' }],
+        key: { type: 'Addr' },
         value: {
           type: 'Uint128',
         },
       },
     },
   },
+  instantiate: {
+    args: {
+      name: { type: 'String' },
+      symbol: { type: 'String' },
+      decimals: { type: 'u8' },
+      initial_balances: { vec: { $symbol: 'Cw20Coin' } },
+    },
+    body: [
+      {
+        let: {
+          name: 'total_supply',
+          value: {},
+        },
+      },
+      {
+        forIn: {
+          bindings: {
+            destructure: '',
+            keys: ['address', 'amount'],
+          },
+          body: [],
+        },
+      },
+    ],
+  },
+  exec: {},
   symbols: {
     TokenInfo: {
       struct: {
@@ -60,24 +84,3 @@ let contract = {
     },
   },
 };
-
-export class CWSContract {
-  protected state: any = {};
-
-  public addStateItem(stateKey: string, itemType: any) {
-    this.state[stateKey] = {
-      item: itemType,
-    };
-  }
-
-  public addStateMap(stateKey: string, mapKeys: any[], mapType: any) {
-    this.state[stateKey] = {
-      map: {
-        mapKeys,
-        mapType,
-      },
-    };
-  }
-}
-
-export class CWSContract {}

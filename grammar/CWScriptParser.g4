@@ -1,7 +1,6 @@
 parser grammar CWScriptParser;
 
 options {
-	language = JavaScript;
 	tokenVocab = CWScriptLexer;
 }
 
@@ -13,19 +12,13 @@ topLevelStmt: contractDefn | interfaceDefn | importStmt;
 contractDefn:
 	(spec = cwspec)? CONTRACT (name = ident) (
 		EXTENDS baseContracts = identList
-	)? (IMPLEMENTS (interfaces = interfaceList))? contractBody;
-
-interfaceList: interfaceVal (COMMA interfaceVal)*;
-
-interfaceVal: (interfaceName = ident) (
-		LBRACK mixins = identList RBRACK
-	)?;
+	)? (IMPLEMENTS (interfaces = identList))? contractBody;
 
 // Interface 
 interfaceDefn:
 	(spec = cwspec)? INTERFACE (name = ident) (
-		LBRACK mixinName = ident RBRACK
-	)? (EXTENDS baseInterfaces = interfaceList)? interfaceBody;
+		EXTENDS baseInterfaces = identList
+	)? interfaceBody;
 
 // Import Statement
 importStmt:
@@ -76,19 +69,28 @@ interfaceItem:
 
 // Errors
 errorDefn: (spec = cwspec)? ERROR enumVariant;
-errorDefnBlock: ERROR LBRACE errorDefnBlock_item* RBRACE;
+errorDefnBlock:
+	ERROR LBRACE (
+		errorDefnBlock_item (COMMA errorDefnBlock_item)* COMMA?
+	)? RBRACE;
 errorDefnBlock_item: (spec = cwspec)? enumVariant;
 
 // Events
 eventDefn: (spec = cwspec)? EVENT enumVariant;
-eventDefnBlock: EVENT LBRACE eventDefnBlock_item* RBRACE;
+eventDefnBlock:
+	EVENT LBRACE (
+		eventDefnBlock_item (COMMA eventDefnBlock_item)* COMMA?
+	)? RBRACE;
 eventDefnBlock_item: (spec = cwspec)? enumVariant;
 
 // State
 stateDefn: (spec = cwspec)? STATE (item = itemDefn)	# StateItemDefn
 	| (spec = cwspec)? STATE map = mapDefn			# StateMapDefn;
 
-stateDefnBlock: STATE LBRACE stateDefnBlock_item* RBRACE;
+stateDefnBlock:
+	STATE LBRACE (
+		stateDefnBlock_item (COMMA stateDefnBlock_item)* COMMA?
+	)? RBRACE;
 stateDefnBlock_item: (spec = cwspec)? (item = itemDefn)	# StateBlockItemDefn
 	| (spec = cwspec)? (map = mapDefn)					# StateBlockMapDefn;
 
@@ -101,9 +103,8 @@ mapDefn:
 		valueType = typeExpr
 	);
 
-mapDefnKeys: mapDefnKey+;
-mapDefnKey:
-	LBRACK (keyName = ident COLON)? (keyType = typeExpr) RBRACK;
+mapDefnKeys: LBRACK mapDefnKey (COMMA mapDefnKey)* RBRACK;
+mapDefnKey: (keyName = ident COLON)? (keyType = typeExpr);
 
 // Instantiate
 instantiateDefn: (spec = cwspec)? INSTANTIATE fnArgs fnType? fnBody;
@@ -195,15 +196,8 @@ fnBody: (LBRACE (stmt)* RBRACE)	# NormalFnBody
 
 // Statements
 stmt:
-	letStmt_ # LetStmt
-	| expr assignOp = (
-		EQ
-		| PLUS_EQ
-		| MINUS_EQ
-		| MUL_EQ
-		| DIV_EQ
-		| MOD_EQ
-	) expr			# AssignStmt
+	letStmt_		# LetStmt
+	| assignStmt_	# AssignStmt
 	| ifExpr_		# IfStmt
 	| forStmt_		# ForStmt
 	| EXEC expr		# ExecStmt
@@ -212,21 +206,40 @@ stmt:
 	| FAIL expr		# FailStmt
 	| expr			# ExprStmt;
 
-// assignLHS: (ident) # IdentLHS | (expr) DOT ident # MemberLHS | STATE DOT ident (LBRACK expr
-// RBRACK)* # StateItemLHS;
-
 letStmt_: LET letLHS EQ expr;
 letLHS:
 	ident (COLON varType = typeExpr)?	# IdentLHS
-	| LBRACE identList RBRACE			# StructUnpackLHS
-	| LPAREN (front = identList) (
-		COMMA DOT DOT DOT back = identList
-	)? RBRACE									# TupleUnpackLHSFrontBack
-	| LPAREN COMMA DOT DOT DOT back = identList	# TupleUnpackLHSBack;
+	| LBRACE identList RBRACE			# StructUnpackLHS;
+
+assignStmt_:
+	lhs = assignLHS assignOp = (
+		EQ
+		| PLUS_EQ
+		| MINUS_EQ
+		| MUL_EQ
+		| DIV_EQ
+		| MOD_EQ
+	) rhs = expr;
+
+assignLHS:
+	STATE DOT key = ident (inner = innerAssign)? # StateItemAssignLHS
+	| STATE DOT key = ident LBRACK (mapKeys += expr) (
+		COMMA mapKeys += expr
+	)* RBRACK (inner = innerAssign)?		# StateMapAssignLHS
+	| ident									# IdentAssignLHS
+	| obj = expr DOT member = ident			# MemberAssignLHS
+	| table = expr LBRACK key = expr RBRACK	# TableAssignLHS;
+
+innerAssign: (DOT paths += innerPath (DOT paths += innerPath)*);
+innerPath: (name = ident) (LBRACK tableKey = expr RBRACK)?;
 
 // Expressions
 expr:
-	LPAREN expr RPAREN							# GroupedExpr
+	LPAREN expr RPAREN		# GroupedExpr
+	| STATE DOT key = ident	# StateItemAccessExpr
+	| STATE DOT key = ident LBRACK (mapKeys += expr) (
+		COMMA mapKeys += expr
+	)* RBRACK									# StateMapAccessExpr
 	| expr DOT ident							# MemberAccessExpr
 	| expr LBRACK expr RBRACK					# TableLookupExpr
 	| expr LPAREN (exprList)? RPAREN			# PosArgsFnCallExpr

@@ -1,9 +1,5 @@
 lexer grammar CWScriptLexer;
 
-options {
-	language = JavaScript;
-}
-
 // KEYWORDS
 CONTRACT: 'contract';
 INTERFACE: 'interface';

@@ -1,212 +1,263 @@
-export interface MemberAssign {
-  $type: 'MemberAssign';
-  lhs: IR;
-  member: string;
-  rhs: IR;
-}
-export interface StateMapLoad {
-  $type: 'StateMapLoad';
-  key: string;
-  mapKey: IR;
-}
-
-export interface StateMapSave {
-  $type: 'StateMapSave';
-  key: string;
-  mapKey: IR;
-  value: IR;
-}
-
-export interface StateItemLoad {
-  $type: 'StateItemLoad';
-  key: string;
-}
-
-export interface StateItemSave {
-  $type: 'StateItemSave';
-  key: string;
-  value: IR;
-}
-
-export interface MemberAccess {
-  $type: 'MemberAccess';
-  lhs: IR;
-  member: string;
-}
-
-export interface Ident {
-  $type: 'Ident';
-  name: string;
-}
-
-export interface BinaryOp {
-  $type: 'BinaryOp';
-  op: string;
-  lhs: IR;
-  rhs: IR;
-}
-
-export interface FnCall {
-  $type: 'FnCall';
-  function: IR;
-  args: IR[];
-}
-
-export interface EmitEvent {
-  $type: 'EmitEvent';
-  event_type: IR;
-  event_attrs: IR[];
-}
-
-export interface NoneVal {
-  $type: 'NoneVal';
-}
-
-export interface Fail {
-  $type: 'Fail';
-  error_type: string;
-  error_args: IR[];
-}
-
-export interface Condition {
-  $type: 'Condition';
-  predicate: IR;
-  true_branch: IR;
-  false_branch: IR;
-}
-
 export type IR =
-  | MemberAssign
-  | StateItemLoad
-  | StateItemSave
-  | StateMapLoad
-  | StateMapSave
-  | FnCall
-  | MemberAccess
-  | Ident
-  | BinaryOp
+  | InfixOp
   | Condition
-  | NoneVal
-  | Fail;
+  | FnCall
+  | ValNone
+  | Fail
+  | EmitEvent
+  | AssignIdent
+  | AssignMember
+  | AssignStateItem
+  | AssignStateMap
+  | AssignTable
+  | GetRustSymbol
+  | GetStructMember;
 
-export class TranspilerCtx {
-  constructor(public items: any[] = [], public tmpVarCount: number = 0) {}
+export class BaseIR {
+  public $type: string = '<BaseIR>';
 
-  makeTmpVar() {
-    return `__${this.tmpVarCount++}`;
+  toData(): any {
+    return {
+      $type: this.$type,
+    };
+  }
+}
+
+export class InfixOp extends BaseIR {
+  public $type: string = 'op.infix';
+
+  // it is confusing, I know...
+  // that 1 + 2 -> InfixOp(+, 1, 2)
+  constructor(public op: string, public lhs: BaseIR, public rhs: BaseIR) {
+    super();
   }
 
-  lastVar() {
-    return `__${this.tmpVarCount - 1}`;
+  toData(): any {
+    return {
+      $type: this.$type,
+      op: this.op,
+      lhs: this.lhs.toData(),
+      rhs: this.rhs.toData(),
+    };
+  }
+}
+
+export class Condition extends BaseIR {
+  public $type: string = 'condition';
+
+  constructor(
+    public predicate: BaseIR,
+    public trueBranch: BaseIR[],
+    public falseBranch?: BaseIR[]
+  ) {
+    super();
   }
 
-  eval(expr: IR): string {
-    this.translateToRust(expr);
-    return `${this.lastVar()}`;
+  toData() {
+    return {
+      $type: this.$type,
+      predicate: this.predicate.toData(),
+      trueBranch: this.trueBranch.map(x => x.toData()),
+      falseBranch: this.falseBranch?.map(x => x.toData()),
+    };
+  }
+}
+export class FnCall extends BaseIR {
+  public $type: string = 'fn-call';
+
+  constructor(public fn: BaseIR, public args: BaseIR[]) {
+    super();
   }
 
-  output(...items: any) {
-    let out = this.makeTmpVar();
-    this.items.push(`let ${out} = ${items.join('')};`);
+  toData() {
+    return {
+      $type: this.$type,
+      fn: this.fn.toData(),
+      args: this.args.map(x => x.toData()),
+    };
+  }
+}
+
+export class ValNone extends BaseIR {
+  public $type: string = 'val.none';
+}
+
+export class Fail extends BaseIR {
+  public $type: string = 'fail';
+
+  constructor(public typeName: string, public args: BaseIR[]) {
+    super();
   }
 
-  cond(predicate: any, true_branch: any, false_branch: any) {
-    let true_ctx = new TranspilerCtx();
-    let false_ctx = new TranspilerCtx();
-    let i0 = true_ctx.transpile(true_branch);
-    let res = `if (${predicate}) {\n${i0}\n}`;
-    if (!!false_branch) {
-      let i1 = false_ctx.transpile(false_branch);
-      res += ` else {\n${i1}\n}`;
-    }
-    this.items.push(res);
+  toData() {
+    return {
+      ...super.toData(),
+      typeName: this.typeName,
+      args: this.args.map(x => x.toData()),
+    };
+  }
+}
+
+export class EmitEvent extends BaseIR {
+  public $type: string = 'emit-event';
+
+  constructor(public typeName: string, public args: BaseIR[]) {
+    super();
   }
 
-  transpile(items: IR[]): string {
-    items.forEach(item => {
-      this.eval(item);
-    });
-    return this.items.join('\n');
+  toData(): any {
+    return {
+      ...super.toData(),
+      typeName: this.typeName,
+      args: this.args.map(x => x.toData()),
+    };
+  }
+}
+
+export class AssignIdent extends BaseIR {
+  public $type: string = 'assign.ident';
+
+  constructor(public ident: string, public rhs: BaseIR) {
+    super();
   }
 
-  translateToRust(e: IR) {
-    switch (e.$type) {
-      case 'StateMapLoad': {
-        let skUpper = e.key.toUpperCase();
-        let i0 = this.eval(e.mapKey);
-        this.output(skUpper, '.load(&__deps.storage,', '&', i0, ')?');
-        break;
-      }
-      case 'StateMapSave': {
-        let skUpper = e.key.toUpperCase();
-        let i0 = this.eval(e.mapKey);
-        let i1 = this.eval(e.value);
-        this.output(
-          skUpper,
-          '.save(&mut __deps.storage,',
-          '&',
-          i0,
-          ',',
-          '&',
-          i1,
-          ')?'
-        );
-        break;
-      }
-      case 'StateItemLoad': {
-        let skUpper = e.key.toUpperCase();
-        this.output(skUpper, '.load(&deps.storage)?');
-        break;
-      }
-      case 'StateItemSave': {
-        let skUpper = e.key.toUpperCase();
-        let i0 = this.eval(e.value);
-        this.output(skUpper, `.load(&mut deps.storage, &${i0})?`);
-        break;
-      }
-      case 'MemberAccess': {
-        let i0 = this.eval(e.lhs);
-        this.output(i0, '.', e.member, '.clone()');
-        break;
-      }
-      case 'Ident': {
-        this.output('&', e.name);
-        break;
-      }
-      case 'BinaryOp': {
-        let i0 = this.eval(e.lhs);
-        let i1 = this.eval(e.rhs);
-        this.output(i0, ` ${e.op} `, i1);
-        break;
-      }
-      case 'Condition': {
-        let i0 = this.eval(e.predicate);
-        this.cond(i0, e.true_branch, e.false_branch);
-        break;
-      }
-      case 'NoneVal': {
-        this.output('None');
-        break;
-      }
-      case 'Fail': {
-        this.items.push(`return Err(${e.error_type} {});`);
-        break;
-      }
-      case 'MemberAssign': {
-        let i0 = this.eval(e.lhs);
-        let i1 = this.eval(e.rhs);
-        this.items.push(`${i0}.${e.member} = ${i1};`);
-        break;
-      }
-      case 'FnCall': {
-        let i0 = this.eval(e.function);
-        let args = e.args.map(arg => this.eval(arg));
-        this.output(`${i0}(`, args.join(', '), `)`);
-        break;
-      }
-      default:
-        // @ts-ignore
-        throw new Error(`not implemented ${e.$type}`);
-    }
+  toData(): any {
+    return {
+      ...super.toData(),
+      ident: this.ident,
+      rhs: this.rhs.toData(),
+    };
+  }
+}
+
+export class AssignMember extends BaseIR {
+  public $type: string = 'assign.member';
+
+  constructor(public obj: BaseIR, public member: string, public rhs: BaseIR) {
+    super();
+  }
+
+  toData(): any {
+    return {
+      ...super.toData(),
+      obj: this.obj.toData(),
+      member: this.member,
+      rhs: this.rhs.toData(),
+    };
+  }
+}
+
+export class AssignTable extends BaseIR {
+  public $type: string = 'assign.table';
+
+  constructor(public table: BaseIR, public key: BaseIR, public rhs: BaseIR) {
+    super();
+  }
+
+  toData(): any {
+    return {
+      ...super.toData(),
+      table: this.table.toData(),
+      key: this.key.toData(),
+      rhs: this.rhs.toData(),
+    };
+  }
+}
+
+export class AssignStateMap extends BaseIR {
+  public $type: string = 'assign.state.map';
+
+  constructor(
+    public key: string,
+    public mapKeys: BaseIR[],
+    public rhs: BaseIR
+  ) {
+    super();
+  }
+
+  toData() {
+    return {
+      $type: this.$type,
+      key: this.key,
+      mapKeys: this.mapKeys.map(k => k.toData()),
+      rhs: this.rhs.toData(),
+    };
+  }
+}
+
+export class AssignStateItem extends BaseIR {
+  public $type: string = 'assign.state.item';
+
+  constructor(public key: string, public rhs: BaseIR) {
+    super();
+  }
+
+  toData() {
+    return {
+      $type: this.$type,
+      key: this.key,
+      rhs: this.rhs.toData(),
+    };
+  }
+}
+
+export class GetStructMember extends BaseIR {
+  public $type: string = 'get.struct-member';
+
+  constructor(public obj: BaseIR, public member: string) {
+    super();
+  }
+
+  toData() {
+    return {
+      $type: this.$type,
+      obj: this.obj.toData(),
+      member: this.member,
+    };
+  }
+}
+
+export class GetRustSymbol extends BaseIR {
+  public $type: string = 'get.rust-symbol';
+
+  constructor(public symbol: string) {
+    super();
+  }
+
+  toData() {
+    return {
+      $type: this.$type,
+      symbol: this.symbol,
+    };
+  }
+}
+export class LoadStateMap extends BaseIR {
+  public $type: string = 'load.state.map';
+
+  constructor(public key: string, public mapKeys: BaseIR[]) {
+    super();
+  }
+
+  toData() {
+    return {
+      $type: this.$type,
+      key: this.key,
+      mapKeys: this.mapKeys.map(k => k.toData()),
+    };
+  }
+}
+
+export class LoadStateItem extends BaseIR {
+  public $type: string = 'load.state.item';
+
+  constructor(public key: string) {
+    super();
+  }
+
+  toData() {
+    return {
+      $type: this.$type,
+      key: this.key,
+    };
   }
 }

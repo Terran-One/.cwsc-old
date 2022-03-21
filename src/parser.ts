@@ -1,5 +1,4 @@
 import { CWScriptParser } from './grammar/CWScriptParser';
-// import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { CWScriptLexer } from './grammar/CWScriptLexer';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import * as AST from './ast';

@@ -1,0 +1,3930 @@
+{
+  "$type": "SourceFile",
+  "$position": {
+    "a": 0,
+    "b": 2024,
+    "line": 1,
+    "column": 0
+  },
+  "stmts": {
+    "$type": "List",
+    "$position": {},
+    "elements": [
+      {
+        "$type": "ContractDefn",
+        "$position": {
+          "a": 0,
+          "b": 2023,
+          "line": 1,
+          "column": 0
+        },
+        "name": {
+          "$type": "Ident",
+          "$position": {
+            "a": 9,
+            "b": 16,
+            "length": 8,
+            "line": 1,
+            "column": 9
+          },
+          "text": "CW20Base"
+        },
+        "body": {
+          "$type": "List",
+          "$position": {
+            "a": 18,
+            "b": 2023,
+            "length": 2006,
+            "line": 1,
+            "column": 18
+          },
+          "elements": [
+            {
+              "$type": "ErrorDefn",
+              "$position": {
+                "a": 29,
+                "b": 53,
+                "length": 25,
+                "line": 3,
+                "column": 4
+              },
+              "enumVariant": {
+                "$type": "EnumVariantStruct",
+                "$position": {
+                  "a": 35,
+                  "b": 53,
+                  "length": 19,
+                  "line": 3,
+                  "column": 10
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 35,
+                    "b": 51,
+                    "length": 17,
+                    "line": 3,
+                    "column": 10
+                  },
+                  "text": "InvalidZeroAmount"
+                },
+                "members": {
+                  "$type": "List",
+                  "$position": {
+                    "a": 52,
+                    "b": 53,
+                    "length": 2,
+                    "line": 3,
+                    "column": 27
+                  },
+                  "elements": []
+                }
+              }
+            },
+            {
+              "$type": "ErrorDefn",
+              "$position": {
+                "a": 59,
+                "b": 78,
+                "length": 20,
+                "line": 4,
+                "column": 4
+              },
+              "enumVariant": {
+                "$type": "EnumVariantStruct",
+                "$position": {
+                  "a": 65,
+                  "b": 78,
+                  "length": 14,
+                  "line": 4,
+                  "column": 10
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 65,
+                    "b": 76,
+                    "length": 12,
+                    "line": 4,
+                    "column": 10
+                  },
+                  "text": "Unauthorized"
+                },
+                "members": {
+                  "$type": "List",
+                  "$position": {
+                    "a": 77,
+                    "b": 78,
+                    "length": 2,
+                    "line": 4,
+                    "column": 22
+                  },
+                  "elements": []
+                }
+              }
+            },
+            {
+              "$type": "EventDefn",
+              "$position": {
+                "a": 85,
+                "b": 146,
+                "length": 62,
+                "line": 6,
+                "column": 4
+              },
+              "enumVariant": {
+                "$type": "EnumVariantStruct",
+                "$position": {
+                  "a": 91,
+                  "b": 146,
+                  "length": 56,
+                  "line": 6,
+                  "column": 10
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 91,
+                    "b": 98,
+                    "length": 8,
+                    "line": 6,
+                    "column": 10
+                  },
+                  "text": "Transfer"
+                },
+                "members": {
+                  "$type": "List",
+                  "$position": {
+                    "a": 99,
+                    "b": 146,
+                    "length": 48,
+                    "line": 6,
+                    "column": 18
+                  },
+                  "elements": [
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 100,
+                        "b": 111,
+                        "length": 12,
+                        "line": 6,
+                        "column": 19
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 100,
+                          "b": 105,
+                          "length": 6,
+                          "line": 6,
+                          "column": 19
+                        },
+                        "text": "sender"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 108,
+                          "b": 111,
+                          "length": 4,
+                          "line": 6,
+                          "column": 27
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 108,
+                            "b": 111,
+                            "length": 4,
+                            "line": 6,
+                            "column": 27
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 108,
+                                "b": 111,
+                                "length": 4,
+                                "line": 6,
+                                "column": 27
+                              },
+                              "text": "Addr"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 114,
+                        "b": 128,
+                        "length": 15,
+                        "line": 6,
+                        "column": 33
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 114,
+                          "b": 122,
+                          "length": 9,
+                          "line": 6,
+                          "column": 33
+                        },
+                        "text": "recipient"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 125,
+                          "b": 128,
+                          "length": 4,
+                          "line": 6,
+                          "column": 44
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 125,
+                            "b": 128,
+                            "length": 4,
+                            "line": 6,
+                            "column": 44
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 125,
+                                "b": 128,
+                                "length": 4,
+                                "line": 6,
+                                "column": 44
+                              },
+                              "text": "Addr"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 131,
+                        "b": 145,
+                        "length": 15,
+                        "line": 6,
+                        "column": 50
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 131,
+                          "b": 136,
+                          "length": 6,
+                          "line": 6,
+                          "column": 50
+                        },
+                        "text": "amount"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 139,
+                          "b": 145,
+                          "length": 7,
+                          "line": 6,
+                          "column": 58
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 139,
+                            "b": 145,
+                            "length": 7,
+                            "line": 6,
+                            "column": 58
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 139,
+                                "b": 145,
+                                "length": 7,
+                                "line": 6,
+                                "column": 58
+                              },
+                              "text": "Uint128"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "$type": "EventDefn",
+              "$position": {
+                "a": 152,
+                "b": 192,
+                "length": 41,
+                "line": 7,
+                "column": 4
+              },
+              "enumVariant": {
+                "$type": "EnumVariantStruct",
+                "$position": {
+                  "a": 158,
+                  "b": 192,
+                  "length": 35,
+                  "line": 7,
+                  "column": 10
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 158,
+                    "b": 161,
+                    "length": 4,
+                    "line": 7,
+                    "column": 10
+                  },
+                  "text": "Burn"
+                },
+                "members": {
+                  "$type": "List",
+                  "$position": {
+                    "a": 162,
+                    "b": 192,
+                    "length": 31,
+                    "line": 7,
+                    "column": 14
+                  },
+                  "elements": [
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 163,
+                        "b": 174,
+                        "length": 12,
+                        "line": 7,
+                        "column": 15
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 163,
+                          "b": 168,
+                          "length": 6,
+                          "line": 7,
+                          "column": 15
+                        },
+                        "text": "sender"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 171,
+                          "b": 174,
+                          "length": 4,
+                          "line": 7,
+                          "column": 23
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 171,
+                            "b": 174,
+                            "length": 4,
+                            "line": 7,
+                            "column": 23
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 171,
+                                "b": 174,
+                                "length": 4,
+                                "line": 7,
+                                "column": 23
+                              },
+                              "text": "Addr"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 177,
+                        "b": 191,
+                        "length": 15,
+                        "line": 7,
+                        "column": 29
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 177,
+                          "b": 182,
+                          "length": 6,
+                          "line": 7,
+                          "column": 29
+                        },
+                        "text": "amount"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 185,
+                          "b": 191,
+                          "length": 7,
+                          "line": 7,
+                          "column": 37
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 185,
+                            "b": 191,
+                            "length": 7,
+                            "line": 7,
+                            "column": 37
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 185,
+                                "b": 191,
+                                "length": 7,
+                                "line": 7,
+                                "column": 37
+                              },
+                              "text": "Uint128"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "$type": "EventDefn",
+              "$position": {
+                "a": 198,
+                "b": 255,
+                "length": 58,
+                "line": 8,
+                "column": 4
+              },
+              "enumVariant": {
+                "$type": "EnumVariantStruct",
+                "$position": {
+                  "a": 204,
+                  "b": 255,
+                  "length": 52,
+                  "line": 8,
+                  "column": 10
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 204,
+                    "b": 207,
+                    "length": 4,
+                    "line": 8,
+                    "column": 10
+                  },
+                  "text": "Mint"
+                },
+                "members": {
+                  "$type": "List",
+                  "$position": {
+                    "a": 208,
+                    "b": 255,
+                    "length": 48,
+                    "line": 8,
+                    "column": 14
+                  },
+                  "elements": [
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 209,
+                        "b": 220,
+                        "length": 12,
+                        "line": 8,
+                        "column": 15
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 209,
+                          "b": 214,
+                          "length": 6,
+                          "line": 8,
+                          "column": 15
+                        },
+                        "text": "minter"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 217,
+                          "b": 220,
+                          "length": 4,
+                          "line": 8,
+                          "column": 23
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 217,
+                            "b": 220,
+                            "length": 4,
+                            "line": 8,
+                            "column": 23
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 217,
+                                "b": 220,
+                                "length": 4,
+                                "line": 8,
+                                "column": 23
+                              },
+                              "text": "Addr"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 223,
+                        "b": 237,
+                        "length": 15,
+                        "line": 8,
+                        "column": 29
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 223,
+                          "b": 231,
+                          "length": 9,
+                          "line": 8,
+                          "column": 29
+                        },
+                        "text": "recipient"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 234,
+                          "b": 237,
+                          "length": 4,
+                          "line": 8,
+                          "column": 40
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 234,
+                            "b": 237,
+                            "length": 4,
+                            "line": 8,
+                            "column": 40
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 234,
+                                "b": 237,
+                                "length": 4,
+                                "line": 8,
+                                "column": 40
+                              },
+                              "text": "Addr"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 240,
+                        "b": 254,
+                        "length": 15,
+                        "line": 8,
+                        "column": 46
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 240,
+                          "b": 245,
+                          "length": 6,
+                          "line": 8,
+                          "column": 46
+                        },
+                        "text": "amount"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 248,
+                          "b": 254,
+                          "length": 7,
+                          "line": 8,
+                          "column": 54
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 248,
+                            "b": 254,
+                            "length": 7,
+                            "line": 8,
+                            "column": 54
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 248,
+                                "b": 254,
+                                "length": 7,
+                                "line": 8,
+                                "column": 54
+                              },
+                              "text": "Uint128"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "$type": "EventDefn",
+              "$position": {
+                "a": 261,
+                "b": 317,
+                "length": 57,
+                "line": 9,
+                "column": 4
+              },
+              "enumVariant": {
+                "$type": "EnumVariantStruct",
+                "$position": {
+                  "a": 267,
+                  "b": 317,
+                  "length": 51,
+                  "line": 9,
+                  "column": 10
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 267,
+                    "b": 270,
+                    "length": 4,
+                    "line": 9,
+                    "column": 10
+                  },
+                  "text": "Send"
+                },
+                "members": {
+                  "$type": "List",
+                  "$position": {
+                    "a": 271,
+                    "b": 317,
+                    "length": 47,
+                    "line": 9,
+                    "column": 14
+                  },
+                  "elements": [
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 272,
+                        "b": 283,
+                        "length": 12,
+                        "line": 9,
+                        "column": 15
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 272,
+                          "b": 277,
+                          "length": 6,
+                          "line": 9,
+                          "column": 15
+                        },
+                        "text": "sender"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 280,
+                          "b": 283,
+                          "length": 4,
+                          "line": 9,
+                          "column": 23
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 280,
+                            "b": 283,
+                            "length": 4,
+                            "line": 9,
+                            "column": 23
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 280,
+                                "b": 283,
+                                "length": 4,
+                                "line": 9,
+                                "column": 23
+                              },
+                              "text": "Addr"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 286,
+                        "b": 299,
+                        "length": 14,
+                        "line": 9,
+                        "column": 29
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 286,
+                          "b": 293,
+                          "length": 8,
+                          "line": 9,
+                          "column": 29
+                        },
+                        "text": "contract"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 296,
+                          "b": 299,
+                          "length": 4,
+                          "line": 9,
+                          "column": 39
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 296,
+                            "b": 299,
+                            "length": 4,
+                            "line": 9,
+                            "column": 39
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 296,
+                                "b": 299,
+                                "length": 4,
+                                "line": 9,
+                                "column": 39
+                              },
+                              "text": "Addr"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 302,
+                        "b": 316,
+                        "length": 15,
+                        "line": 9,
+                        "column": 45
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 302,
+                          "b": 307,
+                          "length": 6,
+                          "line": 9,
+                          "column": 45
+                        },
+                        "text": "amount"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 310,
+                          "b": 316,
+                          "length": 7,
+                          "line": 9,
+                          "column": 53
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 310,
+                            "b": 316,
+                            "length": 7,
+                            "line": 9,
+                            "column": 53
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 310,
+                                "b": 316,
+                                "length": 7,
+                                "line": 9,
+                                "column": 53
+                              },
+                              "text": "Uint128"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "$type": "StructDefn",
+              "$position": {
+                "a": 324,
+                "b": 446,
+                "length": 123,
+                "line": 11,
+                "column": 4
+              },
+              "name": {
+                "$type": "Ident",
+                "$position": {
+                  "a": 331,
+                  "b": 339,
+                  "length": 9,
+                  "line": 11,
+                  "column": 11
+                },
+                "text": "TokenInfo"
+              },
+              "enumVariant": {
+                "$type": "EnumVariantStruct",
+                "$position": {
+                  "a": 331,
+                  "b": 446,
+                  "length": 116,
+                  "line": 11,
+                  "column": 11
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 331,
+                    "b": 339,
+                    "length": 9,
+                    "line": 11,
+                    "column": 11
+                  },
+                  "text": "TokenInfo"
+                },
+                "members": {
+                  "$type": "List",
+                  "$position": {
+                    "a": 341,
+                    "b": 446,
+                    "length": 106,
+                    "line": 11,
+                    "column": 21
+                  },
+                  "elements": [
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 351,
+                        "b": 362,
+                        "length": 12,
+                        "line": 12,
+                        "column": 8
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 351,
+                          "b": 354,
+                          "length": 4,
+                          "line": 12,
+                          "column": 8
+                        },
+                        "text": "name"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 357,
+                          "b": 362,
+                          "length": 6,
+                          "line": 12,
+                          "column": 14
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 357,
+                            "b": 362,
+                            "length": 6,
+                            "line": 12,
+                            "column": 14
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 357,
+                                "b": 362,
+                                "length": 6,
+                                "line": 12,
+                                "column": 14
+                              },
+                              "text": "String"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 373,
+                        "b": 386,
+                        "length": 14,
+                        "line": 13,
+                        "column": 8
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 373,
+                          "b": 378,
+                          "length": 6,
+                          "line": 13,
+                          "column": 8
+                        },
+                        "text": "symbol"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 381,
+                          "b": 386,
+                          "length": 6,
+                          "line": 13,
+                          "column": 16
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 381,
+                            "b": 386,
+                            "length": 6,
+                            "line": 13,
+                            "column": 16
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 381,
+                                "b": 386,
+                                "length": 6,
+                                "line": 13,
+                                "column": 16
+                              },
+                              "text": "String"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 397,
+                        "b": 408,
+                        "length": 12,
+                        "line": 14,
+                        "column": 8
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 397,
+                          "b": 404,
+                          "length": 8,
+                          "line": 14,
+                          "column": 8
+                        },
+                        "text": "decimals"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 407,
+                          "b": 408,
+                          "length": 2,
+                          "line": 14,
+                          "column": 18
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 407,
+                            "b": 408,
+                            "length": 2,
+                            "line": 14,
+                            "column": 18
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 407,
+                                "b": 408,
+                                "length": 2,
+                                "line": 14,
+                                "column": 18
+                              },
+                              "text": "u8"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$type": "StructMember",
+                      "$position": {
+                        "a": 419,
+                        "b": 439,
+                        "length": 21,
+                        "line": 15,
+                        "column": 8
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 419,
+                          "b": 430,
+                          "length": 12,
+                          "line": 15,
+                          "column": 8
+                        },
+                        "text": "total_supply"
+                      },
+                      "option": false,
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 433,
+                          "b": 439,
+                          "length": 7,
+                          "line": 15,
+                          "column": 22
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 433,
+                            "b": 439,
+                            "length": 7,
+                            "line": 15,
+                            "column": 22
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 433,
+                                "b": 439,
+                                "length": 7,
+                                "line": 15,
+                                "column": 22
+                              },
+                              "text": "Uint128"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "$type": "List",
+              "$position": {
+                "a": 453,
+                "b": 528,
+                "length": 76,
+                "line": 18,
+                "column": 4
+              },
+              "elements": [
+                {
+                  "$type": "ItemDefn",
+                  "$position": {},
+                  "key": {
+                    "$type": "Ident",
+                    "$position": {
+                      "a": 469,
+                      "b": 478,
+                      "length": 10,
+                      "line": 19,
+                      "column": 8
+                    },
+                    "text": "token_info"
+                  },
+                  "type": {
+                    "$type": "TypePath",
+                    "$position": {
+                      "a": 481,
+                      "b": 489,
+                      "length": 9,
+                      "line": 19,
+                      "column": 20
+                    },
+                    "root": false,
+                    "paths": {
+                      "$type": "List",
+                      "$position": {
+                        "a": 481,
+                        "b": 489,
+                        "length": 9,
+                        "line": 19,
+                        "column": 20
+                      },
+                      "elements": [
+                        {
+                          "$type": "Ident",
+                          "$position": {
+                            "a": 481,
+                            "b": 489,
+                            "length": 9,
+                            "line": 19,
+                            "column": 20
+                          },
+                          "text": "TokenInfo"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "$type": "MapDefn",
+                  "$position": {},
+                  "key": {
+                    "$type": "Ident",
+                    "$position": {
+                      "a": 500,
+                      "b": 507,
+                      "length": 8,
+                      "line": 20,
+                      "column": 8
+                    },
+                    "text": "balances"
+                  },
+                  "type": {
+                    "$type": "TypePath",
+                    "$position": {
+                      "a": 516,
+                      "b": 522,
+                      "length": 7,
+                      "line": 20,
+                      "column": 24
+                    },
+                    "root": false,
+                    "paths": {
+                      "$type": "List",
+                      "$position": {
+                        "a": 516,
+                        "b": 522,
+                        "length": 7,
+                        "line": 20,
+                        "column": 24
+                      },
+                      "elements": [
+                        {
+                          "$type": "Ident",
+                          "$position": {
+                            "a": 516,
+                            "b": 522,
+                            "length": 7,
+                            "line": 20,
+                            "column": 24
+                          },
+                          "text": "Uint128"
+                        }
+                      ]
+                    }
+                  },
+                  "mapKeys": {
+                    "$type": "List",
+                    "$position": {
+                      "a": 508,
+                      "b": 513,
+                      "length": 6,
+                      "line": 20,
+                      "column": 16
+                    },
+                    "elements": [
+                      {
+                        "$type": "MapDefnKey",
+                        "$position": {
+                          "a": 509,
+                          "b": 512,
+                          "length": 4,
+                          "line": 20,
+                          "column": 17
+                        },
+                        "type": {
+                          "$type": "TypePath",
+                          "$position": {
+                            "a": 509,
+                            "b": 512,
+                            "length": 4,
+                            "line": 20,
+                            "column": 17
+                          },
+                          "root": false,
+                          "paths": {
+                            "$type": "List",
+                            "$position": {
+                              "a": 509,
+                              "b": 512,
+                              "length": 4,
+                              "line": 20,
+                              "column": 17
+                            },
+                            "elements": [
+                              {
+                                "$type": "Ident",
+                                "$position": {
+                                  "a": 509,
+                                  "b": 512,
+                                  "length": 4,
+                                  "line": 20,
+                                  "column": 17
+                                },
+                                "text": "Addr"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "$type": "InstantiateDefn",
+              "$position": {
+                "a": 539,
+                "b": 1100,
+                "length": 562,
+                "line": 23,
+                "column": 4
+              },
+              "args": {
+                "$type": "List",
+                "$position": {
+                  "a": 550,
+                  "b": 726,
+                  "length": 177,
+                  "line": 23,
+                  "column": 15
+                },
+                "elements": [
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 560,
+                      "b": 571,
+                      "length": 12,
+                      "line": 24,
+                      "column": 8
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 560,
+                        "b": 563,
+                        "length": 4,
+                        "line": 24,
+                        "column": 8
+                      },
+                      "text": "name"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 566,
+                        "b": 571,
+                        "length": 6,
+                        "line": 24,
+                        "column": 14
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 566,
+                          "b": 571,
+                          "length": 6,
+                          "line": 24,
+                          "column": 14
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 566,
+                              "b": 571,
+                              "length": 6,
+                              "line": 24,
+                              "column": 14
+                            },
+                            "text": "String"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 582,
+                      "b": 595,
+                      "length": 14,
+                      "line": 25,
+                      "column": 8
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 582,
+                        "b": 587,
+                        "length": 6,
+                        "line": 25,
+                        "column": 8
+                      },
+                      "text": "symbol"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 590,
+                        "b": 595,
+                        "length": 6,
+                        "line": 25,
+                        "column": 16
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 590,
+                          "b": 595,
+                          "length": 6,
+                          "line": 25,
+                          "column": 16
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 590,
+                              "b": 595,
+                              "length": 6,
+                              "line": 25,
+                              "column": 16
+                            },
+                            "text": "String"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 606,
+                      "b": 617,
+                      "length": 12,
+                      "line": 26,
+                      "column": 8
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 606,
+                        "b": 613,
+                        "length": 8,
+                        "line": 26,
+                        "column": 8
+                      },
+                      "text": "decimals"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 616,
+                        "b": 617,
+                        "length": 2,
+                        "line": 26,
+                        "column": 18
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 616,
+                          "b": 617,
+                          "length": 2,
+                          "line": 26,
+                          "column": 18
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 616,
+                              "b": 617,
+                              "length": 2,
+                              "line": 26,
+                              "column": 18
+                            },
+                            "text": "u8"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 628,
+                      "b": 697,
+                      "length": 70,
+                      "line": 27,
+                      "column": 8
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 628,
+                        "b": 643,
+                        "length": 16,
+                        "line": 27,
+                        "column": 8
+                      },
+                      "text": "initial_balances"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "ShortVecTypeExpr",
+                      "$position": {
+                        "a": 646,
+                        "b": 697,
+                        "length": 52,
+                        "line": 27,
+                        "column": 26
+                      },
+                      "type": {
+                        "$type": "StructDefn",
+                        "$position": {
+                          "a": 646,
+                          "b": 695,
+                          "length": 50,
+                          "line": 27,
+                          "column": 26
+                        },
+                        "name": {
+                          "$type": "Ident",
+                          "$position": {
+                            "a": 653,
+                            "b": 660,
+                            "length": 8,
+                            "line": 27,
+                            "column": 33
+                          },
+                          "text": "Cw20Coin"
+                        },
+                        "enumVariant": {
+                          "$type": "EnumVariantStruct",
+                          "$position": {
+                            "a": 653,
+                            "b": 695,
+                            "length": 43,
+                            "line": 27,
+                            "column": 33
+                          },
+                          "name": {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 653,
+                              "b": 660,
+                              "length": 8,
+                              "line": 27,
+                              "column": 33
+                            },
+                            "text": "Cw20Coin"
+                          },
+                          "members": {
+                            "$type": "List",
+                            "$position": {
+                              "a": 662,
+                              "b": 695,
+                              "length": 34,
+                              "line": 27,
+                              "column": 42
+                            },
+                            "elements": [
+                              {
+                                "$type": "StructMember",
+                                "$position": {
+                                  "a": 664,
+                                  "b": 676,
+                                  "length": 13,
+                                  "line": 27,
+                                  "column": 44
+                                },
+                                "name": {
+                                  "$type": "Ident",
+                                  "$position": {
+                                    "a": 664,
+                                    "b": 670,
+                                    "length": 7,
+                                    "line": 27,
+                                    "column": 44
+                                  },
+                                  "text": "address"
+                                },
+                                "option": false,
+                                "type": {
+                                  "$type": "TypePath",
+                                  "$position": {
+                                    "a": 673,
+                                    "b": 676,
+                                    "length": 4,
+                                    "line": 27,
+                                    "column": 53
+                                  },
+                                  "root": false,
+                                  "paths": {
+                                    "$type": "List",
+                                    "$position": {
+                                      "a": 673,
+                                      "b": 676,
+                                      "length": 4,
+                                      "line": 27,
+                                      "column": 53
+                                    },
+                                    "elements": [
+                                      {
+                                        "$type": "Ident",
+                                        "$position": {
+                                          "a": 673,
+                                          "b": 676,
+                                          "length": 4,
+                                          "line": 27,
+                                          "column": 53
+                                        },
+                                        "text": "Addr"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "$type": "StructMember",
+                                "$position": {
+                                  "a": 679,
+                                  "b": 693,
+                                  "length": 15,
+                                  "line": 27,
+                                  "column": 59
+                                },
+                                "name": {
+                                  "$type": "Ident",
+                                  "$position": {
+                                    "a": 679,
+                                    "b": 684,
+                                    "length": 6,
+                                    "line": 27,
+                                    "column": 59
+                                  },
+                                  "text": "amount"
+                                },
+                                "option": false,
+                                "type": {
+                                  "$type": "TypePath",
+                                  "$position": {
+                                    "a": 687,
+                                    "b": 693,
+                                    "length": 7,
+                                    "line": 27,
+                                    "column": 67
+                                  },
+                                  "root": false,
+                                  "paths": {
+                                    "$type": "List",
+                                    "$position": {
+                                      "a": 687,
+                                      "b": 693,
+                                      "length": 7,
+                                      "line": 27,
+                                      "column": 67
+                                    },
+                                    "elements": [
+                                      {
+                                        "$type": "Ident",
+                                        "$position": {
+                                          "a": 687,
+                                          "b": 693,
+                                          "length": 7,
+                                          "line": 27,
+                                          "column": 67
+                                        },
+                                        "text": "Uint128"
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 708,
+                      "b": 720,
+                      "length": 13,
+                      "line": 28,
+                      "column": 8
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 708,
+                        "b": 711,
+                        "length": 4,
+                        "line": 28,
+                        "column": 8
+                      },
+                      "text": "mint"
+                    },
+                    "option": true,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 715,
+                        "b": 720,
+                        "length": 6,
+                        "line": 28,
+                        "column": 15
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 715,
+                          "b": 720,
+                          "length": 6,
+                          "line": 28,
+                          "column": 15
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 715,
+                              "b": 720,
+                              "length": 6,
+                              "line": 28,
+                              "column": 15
+                            },
+                            "text": "String"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "body": {
+                "$type": "List",
+                "$position": {
+                  "a": 728,
+                  "b": 1100,
+                  "length": 373,
+                  "line": 29,
+                  "column": 6
+                },
+                "elements": [
+                  {
+                    "$type": "LetStmt",
+                    "$position": {
+                      "a": 738,
+                      "b": 775,
+                      "length": 38,
+                      "line": 30,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "IdentLHS",
+                      "$position": {
+                        "a": 742,
+                        "b": 762,
+                        "length": 21,
+                        "line": 30,
+                        "column": 12
+                      },
+                      "name": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 742,
+                          "b": 753,
+                          "length": 12,
+                          "line": 30,
+                          "column": 12
+                        },
+                        "text": "total_supply"
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 756,
+                          "b": 762,
+                          "length": 7,
+                          "line": 30,
+                          "column": 26
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 756,
+                            "b": 762,
+                            "length": 7,
+                            "line": 30,
+                            "column": 26
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 756,
+                                "b": 762,
+                                "length": 7,
+                                "line": 30,
+                                "column": 26
+                              },
+                              "text": "Uint128"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "rhs": {
+                      "$type": "TupleVal",
+                      "$position": {
+                        "a": 766,
+                        "b": 775,
+                        "length": 10,
+                        "line": 30,
+                        "column": 36
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 766,
+                          "b": 772,
+                          "length": 7,
+                          "line": 30,
+                          "column": 36
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 766,
+                            "b": 772,
+                            "length": 7,
+                            "line": 30,
+                            "column": 36
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 766,
+                                "b": 772,
+                                "length": 7,
+                                "line": 30,
+                                "column": 36
+                              },
+                              "text": "Uint128"
+                            }
+                          ]
+                        }
+                      },
+                      "members": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 774,
+                          "b": 774,
+                          "length": 1,
+                          "line": 30,
+                          "column": 44
+                        },
+                        "elements": [
+                          {
+                            "$type": "IntegerVal",
+                            "$position": {
+                              "a": 774,
+                              "b": 774,
+                              "length": 1,
+                              "line": 30,
+                              "column": 44
+                            },
+                            "value": "0"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "$type": "List",
+                    "$position": {
+                      "a": 829,
+                      "b": 920,
+                      "length": 92,
+                      "line": 31,
+                      "column": 52
+                    },
+                    "elements": [
+                      {
+                        "$type": "AssignStmt",
+                        "$position": {
+                          "a": 843,
+                          "b": 875,
+                          "length": 33,
+                          "line": 32,
+                          "column": 12
+                        },
+                        "lhs": {
+                          "$type": "TableAssignLHS",
+                          "$position": {
+                            "a": 843,
+                            "b": 865,
+                            "length": 23,
+                            "line": 32,
+                            "column": 12
+                          },
+                          "table": {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 849,
+                              "b": 856,
+                              "length": 8,
+                              "line": 32,
+                              "column": 18
+                            },
+                            "text": "balances"
+                          },
+                          "key": {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 858,
+                              "b": 864,
+                              "length": 7,
+                              "line": 32,
+                              "column": 27
+                            },
+                            "text": "address"
+                          }
+                        },
+                        "assignOp": "+=",
+                        "rhs": {
+                          "$type": "Ident",
+                          "$position": {
+                            "a": 870,
+                            "b": 875,
+                            "length": 6,
+                            "line": 32,
+                            "column": 39
+                          },
+                          "text": "amount"
+                        }
+                      },
+                      {
+                        "$type": "AssignStmt",
+                        "$position": {
+                          "a": 889,
+                          "b": 910,
+                          "length": 22,
+                          "line": 33,
+                          "column": 12
+                        },
+                        "lhs": {
+                          "$type": "IdentAssignLHS",
+                          "$position": {
+                            "a": 889,
+                            "b": 900,
+                            "length": 12,
+                            "line": 33,
+                            "column": 12
+                          },
+                          "ident": {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 889,
+                              "b": 900,
+                              "length": 12,
+                              "line": 33,
+                              "column": 12
+                            },
+                            "text": "total_supply"
+                          }
+                        },
+                        "assignOp": "+=",
+                        "rhs": {
+                          "$type": "Ident",
+                          "$position": {
+                            "a": 905,
+                            "b": 910,
+                            "length": 6,
+                            "line": 33,
+                            "column": 28
+                          },
+                          "text": "amount"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "$type": "AssignStmt",
+                    "$position": {
+                      "a": 931,
+                      "b": 1094,
+                      "length": 164,
+                      "line": 36,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "StateItemAssignLHS",
+                      "$position": {
+                        "a": 931,
+                        "b": 946,
+                        "length": 16,
+                        "line": 36,
+                        "column": 8
+                      },
+                      "key": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 937,
+                          "b": 946,
+                          "length": 10,
+                          "line": 36,
+                          "column": 14
+                        },
+                        "text": "token_info"
+                      }
+                    },
+                    "assignOp": "=",
+                    "rhs": {
+                      "$type": "StructVal",
+                      "$position": {
+                        "a": 950,
+                        "b": 1094,
+                        "length": 145,
+                        "line": 36,
+                        "column": 27
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 950,
+                          "b": 958,
+                          "length": 9,
+                          "line": 36,
+                          "column": 27
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 950,
+                            "b": 958,
+                            "length": 9,
+                            "line": 36,
+                            "column": 27
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 950,
+                                "b": 958,
+                                "length": 9,
+                                "line": 36,
+                                "column": 27
+                              },
+                              "text": "TokenInfo"
+                            }
+                          ]
+                        }
+                      },
+                      "members": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 974,
+                          "b": 1084,
+                          "length": 111,
+                          "line": 37,
+                          "column": 12
+                        },
+                        "elements": [
+                          {
+                            "$type": "StructValMember",
+                            "$position": {
+                              "a": 974,
+                              "b": 983,
+                              "length": 10,
+                              "line": 37,
+                              "column": 12
+                            },
+                            "name": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 974,
+                                "b": 977,
+                                "length": 4,
+                                "line": 37,
+                                "column": 12
+                              },
+                              "text": "name"
+                            },
+                            "value": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 980,
+                                "b": 983,
+                                "length": 4,
+                                "line": 37,
+                                "column": 18
+                              },
+                              "text": "name"
+                            }
+                          },
+                          {
+                            "$type": "StructValMember",
+                            "$position": {
+                              "a": 998,
+                              "b": 1011,
+                              "length": 14,
+                              "line": 38,
+                              "column": 12
+                            },
+                            "name": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 998,
+                                "b": 1003,
+                                "length": 6,
+                                "line": 38,
+                                "column": 12
+                              },
+                              "text": "symbol"
+                            },
+                            "value": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1006,
+                                "b": 1011,
+                                "length": 6,
+                                "line": 38,
+                                "column": 20
+                              },
+                              "text": "symbol"
+                            }
+                          },
+                          {
+                            "$type": "StructValMember",
+                            "$position": {
+                              "a": 1026,
+                              "b": 1043,
+                              "length": 18,
+                              "line": 39,
+                              "column": 12
+                            },
+                            "name": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1026,
+                                "b": 1033,
+                                "length": 8,
+                                "line": 39,
+                                "column": 12
+                              },
+                              "text": "decimals"
+                            },
+                            "value": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1036,
+                                "b": 1043,
+                                "length": 8,
+                                "line": 39,
+                                "column": 22
+                              },
+                              "text": "decimals"
+                            }
+                          },
+                          {
+                            "$type": "StructValMember",
+                            "$position": {
+                              "a": 1058,
+                              "b": 1083,
+                              "length": 26,
+                              "line": 40,
+                              "column": 12
+                            },
+                            "name": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1058,
+                                "b": 1069,
+                                "length": 12,
+                                "line": 40,
+                                "column": 12
+                              },
+                              "text": "total_supply"
+                            },
+                            "value": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1072,
+                                "b": 1083,
+                                "length": 12,
+                                "line": 40,
+                                "column": 26
+                              },
+                              "text": "total_supply"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "$type": "ExecDefn",
+              "$position": {
+                "a": 1107,
+                "b": 1303,
+                "length": 197,
+                "line": 44,
+                "column": 4
+              },
+              "name": {
+                "$type": "Ident",
+                "$position": {
+                  "a": 1112,
+                  "b": 1119,
+                  "length": 8,
+                  "line": 44,
+                  "column": 9
+                },
+                "text": "transfer"
+              },
+              "args": {
+                "$type": "List",
+                "$position": {
+                  "a": 1120,
+                  "b": 1153,
+                  "length": 34,
+                  "line": 44,
+                  "column": 17
+                },
+                "elements": [
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 1121,
+                      "b": 1135,
+                      "length": 15,
+                      "line": 44,
+                      "column": 18
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1121,
+                        "b": 1129,
+                        "length": 9,
+                        "line": 44,
+                        "column": 18
+                      },
+                      "text": "recipient"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 1132,
+                        "b": 1135,
+                        "length": 4,
+                        "line": 44,
+                        "column": 29
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1132,
+                          "b": 1135,
+                          "length": 4,
+                          "line": 44,
+                          "column": 29
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1132,
+                              "b": 1135,
+                              "length": 4,
+                              "line": 44,
+                              "column": 29
+                            },
+                            "text": "Addr"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 1138,
+                      "b": 1152,
+                      "length": 15,
+                      "line": 44,
+                      "column": 35
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1138,
+                        "b": 1143,
+                        "length": 6,
+                        "line": 44,
+                        "column": 35
+                      },
+                      "text": "amount"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 1146,
+                        "b": 1152,
+                        "length": 7,
+                        "line": 44,
+                        "column": 43
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1146,
+                          "b": 1152,
+                          "length": 7,
+                          "line": 44,
+                          "column": 43
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1146,
+                              "b": 1152,
+                              "length": 7,
+                              "line": 44,
+                              "column": 43
+                            },
+                            "text": "Uint128"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "body": {
+                "$type": "List",
+                "$position": {
+                  "a": 1155,
+                  "b": 1303,
+                  "length": 149,
+                  "line": 44,
+                  "column": 52
+                },
+                "elements": [
+                  {
+                    "$type": "AssignStmt",
+                    "$position": {
+                      "a": 1165,
+                      "b": 1200,
+                      "length": 36,
+                      "line": 45,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "TableAssignLHS",
+                      "$position": {
+                        "a": 1165,
+                        "b": 1190,
+                        "length": 26,
+                        "line": 45,
+                        "column": 8
+                      },
+                      "table": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1171,
+                          "b": 1178,
+                          "length": 8,
+                          "line": 45,
+                          "column": 14
+                        },
+                        "text": "balances"
+                      },
+                      "key": {
+                        "$type": "SpecialVariable",
+                        "$position": {},
+                        "ns": "msg",
+                        "member": "sender"
+                      }
+                    },
+                    "assignOp": "-=",
+                    "rhs": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1195,
+                        "b": 1200,
+                        "length": 6,
+                        "line": 45,
+                        "column": 38
+                      },
+                      "text": "amount"
+                    }
+                  },
+                  {
+                    "$type": "AssignStmt",
+                    "$position": {
+                      "a": 1210,
+                      "b": 1244,
+                      "length": 35,
+                      "line": 46,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "TableAssignLHS",
+                      "$position": {
+                        "a": 1210,
+                        "b": 1234,
+                        "length": 25,
+                        "line": 46,
+                        "column": 8
+                      },
+                      "table": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1216,
+                          "b": 1223,
+                          "length": 8,
+                          "line": 46,
+                          "column": 14
+                        },
+                        "text": "balances"
+                      },
+                      "key": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1225,
+                          "b": 1233,
+                          "length": 9,
+                          "line": 46,
+                          "column": 23
+                        },
+                        "text": "recipient"
+                      }
+                    },
+                    "assignOp": "+=",
+                    "rhs": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1239,
+                        "b": 1244,
+                        "length": 6,
+                        "line": 46,
+                        "column": 37
+                      },
+                      "text": "amount"
+                    }
+                  },
+                  {
+                    "$type": "EmitStmt",
+                    "$position": {
+                      "a": 1254,
+                      "b": 1297,
+                      "length": 44,
+                      "line": 47,
+                      "column": 8
+                    },
+                    "expr": {
+                      "$type": "TupleVal",
+                      "$position": {
+                        "a": 1259,
+                        "b": 1297,
+                        "length": 39,
+                        "line": 47,
+                        "column": 13
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 1259,
+                          "b": 1266,
+                          "length": 8,
+                          "line": 47,
+                          "column": 13
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 1259,
+                            "b": 1266,
+                            "length": 8,
+                            "line": 47,
+                            "column": 13
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1259,
+                                "b": 1266,
+                                "length": 8,
+                                "line": 47,
+                                "column": 13
+                              },
+                              "text": "Transfer"
+                            }
+                          ]
+                        }
+                      },
+                      "members": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1268,
+                          "b": 1296,
+                          "length": 29,
+                          "line": 47,
+                          "column": 22
+                        },
+                        "elements": [
+                          {
+                            "$type": "SpecialVariable",
+                            "$position": {},
+                            "ns": "msg",
+                            "member": "sender"
+                          },
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1280,
+                              "b": 1288,
+                              "length": 9,
+                              "line": 47,
+                              "column": 34
+                            },
+                            "text": "recipient"
+                          },
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1291,
+                              "b": 1296,
+                              "length": 6,
+                              "line": 47,
+                              "column": 45
+                            },
+                            "text": "amount"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "$type": "ExecDefn",
+              "$position": {
+                "a": 1310,
+                "b": 1474,
+                "length": 165,
+                "line": 50,
+                "column": 4
+              },
+              "name": {
+                "$type": "Ident",
+                "$position": {
+                  "a": 1315,
+                  "b": 1318,
+                  "length": 4,
+                  "line": 50,
+                  "column": 9
+                },
+                "text": "burn"
+              },
+              "args": {
+                "$type": "List",
+                "$position": {
+                  "a": 1319,
+                  "b": 1335,
+                  "length": 17,
+                  "line": 50,
+                  "column": 13
+                },
+                "elements": [
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 1320,
+                      "b": 1334,
+                      "length": 15,
+                      "line": 50,
+                      "column": 14
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1320,
+                        "b": 1325,
+                        "length": 6,
+                        "line": 50,
+                        "column": 14
+                      },
+                      "text": "amount"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 1328,
+                        "b": 1334,
+                        "length": 7,
+                        "line": 50,
+                        "column": 22
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1328,
+                          "b": 1334,
+                          "length": 7,
+                          "line": 50,
+                          "column": 22
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1328,
+                              "b": 1334,
+                              "length": 7,
+                              "line": 50,
+                              "column": 22
+                            },
+                            "text": "Uint128"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "body": {
+                "$type": "List",
+                "$position": {
+                  "a": 1337,
+                  "b": 1474,
+                  "length": 138,
+                  "line": 50,
+                  "column": 31
+                },
+                "elements": [
+                  {
+                    "$type": "AssignStmt",
+                    "$position": {
+                      "a": 1347,
+                      "b": 1382,
+                      "length": 36,
+                      "line": 51,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "TableAssignLHS",
+                      "$position": {
+                        "a": 1347,
+                        "b": 1372,
+                        "length": 26,
+                        "line": 51,
+                        "column": 8
+                      },
+                      "table": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1353,
+                          "b": 1360,
+                          "length": 8,
+                          "line": 51,
+                          "column": 14
+                        },
+                        "text": "balances"
+                      },
+                      "key": {
+                        "$type": "SpecialVariable",
+                        "$position": {},
+                        "ns": "msg",
+                        "member": "sender"
+                      }
+                    },
+                    "assignOp": "-=",
+                    "rhs": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1377,
+                        "b": 1382,
+                        "length": 6,
+                        "line": 51,
+                        "column": 38
+                      },
+                      "text": "amount"
+                    }
+                  },
+                  {
+                    "$type": "AssignStmt",
+                    "$position": {
+                      "a": 1392,
+                      "b": 1430,
+                      "length": 39,
+                      "line": 52,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "MemberAssignLHS",
+                      "$position": {
+                        "a": 1392,
+                        "b": 1420,
+                        "length": 29,
+                        "line": 52,
+                        "column": 8
+                      },
+                      "expr": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1398,
+                          "b": 1407,
+                          "length": 10,
+                          "line": 52,
+                          "column": 14
+                        },
+                        "text": "token_info"
+                      },
+                      "member": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1409,
+                          "b": 1420,
+                          "length": 12,
+                          "line": 52,
+                          "column": 25
+                        },
+                        "text": "total_supply"
+                      }
+                    },
+                    "assignOp": "-=",
+                    "rhs": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1425,
+                        "b": 1430,
+                        "length": 6,
+                        "line": 52,
+                        "column": 41
+                      },
+                      "text": "amount"
+                    }
+                  },
+                  {
+                    "$type": "EmitStmt",
+                    "$position": {
+                      "a": 1440,
+                      "b": 1468,
+                      "length": 29,
+                      "line": 53,
+                      "column": 8
+                    },
+                    "expr": {
+                      "$type": "TupleVal",
+                      "$position": {
+                        "a": 1445,
+                        "b": 1468,
+                        "length": 24,
+                        "line": 53,
+                        "column": 13
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 1445,
+                          "b": 1448,
+                          "length": 4,
+                          "line": 53,
+                          "column": 13
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 1445,
+                            "b": 1448,
+                            "length": 4,
+                            "line": 53,
+                            "column": 13
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1445,
+                                "b": 1448,
+                                "length": 4,
+                                "line": 53,
+                                "column": 13
+                              },
+                              "text": "Burn"
+                            }
+                          ]
+                        }
+                      },
+                      "members": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1450,
+                          "b": 1467,
+                          "length": 18,
+                          "line": 53,
+                          "column": 18
+                        },
+                        "elements": [
+                          {
+                            "$type": "SpecialVariable",
+                            "$position": {},
+                            "ns": "msg",
+                            "member": "sender"
+                          },
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1462,
+                              "b": 1467,
+                              "length": 6,
+                              "line": 53,
+                              "column": 30
+                            },
+                            "text": "amount"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "$type": "ExecDefn",
+              "$position": {
+                "a": 1482,
+                "b": 1696,
+                "length": 215,
+                "line": 57,
+                "column": 4
+              },
+              "name": {
+                "$type": "Ident",
+                "$position": {
+                  "a": 1487,
+                  "b": 1490,
+                  "length": 4,
+                  "line": 57,
+                  "column": 9
+                },
+                "text": "send"
+              },
+              "args": {
+                "$type": "List",
+                "$position": {
+                  "a": 1491,
+                  "b": 1541,
+                  "length": 51,
+                  "line": 57,
+                  "column": 13
+                },
+                "elements": [
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 1492,
+                      "b": 1510,
+                      "length": 19,
+                      "line": 57,
+                      "column": 14
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1492,
+                        "b": 1504,
+                        "length": 13,
+                        "line": 57,
+                        "column": 14
+                      },
+                      "text": "contract_addr"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 1507,
+                        "b": 1510,
+                        "length": 4,
+                        "line": 57,
+                        "column": 29
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1507,
+                          "b": 1510,
+                          "length": 4,
+                          "line": 57,
+                          "column": 29
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1507,
+                              "b": 1510,
+                              "length": 4,
+                              "line": 57,
+                              "column": 29
+                            },
+                            "text": "Addr"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 1513,
+                      "b": 1527,
+                      "length": 15,
+                      "line": 57,
+                      "column": 35
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1513,
+                        "b": 1518,
+                        "length": 6,
+                        "line": 57,
+                        "column": 35
+                      },
+                      "text": "amount"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 1521,
+                        "b": 1527,
+                        "length": 7,
+                        "line": 57,
+                        "column": 43
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1521,
+                          "b": 1527,
+                          "length": 7,
+                          "line": 57,
+                          "column": 43
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1521,
+                              "b": 1527,
+                              "length": 7,
+                              "line": 57,
+                              "column": 43
+                            },
+                            "text": "Uint128"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 1530,
+                      "b": 1540,
+                      "length": 11,
+                      "line": 57,
+                      "column": 52
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1530,
+                        "b": 1532,
+                        "length": 3,
+                        "line": 57,
+                        "column": 52
+                      },
+                      "text": "msg"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 1535,
+                        "b": 1540,
+                        "length": 6,
+                        "line": 57,
+                        "column": 57
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1535,
+                          "b": 1540,
+                          "length": 6,
+                          "line": 57,
+                          "column": 57
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1535,
+                              "b": 1540,
+                              "length": 6,
+                              "line": 57,
+                              "column": 57
+                            },
+                            "text": "Binary"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "body": {
+                "$type": "List",
+                "$position": {
+                  "a": 1543,
+                  "b": 1696,
+                  "length": 154,
+                  "line": 57,
+                  "column": 65
+                },
+                "elements": [
+                  {
+                    "$type": "AssignStmt",
+                    "$position": {
+                      "a": 1553,
+                      "b": 1588,
+                      "length": 36,
+                      "line": 58,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "TableAssignLHS",
+                      "$position": {
+                        "a": 1553,
+                        "b": 1578,
+                        "length": 26,
+                        "line": 58,
+                        "column": 8
+                      },
+                      "table": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1559,
+                          "b": 1566,
+                          "length": 8,
+                          "line": 58,
+                          "column": 14
+                        },
+                        "text": "balances"
+                      },
+                      "key": {
+                        "$type": "SpecialVariable",
+                        "$position": {},
+                        "ns": "msg",
+                        "member": "sender"
+                      }
+                    },
+                    "assignOp": "-=",
+                    "rhs": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1583,
+                        "b": 1588,
+                        "length": 6,
+                        "line": 58,
+                        "column": 38
+                      },
+                      "text": "amount"
+                    }
+                  },
+                  {
+                    "$type": "AssignStmt",
+                    "$position": {
+                      "a": 1598,
+                      "b": 1636,
+                      "length": 39,
+                      "line": 59,
+                      "column": 8
+                    },
+                    "lhs": {
+                      "$type": "TableAssignLHS",
+                      "$position": {
+                        "a": 1598,
+                        "b": 1626,
+                        "length": 29,
+                        "line": 59,
+                        "column": 8
+                      },
+                      "table": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1604,
+                          "b": 1611,
+                          "length": 8,
+                          "line": 59,
+                          "column": 14
+                        },
+                        "text": "balances"
+                      },
+                      "key": {
+                        "$type": "Ident",
+                        "$position": {
+                          "a": 1613,
+                          "b": 1625,
+                          "length": 13,
+                          "line": 59,
+                          "column": 23
+                        },
+                        "text": "contract_addr"
+                      }
+                    },
+                    "assignOp": "+=",
+                    "rhs": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1631,
+                        "b": 1636,
+                        "length": 6,
+                        "line": 59,
+                        "column": 41
+                      },
+                      "text": "amount"
+                    }
+                  },
+                  {
+                    "$type": "EmitStmt",
+                    "$position": {
+                      "a": 1646,
+                      "b": 1689,
+                      "length": 44,
+                      "line": 60,
+                      "column": 8
+                    },
+                    "expr": {
+                      "$type": "TupleVal",
+                      "$position": {
+                        "a": 1651,
+                        "b": 1689,
+                        "length": 39,
+                        "line": 60,
+                        "column": 13
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 1651,
+                          "b": 1654,
+                          "length": 4,
+                          "line": 60,
+                          "column": 13
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 1651,
+                            "b": 1654,
+                            "length": 4,
+                            "line": 60,
+                            "column": 13
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1651,
+                                "b": 1654,
+                                "length": 4,
+                                "line": 60,
+                                "column": 13
+                              },
+                              "text": "Send"
+                            }
+                          ]
+                        }
+                      },
+                      "members": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1656,
+                          "b": 1688,
+                          "length": 33,
+                          "line": 60,
+                          "column": 18
+                        },
+                        "elements": [
+                          {
+                            "$type": "SpecialVariable",
+                            "$position": {},
+                            "ns": "msg",
+                            "member": "sender"
+                          },
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1668,
+                              "b": 1680,
+                              "length": 13,
+                              "line": 60,
+                              "column": 30
+                            },
+                            "text": "contract_addr"
+                          },
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1683,
+                              "b": 1688,
+                              "length": 6,
+                              "line": 60,
+                              "column": 45
+                            },
+                            "text": "amount"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "$type": "QueryDefn",
+              "$position": {
+                "a": 1703,
+                "b": 1864,
+                "length": 162,
+                "line": 63,
+                "column": 4
+              },
+              "name": {
+                "$type": "Ident",
+                "$position": {
+                  "a": 1709,
+                  "b": 1715,
+                  "length": 7,
+                  "line": 63,
+                  "column": 10
+                },
+                "text": "balance"
+              },
+              "args": {
+                "$type": "List",
+                "$position": {
+                  "a": 1716,
+                  "b": 1730,
+                  "length": 15,
+                  "line": 63,
+                  "column": 17
+                },
+                "elements": [
+                  {
+                    "$type": "FnArg",
+                    "$position": {
+                      "a": 1717,
+                      "b": 1729,
+                      "length": 13,
+                      "line": 63,
+                      "column": 18
+                    },
+                    "name": {
+                      "$type": "Ident",
+                      "$position": {
+                        "a": 1717,
+                        "b": 1723,
+                        "length": 7,
+                        "line": 63,
+                        "column": 18
+                      },
+                      "text": "address"
+                    },
+                    "option": false,
+                    "type": {
+                      "$type": "TypePath",
+                      "$position": {
+                        "a": 1726,
+                        "b": 1729,
+                        "length": 4,
+                        "line": 63,
+                        "column": 27
+                      },
+                      "root": false,
+                      "paths": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1726,
+                          "b": 1729,
+                          "length": 4,
+                          "line": 63,
+                          "column": 27
+                        },
+                        "elements": [
+                          {
+                            "$type": "Ident",
+                            "$position": {
+                              "a": 1726,
+                              "b": 1729,
+                              "length": 4,
+                              "line": 63,
+                              "column": 27
+                            },
+                            "text": "Addr"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "returnType": {
+                "$type": "StructDefn",
+                "$position": {
+                  "a": 1735,
+                  "b": 1777,
+                  "length": 43,
+                  "line": 63,
+                  "column": 36
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 1742,
+                    "b": 1756,
+                    "length": 15,
+                    "line": 63,
+                    "column": 43
+                  },
+                  "text": "BalanceResponse"
+                },
+                "enumVariant": {
+                  "$type": "EnumVariantStruct",
+                  "$position": {
+                    "a": 1742,
+                    "b": 1777,
+                    "length": 36,
+                    "line": 63,
+                    "column": 43
+                  },
+                  "name": {
+                    "$type": "Ident",
+                    "$position": {
+                      "a": 1742,
+                      "b": 1756,
+                      "length": 15,
+                      "line": 63,
+                      "column": 43
+                    },
+                    "text": "BalanceResponse"
+                  },
+                  "members": {
+                    "$type": "List",
+                    "$position": {
+                      "a": 1758,
+                      "b": 1777,
+                      "length": 20,
+                      "line": 63,
+                      "column": 59
+                    },
+                    "elements": [
+                      {
+                        "$type": "StructMember",
+                        "$position": {
+                          "a": 1760,
+                          "b": 1775,
+                          "length": 16,
+                          "line": 63,
+                          "column": 61
+                        },
+                        "name": {
+                          "$type": "Ident",
+                          "$position": {
+                            "a": 1760,
+                            "b": 1766,
+                            "length": 7,
+                            "line": 63,
+                            "column": 61
+                          },
+                          "text": "balance"
+                        },
+                        "option": false,
+                        "type": {
+                          "$type": "TypePath",
+                          "$position": {
+                            "a": 1769,
+                            "b": 1775,
+                            "length": 7,
+                            "line": 63,
+                            "column": 70
+                          },
+                          "root": false,
+                          "paths": {
+                            "$type": "List",
+                            "$position": {
+                              "a": 1769,
+                              "b": 1775,
+                              "length": 7,
+                              "line": 63,
+                              "column": 70
+                            },
+                            "elements": [
+                              {
+                                "$type": "Ident",
+                                "$position": {
+                                  "a": 1769,
+                                  "b": 1775,
+                                  "length": 7,
+                                  "line": 63,
+                                  "column": 70
+                                },
+                                "text": "Uint128"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "body": {
+                "$type": "List",
+                "$position": {
+                  "a": 1779,
+                  "b": 1864,
+                  "length": 86,
+                  "line": 63,
+                  "column": 80
+                },
+                "elements": [
+                  {
+                    "$type": "ReturnStmt",
+                    "$position": {
+                      "a": 1789,
+                      "b": 1858,
+                      "length": 70,
+                      "line": 64,
+                      "column": 8
+                    },
+                    "expr": {
+                      "$type": "StructVal",
+                      "$position": {
+                        "a": 1796,
+                        "b": 1858,
+                        "length": 63,
+                        "line": 64,
+                        "column": 15
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 1796,
+                          "b": 1796,
+                          "length": 1,
+                          "line": 64,
+                          "column": 15
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 1796,
+                            "b": 1796,
+                            "length": 1,
+                            "line": 64,
+                            "column": 15
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1796,
+                                "b": 1796,
+                                "length": 1,
+                                "line": 64,
+                                "column": 15
+                              },
+                              "text": "_"
+                            }
+                          ]
+                        }
+                      },
+                      "members": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1812,
+                          "b": 1848,
+                          "length": 37,
+                          "line": 65,
+                          "column": 12
+                        },
+                        "elements": [
+                          {
+                            "$type": "StructValMember",
+                            "$position": {
+                              "a": 1812,
+                              "b": 1848,
+                              "length": 37,
+                              "line": 65,
+                              "column": 12
+                            },
+                            "name": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1812,
+                                "b": 1818,
+                                "length": 7,
+                                "line": 65,
+                                "column": 12
+                              },
+                              "text": "balance"
+                            },
+                            "value": {
+                              "$type": "OrExpr",
+                              "$position": {
+                                "a": 1821,
+                                "b": 1848,
+                                "length": 28,
+                                "line": 65,
+                                "column": 21
+                              },
+                              "lhs": {
+                                "$type": "TableLookupExpr",
+                                "$position": {
+                                  "a": 1821,
+                                  "b": 1843,
+                                  "length": 23,
+                                  "line": 65,
+                                  "column": 21
+                                },
+                                "lhs": {
+                                  "$type": "Ident",
+                                  "$position": {
+                                    "a": 1827,
+                                    "b": 1834,
+                                    "length": 8,
+                                    "line": 65,
+                                    "column": 27
+                                  },
+                                  "text": "balances"
+                                },
+                                "key": {
+                                  "$type": "Ident",
+                                  "$position": {
+                                    "a": 1836,
+                                    "b": 1842,
+                                    "length": 7,
+                                    "line": 65,
+                                    "column": 36
+                                  },
+                                  "text": "address"
+                                }
+                              },
+                              "rhs": {
+                                "$type": "IntegerVal",
+                                "$position": {
+                                  "a": 1848,
+                                  "b": 1848,
+                                  "length": 1,
+                                  "line": 65,
+                                  "column": 48
+                                },
+                                "value": "0"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "$type": "QueryDefn",
+              "$position": {
+                "a": 1871,
+                "b": 2020,
+                "length": 150,
+                "line": 69,
+                "column": 4
+              },
+              "name": {
+                "$type": "Ident",
+                "$position": {
+                  "a": 1877,
+                  "b": 1886,
+                  "length": 10,
+                  "line": 69,
+                  "column": 10
+                },
+                "text": "token_info"
+              },
+              "args": {
+                "$type": "List",
+                "$position": {
+                  "a": 1887,
+                  "b": 1888,
+                  "length": 2,
+                  "line": 69,
+                  "column": 20
+                },
+                "elements": []
+              },
+              "returnType": {
+                "$type": "StructDefn",
+                "$position": {
+                  "a": 1893,
+                  "b": 1942,
+                  "length": 50,
+                  "line": 69,
+                  "column": 26
+                },
+                "name": {
+                  "$type": "Ident",
+                  "$position": {
+                    "a": 1900,
+                    "b": 1916,
+                    "length": 17,
+                    "line": 69,
+                    "column": 33
+                  },
+                  "text": "TokenInfoResponse"
+                },
+                "enumVariant": {
+                  "$type": "EnumVariantStruct",
+                  "$position": {
+                    "a": 1900,
+                    "b": 1942,
+                    "length": 43,
+                    "line": 69,
+                    "column": 33
+                  },
+                  "name": {
+                    "$type": "Ident",
+                    "$position": {
+                      "a": 1900,
+                      "b": 1916,
+                      "length": 17,
+                      "line": 69,
+                      "column": 33
+                    },
+                    "text": "TokenInfoResponse"
+                  },
+                  "members": {
+                    "$type": "List",
+                    "$position": {
+                      "a": 1918,
+                      "b": 1942,
+                      "length": 25,
+                      "line": 69,
+                      "column": 51
+                    },
+                    "elements": [
+                      {
+                        "$type": "StructMember",
+                        "$position": {
+                          "a": 1920,
+                          "b": 1940,
+                          "length": 21,
+                          "line": 69,
+                          "column": 53
+                        },
+                        "name": {
+                          "$type": "Ident",
+                          "$position": {
+                            "a": 1920,
+                            "b": 1929,
+                            "length": 10,
+                            "line": 69,
+                            "column": 53
+                          },
+                          "text": "token_info"
+                        },
+                        "option": false,
+                        "type": {
+                          "$type": "TypePath",
+                          "$position": {
+                            "a": 1932,
+                            "b": 1940,
+                            "length": 9,
+                            "line": 69,
+                            "column": 65
+                          },
+                          "root": false,
+                          "paths": {
+                            "$type": "List",
+                            "$position": {
+                              "a": 1932,
+                              "b": 1940,
+                              "length": 9,
+                              "line": 69,
+                              "column": 65
+                            },
+                            "elements": [
+                              {
+                                "$type": "Ident",
+                                "$position": {
+                                  "a": 1932,
+                                  "b": 1940,
+                                  "length": 9,
+                                  "line": 69,
+                                  "column": 65
+                                },
+                                "text": "TokenInfo"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "body": {
+                "$type": "List",
+                "$position": {
+                  "a": 1944,
+                  "b": 2020,
+                  "length": 77,
+                  "line": 69,
+                  "column": 77
+                },
+                "elements": [
+                  {
+                    "$type": "ReturnStmt",
+                    "$position": {
+                      "a": 1954,
+                      "b": 2014,
+                      "length": 61,
+                      "line": 70,
+                      "column": 8
+                    },
+                    "expr": {
+                      "$type": "StructVal",
+                      "$position": {
+                        "a": 1961,
+                        "b": 2014,
+                        "length": 54,
+                        "line": 70,
+                        "column": 15
+                      },
+                      "type": {
+                        "$type": "TypePath",
+                        "$position": {
+                          "a": 1961,
+                          "b": 1961,
+                          "length": 1,
+                          "line": 70,
+                          "column": 15
+                        },
+                        "root": false,
+                        "paths": {
+                          "$type": "List",
+                          "$position": {
+                            "a": 1961,
+                            "b": 1961,
+                            "length": 1,
+                            "line": 70,
+                            "column": 15
+                          },
+                          "elements": [
+                            {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1961,
+                                "b": 1961,
+                                "length": 1,
+                                "line": 70,
+                                "column": 15
+                              },
+                              "text": "_"
+                            }
+                          ]
+                        }
+                      },
+                      "members": {
+                        "$type": "List",
+                        "$position": {
+                          "a": 1977,
+                          "b": 2004,
+                          "length": 28,
+                          "line": 71,
+                          "column": 12
+                        },
+                        "elements": [
+                          {
+                            "$type": "StructValMember",
+                            "$position": {
+                              "a": 1977,
+                              "b": 2004,
+                              "length": 28,
+                              "line": 71,
+                              "column": 12
+                            },
+                            "name": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1977,
+                                "b": 1986,
+                                "length": 10,
+                                "line": 71,
+                                "column": 12
+                              },
+                              "text": "token_info"
+                            },
+                            "value": {
+                              "$type": "Ident",
+                              "$position": {
+                                "a": 1995,
+                                "b": 2004,
+                                "length": 10,
+                                "line": 71,
+                                "column": 30
+                              },
+                              "text": "token_info"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

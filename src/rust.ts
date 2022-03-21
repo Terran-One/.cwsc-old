@@ -1,3 +1,5 @@
+import { BailErrorStrategy } from 'antlr4ts';
+
 interface Rust {
   toRust(): string;
 }
@@ -5,6 +7,20 @@ interface Rust {
 export class RustBase implements Rust {
   toRust(): string {
     return '';
+  }
+
+  q(): Q {
+    return new Q(this);
+  }
+}
+
+export class Q extends RustBase {
+  constructor(public inner: Rust) {
+    super();
+  }
+
+  toRust(): string {
+    return `${this.inner.toRust()}?`;
   }
 }
 
@@ -84,7 +100,7 @@ export class TypePath extends RustBase {
   public pathElements: string[] = [];
   constructor(public root: boolean, ...pathElements: string[]) {
     super();
-    this.pathElements;
+    this.pathElements = pathElements;
   }
 
   toRust(): string {
@@ -92,14 +108,16 @@ export class TypePath extends RustBase {
   }
 }
 
-export class FnDefn implements Rust {
+export class FnDefn extends RustBase {
   constructor(
     public viz: Viz,
     public name: string,
     public args: Array<FnArg> = [],
     public returnType: TypePath | null = null,
     public body: Rust[] = []
-  ) {}
+  ) {
+    super();
+  }
 
   toRust(): string {
     let res = '';
@@ -115,3 +133,55 @@ export class FnDefn implements Rust {
     return res;
   }
 }
+
+export class FnCall extends RustBase {
+  constructor(public path: string, public args: Rust[]) {
+    super();
+  }
+
+  toRust(): string {
+    return `${this.path}(${this.args.map(x => x.toRust()).join(', ')})`;
+  }
+}
+
+export class LetStmt extends RustBase {
+  constructor(
+    public name: string,
+    public isMut: boolean = false,
+    public value?: Rust,
+    public type?: TypePath
+  ) {
+    super();
+  }
+  toRust(): string {
+    let res = 'let ';
+    if (this.isMut) {
+      res += 'mut ';
+    }
+    res += `${this.name}`;
+    if (this.type !== undefined) {
+      res += `: ${this.type.toRust()}`;
+    }
+    if (this.value !== undefined) {
+      res += ` = ${this.value.toRust()}`;
+    }
+    return res;
+  }
+}
+
+export class Verbatim extends RustBase {
+  constructor(public value: string) {
+    super();
+  }
+
+  toRust(): string {
+    return this.value;
+  }
+}
+
+const r = [
+  new LetStmt('x', false, new Verbatim('1').q()),
+  new LetStmt('y', true, new Verbatim('2').q()),
+];
+
+console.log(r.map(x => x.toRust()).join('\n'));
