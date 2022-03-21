@@ -1,7 +1,7 @@
 contract CW20Base {    
 
     error InvalidZeroAmount()
-    error Unauthorized()
+    error Unauthorized() 
 
     event Transfer(sender: Addr, recipient: Addr, amount: Uint128)
     event Burn(sender: Addr, amount: Uint128)

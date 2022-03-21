@@ -95,10 +95,10 @@ export class AST2IR {
     if (`translate${ast.constructor.name}` in AST2IR.prototype) {
       return (AST2IR.prototype as any)[`translate${ast.constructor.name}`](ast);
     }
-    // return ast.constructor.name;
-    throw new Error(
-      `unsuppored AST -> IR translation (${ast.constructor.name})`
-    );
+    return ast.constructor.name;
+    // throw new Error(
+    //   `unsuppored AST -> IR translation (${ast.constructor.name})`
+    // );
   }
 }
 export class IR2Rust {
@@ -118,7 +118,7 @@ export class IR2Rust {
   }
 
   push(...items: any) {
-    this.items.push(items);
+    this.items.push(items.join(''));
   }
 
   cond(predicate: any, true_branch: any, false_branch: any) {
@@ -201,7 +201,7 @@ export class IR2Rust {
       // TODO: implement
       this.output('return Err(', e.typeName, ' {})');
     } else {
-      throw new Error('eval() not implemented for ' + e.constructor.name);
+      // throw new Error('eval() not implemented for ' + e.constructor.name);
     }
     return this.lastVar();
   }

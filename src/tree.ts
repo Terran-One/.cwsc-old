@@ -37,7 +37,9 @@ export class Tree<T extends Tree<any>> {
 
   public get children(): T[] {
     let { __parent, ...rest } = this;
-    return Object.values(rest).filter(x => x instanceof Tree);
+    return Object.values(rest)
+      .filter(x => x instanceof Tree)
+      .map(x => x as T);
   }
 
   public *walkAncestors(includeSelf: boolean = false): IterableIterator<T> {
@@ -69,7 +71,7 @@ export class Tree<T extends Tree<any>> {
   }
 
   // Leaves-first traversal of descendant nodes.
-  public *walkDescendantsLF(includeSelf: boolean = false): IterableIterator<T> {
+  public *walkDescendantsLF(): IterableIterator<T> {
     for (const child of this.children) {
       yield* child.walkDescendantsLF();
     }
