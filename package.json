@@ -17,7 +17,7 @@
     "ir": "ts-node src/ir.ts",
     "fw": "ts-node src/filewriter.ts",
     "cwam": "ts-node src/cwam.ts",
-    "rust": "ts-node src/rust.ts",
+    "model": "ts-node src/model.ts",
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test",

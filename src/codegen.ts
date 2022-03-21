@@ -1,5 +1,6 @@
 import * as IR from './ir';
 import * as AST from './ast';
+import { ContractModel } from './model';
 
 export interface FileSource {
   file: string;
@@ -11,7 +12,7 @@ export type Source = FileSource;
 export class CWScriptCodegen {
   constructor(public sources: Source[]) {}
 
-  generateContract(name: string, file?: string) {
+  generateContract(name: string, file?: string): string {
     let sourceFiles = this.sources.filter(
       source =>
         source.ast
@@ -35,29 +36,22 @@ export class CWScriptCodegen {
       .descendantsOfType(AST.ContractDefn)
       .find(x => x.name.text === name)!;
 
-    let execDefns = contractDefn.descendantsOfType(AST.ExecDefn);
-    let exec: any = {};
-    execDefns.forEach(xdefn => {
-      let ast2ir = new AST2IR();
-      exec[xdefn.name!.text] = {
-        args: [],
-        returnType: xdefn.returnType,
-        body: xdefn.body.elements.map(x => ast2ir.translate(x)),
-      };
-    });
-    return {
-      exec,
-    };
+    let contractModel = ContractModel.fromAST(contractDefn);
+    return contractModel.toRust();
   }
 }
 
 export class AST2IR {
+  translateEmitStmt(ast: AST.EmitStmt): any {
+    return new IR.EmitEvent(ast.expr.constructor.name, []);
+  }
+
   translateIdent(ast: AST.Ident): any {
-    new IR.GetRustSymbol(ast.text);
+    return new IR.GetRustSymbol(ast.text);
   }
 
   translateSpecialVariable(ast: AST.Ext.SpecialVariable): any {
-    new IR.GetRustSymbol(ast.ns + '.' + ast.member);
+    return new IR.GetRustSymbol(ast.ns + '.' + ast.member);
   }
 
   translateAssignStmt(ast: AST.AssignStmt): any {
@@ -101,10 +95,10 @@ export class AST2IR {
     if (`translate${ast.constructor.name}` in AST2IR.prototype) {
       return (AST2IR.prototype as any)[`translate${ast.constructor.name}`](ast);
     }
-    return ast.constructor.name;
-    // throw new Error(
-    //   `unsuppored AST -> IR translation (${ast.constructor.name})`
-    // );
+    // return ast.constructor.name;
+    throw new Error(
+      `unsuppored AST -> IR translation (${ast.constructor.name})`
+    );
   }
 }
 export class IR2Rust {
@@ -123,6 +117,10 @@ export class IR2Rust {
     this.items.push(`let ${out} = ${items.join('')};`);
   }
 
+  push(...items: any) {
+    this.items.push(items);
+  }
+
   cond(predicate: any, true_branch: any, false_branch: any) {
     let true_ctx = new IR2Rust();
     let false_ctx = new IR2Rust();
@@ -132,7 +130,7 @@ export class IR2Rust {
       let i1 = false_ctx.translate(false_branch);
       res += ` else {\n${i1}\n}`;
     }
-    this.items.push(res);
+    this.push(res);
   }
 
   translate(items: IR.IR[]): string {
@@ -142,91 +140,67 @@ export class IR2Rust {
     return this.items.join('\n');
   }
 
-  eval(e: IR.IR) {
+  eval(e: IR.IR, mut: boolean = false) {
     if (e instanceof IR.GetRustSymbol) {
       this.output(e.symbol);
-      return;
-    }
-
-    if (e instanceof IR.AssignStateItem) {
+    } else if (e instanceof IR.GetStructMember) {
+      let i0 = this.eval(e.obj);
+      this.output(i0, '.', e.member);
+    } else if (e instanceof IR.AssignStateItem) {
       let skUpper = e.key.toUpperCase();
       let i0 = this.eval(e.rhs);
       this.output(skUpper, `.load(&mut deps.storage, &${i0})?`);
-      return;
+    } else if (e instanceof IR.AssignStateMap) {
+      let skUpper = e.key.toUpperCase();
+      let i0 = this.eval(e.mapKeys[0]);
+      let i1 = this.eval(e.rhs);
+      this.output(
+        skUpper,
+        '.save(&mut deps.storage,',
+        '&',
+        i0,
+        ',',
+        '&',
+        i1,
+        ')?'
+      );
+    } else if (e instanceof IR.AssignIdent) {
+      let i0 = this.eval(e.rhs);
+      this.push('let ', e.ident, ' = ', i0, ';');
+      return e.ident;
+    } else if (e instanceof IR.AssignMember) {
+      let i0 = this.eval(e.obj);
+      let i1 = this.eval(e.rhs);
+      this.push(i0, '.', e.member, ' = ', i1);
+    } else if (e instanceof IR.AssignTable) {
+      let i0 = this.eval(e.table);
+      let i1 = this.eval(e.key);
+      let i2 = this.eval(e.rhs);
+      this.push(i0, '[', i1, ']', ' = ', i2);
+    } else if (e instanceof IR.LoadStateMap) {
+      let skUpper = e.key.toUpperCase();
+      let i0 = this.eval(e.mapKeys[0]);
+      this.output(skUpper, '.load(&__deps.storage,', '&', i0, ')?');
+    } else if (e instanceof IR.LoadStateItem) {
+      let skUpper = e.key.toUpperCase();
+      this.output(skUpper, '.load(&deps.storage)?');
+    } else if (e instanceof IR.InfixOp) {
+      let i0 = this.eval(e.rhs);
+      let i1 = this.eval(e.lhs);
+      this.output(i0, e.op, i1);
+    } else if (e instanceof IR.Condition) {
+      let i0 = this.eval(e.predicate);
+      this.cond(i0, e.trueBranch, e.falseBranch);
+    } else if (e instanceof IR.FnCall) {
+      let i0 = this.eval(e.fn);
+      let ix = e.args.map(x => this.eval(x));
+      this.output(i0, '(', ix.join(', '), ')');
+    } else if (e instanceof IR.ValNone) {
+      this.output('None');
+    } else if (e instanceof IR.Fail) {
+      // TODO: implement
+      this.output('return Err(', e.typeName, ' {})');
     }
-
-    // case 'StateMapLoad': {
-    //   let skUpper = e.key.toUpperCase();
-    //   let i0 = this.eval(e.mapKey);
-    //   this.output(skUpper, '.load(&__deps.storage,', '&', i0, ')?');
-    //   break;
-    // }
-    // case 'StateMapSave': {
-    //   let skUpper = e.key.toUpperCase();
-    //   let i0 = this.eval(e.mapKey);
-    //   let i1 = this.eval(e.value);
-    //   this.output(
-    //     skUpper,
-    //     '.save(&mut __deps.storage,',
-    //     '&',
-    //     i0,
-    //     ',',
-    //     '&',
-    //     i1,
-    //     ')?'
-    //   );
-    //   break;
-    // }
-    // case 'StateItemLoad': {
-    //   let skUpper = e.key.toUpperCase();
-    //   this.output(skUpper, '.load(&deps.storage)?');
-    //   break;
-    // }
-    // case 'StateItemSave': {
-    //   let skUpper = e.key.toUpperCase();
-    //   let i0 = this.eval(e.value);
-    //   this.output(skUpper, `.load(&mut deps.storage, &${i0})?`);
-    //   break;
-    // }
-    // case 'MemberAccess': {
-    //   let i0 = this.eval(e.lhs);
-    //   this.output(i0, '.', e.member, '.clone()');
-    //   break;
-    // }
-    // case 'Ident': {
-    //   this.output('&', e.name);
-    //   break;
-    // }
-    // case 'BinaryOp': {
-    //   let i0 = this.eval(e.lhs);
-    //   let i1 = this.eval(e.rhs);
-    //   this.output(i0, ` ${e.op} `, i1);
-    //   break;
-    // }
-    // case 'Condition': {
-    //   let i0 = this.eval(e.predicate);
-    //   this.cond(i0, e.true_branch, e.false_branch);
-    //   break;
-    // }
-    // case 'NoneVal': {
-    //   this.output('None');
-    //   break;
-    // }
-    // case 'Fail': {
-    //   this.items.push(`return Err(${e.error_type} {});`);
-    //   break;
-    // }
-    // case 'MemberAssign': {
-    //   let i0 = this.eval(e.lhs);
-    //   let i1 = this.eval(e.rhs);
-    //   this.items.push(`${i0}.${e.member} = ${i1};`);
-    //   break;
-    // }
-    // case 'FnCall': {
-    //   let i0 = this.eval(e.function);
-    //   let args = e.args.map(arg => this.eval(arg));
-    //   this.output(`${i0}(`, args.join(', '), `)`);
-    //   break;
-    // }
+    return this.lastVar();
   }
 }

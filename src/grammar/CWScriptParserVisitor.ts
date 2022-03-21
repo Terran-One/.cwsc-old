@@ -110,7 +110,6 @@ import { MigrateDeclContext } from "./CWScriptParser";
 import { EnumVariantContext } from "./CWScriptParser";
 import { EnumVariant_structContext } from "./CWScriptParser";
 import { EnumVariant_tupleContext } from "./CWScriptParser";
-import { EnumVariant_unitContext } from "./CWScriptParser";
 import { TupleMembersContext } from "./CWScriptParser";
 import { ParenStructMembersContext } from "./CWScriptParser";
 import { CurlyStructMembersContext } from "./CWScriptParser";
@@ -126,6 +125,7 @@ import { EnumVariantListContext } from "./CWScriptParser";
 import { TypeAliasDefnContext } from "./CWScriptParser";
 import { NamedFnDeclContext } from "./CWScriptParser";
 import { NamedFnDefnContext } from "./CWScriptParser";
+import { FnDefnContext } from "./CWScriptParser";
 import { FnTypeContext } from "./CWScriptParser";
 import { FnArgsContext } from "./CWScriptParser";
 import { FnArgListContext } from "./CWScriptParser";
@@ -979,13 +979,6 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitEnumVariant_tuple?: (ctx: EnumVariant_tupleContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `CWScriptParser.enumVariant_unit`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitEnumVariant_unit?: (ctx: EnumVariant_unitContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by `CWScriptParser.tupleMembers`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1089,6 +1082,13 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitNamedFnDefn?: (ctx: NamedFnDefnContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `CWScriptParser.fnDefn`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFnDefn?: (ctx: FnDefnContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `CWScriptParser.fnType`.

@@ -1,6 +1,4 @@
-import { ContextSensitivityInfo } from 'antlr4ts/atn/ContextSensitivityInfo';
 import * as AST from './ast';
-import { CWScriptEnv, SourceFileEnv } from './env';
 import * as IR from './ir';
 import util from 'util';
 

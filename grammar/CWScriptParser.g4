@@ -39,6 +39,7 @@ interfaceBody: LBRACE (items = interfaceItem)* RBRACE;
 
 contractItem:
 	typeDefn
+	| fnDefn
 	| errorDefn
 	| errorDefnBlock
 	| eventDefn
@@ -68,20 +69,20 @@ interfaceItem:
 	| migrateDecl;
 
 // Errors
-errorDefn: (spec = cwspec)? ERROR enumVariant;
+errorDefn: (spec = cwspec)? ERROR enumVariant_struct;
 errorDefnBlock:
 	ERROR LBRACE (
 		errorDefnBlock_item (COMMA errorDefnBlock_item)* COMMA?
 	)? RBRACE;
-errorDefnBlock_item: (spec = cwspec)? enumVariant;
+errorDefnBlock_item: (spec = cwspec)? enumVariant_struct;
 
 // Events
-eventDefn: (spec = cwspec)? EVENT enumVariant;
+eventDefn: (spec = cwspec)? EVENT enumVariant_struct;
 eventDefnBlock:
 	EVENT LBRACE (
 		eventDefnBlock_item (COMMA eventDefnBlock_item)* COMMA?
 	)? RBRACE;
-eventDefnBlock_item: (spec = cwspec)? enumVariant;
+eventDefnBlock_item: (spec = cwspec)? enumVariant_struct;
 
 // State
 stateDefn: (spec = cwspec)? STATE (item = itemDefn)	# StateItemDefn
@@ -134,10 +135,7 @@ migrateDefn: (spec = cwspec)? MIGRATE fnArgs fnType? fnBody;
 migrateDecl: (spec = cwspec)? MIGRATE fnArgs fnType?;
 
 // Enum Variants
-enumVariant:
-	enumVariant_struct
-	| enumVariant_tuple
-	| enumVariant_unit;
+enumVariant: enumVariant_struct | enumVariant_tuple;
 
 enumVariant_struct: (name = ident) (
 		parenStructMembers
@@ -145,7 +143,6 @@ enumVariant_struct: (name = ident) (
 	);
 
 enumVariant_tuple: (name = ident) members = tupleMembers;
-enumVariant_unit: (name = ident);
 
 // Tuple Variants
 tupleMembers: LPAREN typeExpr (COMMA typeExpr)* RPAREN;
@@ -185,6 +182,7 @@ typeAliasDefn: (spec = cwspec)? TYPE (name = ident) EQ (
 namedFnDecl: (fnName = ident) fnArgs fnType?;
 namedFnDefn: (fnName = ident) fnArgs fnType? fnBody;
 
+fnDefn: (spec = cwspec)? FN namedFnDefn;
 fnType: (ARROW retType = typeExpr);
 fnArgs: LPAREN fnArgList? RPAREN;
 fnArgList: fnArg (COMMA fnArg)*;
@@ -320,6 +318,7 @@ reservedKeyword:
 	| STATE
 	| TIMES
 	| IF
+	| FN
 	| ELSE
 	| AND
 	| OR

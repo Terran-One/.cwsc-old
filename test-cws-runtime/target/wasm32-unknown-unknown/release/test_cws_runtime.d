@@ -1,1 +1,0 @@
-/Users/william/t1/cwsc/test-cws-runtime/target/wasm32-unknown-unknown/release/test_cws_runtime.wasm: /Users/william/t1/cwsc/test-cws-runtime/src/contract.rs /Users/william/t1/cwsc/test-cws-runtime/src/error.rs /Users/william/t1/cwsc/test-cws-runtime/src/lib.rs /Users/william/t1/cwsc/test-cws-runtime/src/msg.rs /Users/william/t1/cwsc/test-cws-runtime/src/state.rs

@@ -62,4 +62,4 @@ sources.forEach(s => {
 
 let cg = new CWScriptCodegen(sources);
 let ct = cg.generateContract('CW20Base');
-console.log(util.inspect(ct, { depth: null }));
+console.log(ct);

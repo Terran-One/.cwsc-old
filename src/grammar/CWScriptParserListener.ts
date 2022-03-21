@@ -110,7 +110,6 @@ import { MigrateDeclContext } from "./CWScriptParser";
 import { EnumVariantContext } from "./CWScriptParser";
 import { EnumVariant_structContext } from "./CWScriptParser";
 import { EnumVariant_tupleContext } from "./CWScriptParser";
-import { EnumVariant_unitContext } from "./CWScriptParser";
 import { TupleMembersContext } from "./CWScriptParser";
 import { ParenStructMembersContext } from "./CWScriptParser";
 import { CurlyStructMembersContext } from "./CWScriptParser";
@@ -126,6 +125,7 @@ import { EnumVariantListContext } from "./CWScriptParser";
 import { TypeAliasDefnContext } from "./CWScriptParser";
 import { NamedFnDeclContext } from "./CWScriptParser";
 import { NamedFnDefnContext } from "./CWScriptParser";
+import { FnDefnContext } from "./CWScriptParser";
 import { FnTypeContext } from "./CWScriptParser";
 import { FnArgsContext } from "./CWScriptParser";
 import { FnArgListContext } from "./CWScriptParser";
@@ -1468,17 +1468,6 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitEnumVariant_tuple?: (ctx: EnumVariant_tupleContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CWScriptParser.enumVariant_unit`.
-	 * @param ctx the parse tree
-	 */
-	enterEnumVariant_unit?: (ctx: EnumVariant_unitContext) => void;
-	/**
-	 * Exit a parse tree produced by `CWScriptParser.enumVariant_unit`.
-	 * @param ctx the parse tree
-	 */
-	exitEnumVariant_unit?: (ctx: EnumVariant_unitContext) => void;
-
-	/**
 	 * Enter a parse tree produced by `CWScriptParser.tupleMembers`.
 	 * @param ctx the parse tree
 	 */
@@ -1642,6 +1631,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitNamedFnDefn?: (ctx: NamedFnDefnContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CWScriptParser.fnDefn`.
+	 * @param ctx the parse tree
+	 */
+	enterFnDefn?: (ctx: FnDefnContext) => void;
+	/**
+	 * Exit a parse tree produced by `CWScriptParser.fnDefn`.
+	 * @param ctx the parse tree
+	 */
+	exitFnDefn?: (ctx: FnDefnContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CWScriptParser.fnType`.
