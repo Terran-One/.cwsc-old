@@ -86,78 +86,74 @@ export class ContractCodegen {
     let args: any = [];
     this.instantiate.args.elements.forEach(arg => {
       let argName = arg.name.text;
-      let argType = arg.type.toRust(this.env, CG.TypeName) as Rust.RustType;
+      let argType = arg.type.toRust(this.env, CG.TypeName) as Rust.Type;
       if (arg.option) {
         argType = argType.option();
       }
       args.push(new Rust.FunctionArg([], argName, argType));
     });
 
-    let instantiate = new Rust.Function(
+    let instantiate = new Rust.Defn.Function(
       [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
       'instantiate',
       [
         new Rust.FunctionArg(
           [],
           '__deps',
-          new Rust.RustType('cosmwasm_std::DepsMut')
+          new Rust.Type('cosmwasm_std::DepsMut')
         ),
-        new Rust.FunctionArg(
-          [],
-          '__env',
-          new Rust.RustType('cosmwasm_std::Env')
-        ),
+        new Rust.FunctionArg([], '__env', new Rust.Type('cosmwasm_std::Env')),
         new Rust.FunctionArg(
           [],
           '__info',
-          new Rust.RustType('cosmwasm_std::MessageInfo')
+          new Rust.Type('cosmwasm_std::MessageInfo')
         ),
         new Rust.FunctionArg(
           [],
           '__msg',
-          new Rust.RustType('crate::msg::InstantiateMsg')
+          new Rust.Type('crate::msg::InstantiateMsg')
         ),
       ],
-      new Rust.RustResult(
-        new Rust.RustType('cosmwasm_std::Response'),
-        new Rust.RustType('crate::error::ContractError')
+      new Rust.Type.Result(
+        new Rust.Type('cosmwasm_std::Response'),
+        new Rust.Type('crate::error::ContractError')
       ),
       []
     );
   }
 
   protected buildModMsg(): string {
-    let module = new Rust.Module('msg');
-    module.addItem(new Rust.UseStmt([], 'schemars::JsonSchema'));
-    module.addItem(new Rust.UseStmt([], 'serde::{Serialize, Deserialize}'));
+    let module = new Rust.Defn.Module('msg');
+    module.addItem(new Rust.Defn.Use([], 'schemars::JsonSchema'));
+    module.addItem(new Rust.Defn.Use([], 'serde::{Serialize, Deserialize}'));
 
     // build instantiate msg
-    let i = new Rust.Struct(
+    let i = new Rust.Defn.Struct(
       [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
       Rust.StructType.STRUCT,
       'InstantiateMsg'
     );
 
     this.instantiate.args.elements.forEach((arg: any) => {
-      let m = new Rust.StructMember([], arg.name, arg.type);
+      let m = new Rust.Defn.StructMember([], arg.name, arg.type);
       i.addMember(m);
     });
 
     // build execute msg
-    let e = new Rust.Enum(
+    let e = new Rust.Defn.Enum(
       [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
       'ExecuteMsg'
     );
     for (let execFn of this.exec) {
       // turn snake-case to pascal case
-      let s = new Rust.Struct(
+      let s = new Rust.Defn.Struct(
         [],
         Rust.StructType.STRUCT,
         snakeToPascal(execFn.name!.text)
       );
 
       execFn.args.elements.forEach((arg: any) => {
-        s.addMember(new Rust.StructMember([], arg.name, arg.type));
+        s.addMember(new Rust.Defn.StructMember([], arg.name, arg.type));
       });
       e.addVariant(s);
     }
@@ -165,20 +161,20 @@ export class ContractCodegen {
     module.addItem(e);
 
     // build query msg
-    let q = new Rust.Enum(
+    let q = new Rust.Defn.Enum(
       [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
       'QueryMsg'
     );
     for (let queryFn of this.query) {
       // turn snake-case to pascal case
-      let s = new Rust.Struct(
+      let s = new Rust.Defn.Struct(
         [],
         Rust.StructType.STRUCT,
         snakeToPascal(queryFn.name!.text)
       );
 
       queryFn.args.elements.forEach((arg: any) => {
-        s.addMember(new Rust.StructMember([], arg.name, arg.type));
+        s.addMember(new Rust.Defn.StructMember([], arg.name, arg.type));
       });
       q.addVariant(s);
     }
@@ -188,38 +184,38 @@ export class ContractCodegen {
   }
 
   protected buildModState(): string {
-    let cw_storage_plus_item = new Rust.RustType('cw_storage_plus::Item');
-    let cw_storage_plus_map = new Rust.RustType('cw_storage_plus::Map');
+    let cw_storage_plus_item = new Rust.Type('cw_storage_plus::Item');
+    let cw_storage_plus_map = new Rust.Type('cw_storage_plus::Map');
 
-    let module = new Rust.Module('state');
-    module.addItem(new Rust.UseStmt([], 'schemars::JsonSchema'));
-    module.addItem(new Rust.UseStmt([], 'serde::{Serialize, Deserialize}'));
-    module.addItem(new Rust.UseStmt([], 'cosmwasm_std::*'));
+    let module = new Rust.Defn.Module('state');
+    module.addItem(new Rust.Defn.Use([], 'schemars::JsonSchema'));
+    module.addItem(new Rust.Defn.Use([], 'serde::{Serialize, Deserialize}'));
+    module.addItem(new Rust.Defn.Use([], 'cosmwasm_std::*'));
 
     for (let defn of this.state) {
       if (defn instanceof AST.ItemDefn) {
         let item_type = cw_storage_plus_item.withTypeParams([
-          new Rust.RustType(defn.type.toString()),
+          new Rust.Type(defn.type.toString()),
         ]);
 
         module.addItem(
-          new Rust.Const(
+          new Rust.Defn.Const(
             defn.key.text.toUpperCase(),
             item_type,
-            item_type.fnCall('new', [new Rust.StringLiteral(defn.key.text)])
+            item_type.fnCall('new', [new Rust.Val.StrLiteral(defn.key.text)])
           )
         );
       } else if (defn instanceof AST.MapDefn) {
         let map_type = cw_storage_plus_item.withTypeParams([
-          new Rust.RustType(defn.mapKeys.elements[0].toString()),
-          new Rust.RustType(defn.type.toString()),
+          new Rust.Type(defn.mapKeys.elements[0].toString()),
+          new Rust.Type(defn.type.toString()),
         ]);
 
         module.addItem(
-          new Rust.Const(
+          new Rust.Defn.Const(
             defn.key.text.toUpperCase(),
             map_type,
-            map_type.fnCall('new', [new Rust.StringLiteral(defn.key.text)])
+            map_type.fnCall('new', [new Rust.StrLiteral(defn.key.text)])
           )
         );
       }
@@ -229,21 +225,21 @@ export class ContractCodegen {
   }
 
   protected buildModError(): string {
-    let module = new Rust.Module('error');
+    let module = new Rust.Defn.Module('error');
     let DERIVE_ERROR_ANNOTATION = new Rust.Annotation(
       'derive(thiserror::Error, Debug)'
     );
 
-    let error_enum = new Rust.Enum([DERIVE_ERROR_ANNOTATION], 'Error');
-    let std = new Rust.Struct(
+    let error_enum = new Rust.Defn.Enum([DERIVE_ERROR_ANNOTATION], 'Error');
+    let std = new Rust.Defn.Struct(
       [new Rust.Annotation('error("{0}")')],
       Rust.StructType.TUPLE,
       'Std',
       [
-        new Rust.StructMember(
+        new Rust.Defn.StructMember(
           [new Rust.Annotation('from')],
           null,
-          new Rust.RustType('cosmwasm_std::StdError')
+          new Rust.Type('cosmwasm_std::StdError')
         ),
       ]
     );
@@ -251,14 +247,14 @@ export class ContractCodegen {
 
     for (let err of this.errors) {
       let annotation = new Rust.Annotation(`error("${err.name}")`);
-      let error_struct = new Rust.Struct(
+      let error_struct = new Rust.Defn.Struct(
         [annotation],
         Rust.StructType.STRUCT,
         err.name.text
       );
 
       err.members.elements.forEach((m: any) => {
-        let member = new Rust.StructMember([], m.name, m.type);
+        let member = new Rust.Defn.StructMember([], m.name, m.type);
         error_struct.addMember(member);
       });
       error_enum.addVariant(error_struct);
@@ -268,37 +264,40 @@ export class ContractCodegen {
   }
 
   protected buildModContract(): string {
-    let module = new Rust.Module('contract');
+    let module = new Rust.Defn.Module('contract');
     module.addItem(
-      new Rust.UseStmt(
+      new Rust.Defn.Use(
         [new Rust.Annotation(`cfg(not(feature = "library"))`)],
         'cosmwasm_std::entry_point'
       )
     );
     module.addItem(
-      new Rust.UseStmt(
+      new Rust.Defn.Use(
         [],
         'cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult}'
       )
     );
-    module.addItem(new Rust.UseStmt([], 'crate::error::ContractError'));
+    module.addItem(new Rust.Defn.Use([], 'crate::error::ContractError'));
     module.addItem(
-      new Rust.UseStmt([], 'crate::msg::{InstantiateMsg, ExecuteMsg, QueryMsg}')
+      new Rust.Defn.Use(
+        [],
+        'crate::msg::{InstantiateMsg, ExecuteMsg, QueryMsg}'
+      )
     );
-    module.addItem(new Rust.UseStmt([], 'crate::state::{State, STATE}'));
+    module.addItem(new Rust.Defn.Use([], 'crate::state::{State, STATE}'));
 
-    let instantiate = new Rust.Function(
+    let instantiate = new Rust.Defn.Function(
       [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
       'instantiate',
       [
-        new Rust.FunctionArg([], '__deps', new Rust.RustType('DepsMut')),
-        new Rust.FunctionArg([], '__env', new Rust.RustType('Env')),
-        new Rust.FunctionArg([], '__info', new Rust.RustType('MessageInfo')),
-        new Rust.FunctionArg([], '__data', new Rust.RustType('Binary')),
+        new Rust.FunctionArg([], '__deps', new Rust.Type('DepsMut')),
+        new Rust.FunctionArg([], '__env', new Rust.Type('Env')),
+        new Rust.FunctionArg([], '__info', new Rust.Type('MessageInfo')),
+        new Rust.FunctionArg([], '__data', new Rust.Type('Binary')),
       ],
-      new Rust.RustResult(
-        new Rust.RustType('Response'),
-        new Rust.RustType('ContractError')
+      new Rust.Type.Result(
+        new Rust.Type('Response'),
+        new Rust.Type('ContractError')
       ),
       []
     );
