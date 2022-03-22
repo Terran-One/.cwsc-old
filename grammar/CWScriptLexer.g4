@@ -1,15 +1,10 @@
 lexer grammar CWScriptLexer;
 
-options {
-	language = JavaScript;
-}
-
 // KEYWORDS
 CONTRACT: 'contract';
 INTERFACE: 'interface';
 IMPORT: 'import';
 IMPLEMENTS: 'implements';
-IMPL: 'impl';
 EXTENSION: 'extension';
 REQUIRES: 'requires';
 EXTENDS: 'extends';
@@ -30,6 +25,7 @@ AND: 'and';
 OR: 'or';
 TRUE: 'true';
 FALSE: 'false';
+FN: 'fn';
 LET: 'let';
 FAIL: 'fail';
 RETURN: 'return';

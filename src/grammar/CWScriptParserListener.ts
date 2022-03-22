@@ -3,6 +3,11 @@
 
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
+import { StateItemAssignLHSContext } from "./CWScriptParser";
+import { StateMapAssignLHSContext } from "./CWScriptParser";
+import { IdentAssignLHSContext } from "./CWScriptParser";
+import { MemberAssignLHSContext } from "./CWScriptParser";
+import { TableAssignLHSContext } from "./CWScriptParser";
 import { StateBlockItemDefnContext } from "./CWScriptParser";
 import { StateBlockMapDefnContext } from "./CWScriptParser";
 import { ForInStmtContext } from "./CWScriptParser";
@@ -27,9 +32,9 @@ import { NormalFnBodyContext } from "./CWScriptParser";
 import { ArrowFnBodyContext } from "./CWScriptParser";
 import { IdentLHSContext } from "./CWScriptParser";
 import { StructUnpackLHSContext } from "./CWScriptParser";
-import { TupleUnpackLHSFrontBackContext } from "./CWScriptParser";
-import { TupleUnpackLHSBackContext } from "./CWScriptParser";
 import { GroupedExprContext } from "./CWScriptParser";
+import { StateItemAccessExprContext } from "./CWScriptParser";
+import { StateMapAccessExprContext } from "./CWScriptParser";
 import { MemberAccessExprContext } from "./CWScriptParser";
 import { TableLookupExprContext } from "./CWScriptParser";
 import { PosArgsFnCallExprContext } from "./CWScriptParser";
@@ -65,8 +70,6 @@ import { ExprStmtContext } from "./CWScriptParser";
 import { SourceFileContext } from "./CWScriptParser";
 import { TopLevelStmtContext } from "./CWScriptParser";
 import { ContractDefnContext } from "./CWScriptParser";
-import { InterfaceListContext } from "./CWScriptParser";
-import { InterfaceValContext } from "./CWScriptParser";
 import { InterfaceDefnContext } from "./CWScriptParser";
 import { ImportStmtContext } from "./CWScriptParser";
 import { ImportListContext } from "./CWScriptParser";
@@ -107,7 +110,6 @@ import { MigrateDeclContext } from "./CWScriptParser";
 import { EnumVariantContext } from "./CWScriptParser";
 import { EnumVariant_structContext } from "./CWScriptParser";
 import { EnumVariant_tupleContext } from "./CWScriptParser";
-import { EnumVariant_unitContext } from "./CWScriptParser";
 import { TupleMembersContext } from "./CWScriptParser";
 import { ParenStructMembersContext } from "./CWScriptParser";
 import { CurlyStructMembersContext } from "./CWScriptParser";
@@ -123,6 +125,7 @@ import { EnumVariantListContext } from "./CWScriptParser";
 import { TypeAliasDefnContext } from "./CWScriptParser";
 import { NamedFnDeclContext } from "./CWScriptParser";
 import { NamedFnDefnContext } from "./CWScriptParser";
+import { FnDefnContext } from "./CWScriptParser";
 import { FnTypeContext } from "./CWScriptParser";
 import { FnArgsContext } from "./CWScriptParser";
 import { FnArgListContext } from "./CWScriptParser";
@@ -131,6 +134,10 @@ import { FnBodyContext } from "./CWScriptParser";
 import { StmtContext } from "./CWScriptParser";
 import { LetStmt_Context } from "./CWScriptParser";
 import { LetLHSContext } from "./CWScriptParser";
+import { AssignStmt_Context } from "./CWScriptParser";
+import { AssignLHSContext } from "./CWScriptParser";
+import { InnerAssignContext } from "./CWScriptParser";
+import { InnerPathContext } from "./CWScriptParser";
 import { ExprContext } from "./CWScriptParser";
 import { ValContext } from "./CWScriptParser";
 import { StructVal_Context } from "./CWScriptParser";
@@ -155,6 +162,71 @@ import { ReservedKeywordContext } from "./CWScriptParser";
  * `CWScriptParser`.
  */
 export interface CWScriptParserListener extends ParseTreeListener {
+	/**
+	 * Enter a parse tree produced by the `StateItemAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterStateItemAssignLHS?: (ctx: StateItemAssignLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by the `StateItemAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitStateItemAssignLHS?: (ctx: StateItemAssignLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `StateMapAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterStateMapAssignLHS?: (ctx: StateMapAssignLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by the `StateMapAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitStateMapAssignLHS?: (ctx: StateMapAssignLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `IdentAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterIdentAssignLHS?: (ctx: IdentAssignLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by the `IdentAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitIdentAssignLHS?: (ctx: IdentAssignLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `MemberAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterMemberAssignLHS?: (ctx: MemberAssignLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by the `MemberAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitMemberAssignLHS?: (ctx: MemberAssignLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `TableAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterTableAssignLHS?: (ctx: TableAssignLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by the `TableAssignLHS`
+	 * labeled alternative in `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitTableAssignLHS?: (ctx: TableAssignLHSContext) => void;
+
 	/**
 	 * Enter a parse tree produced by the `StateBlockItemDefn`
 	 * labeled alternative in `CWScriptParser.stateDefnBlock_item`.
@@ -468,32 +540,6 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitStructUnpackLHS?: (ctx: StructUnpackLHSContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `TupleUnpackLHSFrontBack`
-	 * labeled alternative in `CWScriptParser.letLHS`.
-	 * @param ctx the parse tree
-	 */
-	enterTupleUnpackLHSFrontBack?: (ctx: TupleUnpackLHSFrontBackContext) => void;
-	/**
-	 * Exit a parse tree produced by the `TupleUnpackLHSFrontBack`
-	 * labeled alternative in `CWScriptParser.letLHS`.
-	 * @param ctx the parse tree
-	 */
-	exitTupleUnpackLHSFrontBack?: (ctx: TupleUnpackLHSFrontBackContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `TupleUnpackLHSBack`
-	 * labeled alternative in `CWScriptParser.letLHS`.
-	 * @param ctx the parse tree
-	 */
-	enterTupleUnpackLHSBack?: (ctx: TupleUnpackLHSBackContext) => void;
-	/**
-	 * Exit a parse tree produced by the `TupleUnpackLHSBack`
-	 * labeled alternative in `CWScriptParser.letLHS`.
-	 * @param ctx the parse tree
-	 */
-	exitTupleUnpackLHSBack?: (ctx: TupleUnpackLHSBackContext) => void;
-
-	/**
 	 * Enter a parse tree produced by the `GroupedExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
@@ -505,6 +551,32 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitGroupedExpr?: (ctx: GroupedExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `StateItemAccessExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 */
+	enterStateItemAccessExpr?: (ctx: StateItemAccessExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `StateItemAccessExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 */
+	exitStateItemAccessExpr?: (ctx: StateItemAccessExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `StateMapAccessExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 */
+	enterStateMapAccessExpr?: (ctx: StateMapAccessExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `StateMapAccessExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 */
+	exitStateMapAccessExpr?: (ctx: StateMapAccessExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `MemberAccessExpr`
@@ -956,28 +1028,6 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitContractDefn?: (ctx: ContractDefnContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CWScriptParser.interfaceList`.
-	 * @param ctx the parse tree
-	 */
-	enterInterfaceList?: (ctx: InterfaceListContext) => void;
-	/**
-	 * Exit a parse tree produced by `CWScriptParser.interfaceList`.
-	 * @param ctx the parse tree
-	 */
-	exitInterfaceList?: (ctx: InterfaceListContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `CWScriptParser.interfaceVal`.
-	 * @param ctx the parse tree
-	 */
-	enterInterfaceVal?: (ctx: InterfaceValContext) => void;
-	/**
-	 * Exit a parse tree produced by `CWScriptParser.interfaceVal`.
-	 * @param ctx the parse tree
-	 */
-	exitInterfaceVal?: (ctx: InterfaceValContext) => void;
-
-	/**
 	 * Enter a parse tree produced by `CWScriptParser.interfaceDefn`.
 	 * @param ctx the parse tree
 	 */
@@ -1418,17 +1468,6 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitEnumVariant_tuple?: (ctx: EnumVariant_tupleContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `CWScriptParser.enumVariant_unit`.
-	 * @param ctx the parse tree
-	 */
-	enterEnumVariant_unit?: (ctx: EnumVariant_unitContext) => void;
-	/**
-	 * Exit a parse tree produced by `CWScriptParser.enumVariant_unit`.
-	 * @param ctx the parse tree
-	 */
-	exitEnumVariant_unit?: (ctx: EnumVariant_unitContext) => void;
-
-	/**
 	 * Enter a parse tree produced by `CWScriptParser.tupleMembers`.
 	 * @param ctx the parse tree
 	 */
@@ -1594,6 +1633,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitNamedFnDefn?: (ctx: NamedFnDefnContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `CWScriptParser.fnDefn`.
+	 * @param ctx the parse tree
+	 */
+	enterFnDefn?: (ctx: FnDefnContext) => void;
+	/**
+	 * Exit a parse tree produced by `CWScriptParser.fnDefn`.
+	 * @param ctx the parse tree
+	 */
+	exitFnDefn?: (ctx: FnDefnContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `CWScriptParser.fnType`.
 	 * @param ctx the parse tree
 	 */
@@ -1680,6 +1730,50 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitLetLHS?: (ctx: LetLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CWScriptParser.assignStmt_`.
+	 * @param ctx the parse tree
+	 */
+	enterAssignStmt_?: (ctx: AssignStmt_Context) => void;
+	/**
+	 * Exit a parse tree produced by `CWScriptParser.assignStmt_`.
+	 * @param ctx the parse tree
+	 */
+	exitAssignStmt_?: (ctx: AssignStmt_Context) => void;
+
+	/**
+	 * Enter a parse tree produced by `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	enterAssignLHS?: (ctx: AssignLHSContext) => void;
+	/**
+	 * Exit a parse tree produced by `CWScriptParser.assignLHS`.
+	 * @param ctx the parse tree
+	 */
+	exitAssignLHS?: (ctx: AssignLHSContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CWScriptParser.innerAssign`.
+	 * @param ctx the parse tree
+	 */
+	enterInnerAssign?: (ctx: InnerAssignContext) => void;
+	/**
+	 * Exit a parse tree produced by `CWScriptParser.innerAssign`.
+	 * @param ctx the parse tree
+	 */
+	exitInnerAssign?: (ctx: InnerAssignContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CWScriptParser.innerPath`.
+	 * @param ctx the parse tree
+	 */
+	enterInnerPath?: (ctx: InnerPathContext) => void;
+	/**
+	 * Exit a parse tree produced by `CWScriptParser.innerPath`.
+	 * @param ctx the parse tree
+	 */
+	exitInnerPath?: (ctx: InnerPathContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CWScriptParser.expr`.

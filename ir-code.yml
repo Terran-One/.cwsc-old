@@ -1,23 +1,113 @@
-$type: StateMapSave
-key: 'balances'
-mapKey:
-  $type: MemberAccess
+- $type: Condition
+  predicate:
+    $type: BinaryOp
+    op: '||'
+    lhs:
+      $type: BinaryOp
+      op: ==
+      lhs:
+        $type: MemberAccess
+        lhs:
+          $type: Ident
+          name: config
+        member: mint
+      rhs:
+        $type: NoneVal
+    rhs:
+      $type: BinaryOp
+      op: '!='
+      lhs:
+        $type: MemberAccess
+        lhs:
+          $type: MemberAccess
+          lhs:
+            $type: Ident
+            name: config
+          member: mint
+        member: minter
+      rhs:
+        $type: MemberAccess
+        lhs:
+          $type: Ident
+          name: msg
+        member: sender
+  true_branch:
+    - $type: Fail
+      error_type: Unauthorized
+      error_args: {}
+  false_branch: null
+- $type: MemberAssign
   lhs:
     $type: Ident
-    name: 'msg'
-  member: 'sender'
-value:
-  $type: BinaryOp
-  op: '-'
-  lhs:
-    $type: StateMapLoad
-    key: 'balances'
-    mapKey:
+    name: config
+  member: total_supply
+  rhs:
+    $type: BinaryOp
+    op: '+'
+    lhs:
       $type: MemberAccess
       lhs:
         $type: Ident
-        name: 'msg'
-      member: 'sender'
-  rhs:
+        name: config
+      member: total_supply
+    rhs:
+      $type: Ident
+      name: amount
+- $type: Condition
+  predicate:
+    $type: BinaryOp
+    op: '&&'
+    lhs:
+      $type: FnCall
+      function:
+        $type: MemberAccess
+        lhs:
+          $type: Ident
+          name: config
+        member: 'get_cap'
+      args: []
+    rhs:
+      $type: BinaryOp
+      op: '>'
+      lhs:
+        $type: MemberAccess
+        lhs:
+          $type: Ident
+          name: config
+        member: 'total_supply'
+      rhs:
+        $type: Ident
+        name: limit
+  true_branch:
+    - $type: Fail
+      error_type: CannotExceedCap
+      error_args: null
+  false_branch: null
+- $type: StateItemSave
+  key: token_info
+  value:
     $type: Ident
-    name: '1'
+    name: config
+- $type: StateMapSave
+  key: 'balances'
+  mapKey:
+    $type: MemberAccess
+    lhs:
+      $type: Ident
+      name: 'msg'
+    member: 'sender'
+  value:
+    $type: BinaryOp
+    op: '-'
+    lhs:
+      $type: StateMapLoad
+      key: 'balances'
+      mapKey:
+        $type: MemberAccess
+        lhs:
+          $type: Ident
+          name: 'msg'
+        member: 'sender'
+    rhs:
+      $type: Ident
+      name: '1'

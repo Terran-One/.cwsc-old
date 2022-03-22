@@ -1,3 +1,6 @@
+import * as Rust from './rust';
+import * as IR from './ir';
+
 import {
   CWScriptParser,
   CwspecContext,
@@ -5,14 +8,10 @@ import {
   LetStmt_Context,
   IdentLHSContext,
   StructUnpackLHSContext,
-  TupleUnpackLHSBackContext,
-  TupleUnpackLHSFrontBackContext,
   InterfaceDefnContext,
   InterfaceItemContext,
   IdentListContext,
   SourceFileContext,
-  InterfaceListContext,
-  InterfaceValContext,
   ContractDefnContext,
   AssignStmtContext,
   FailStmtContext,
@@ -22,7 +21,6 @@ import {
   EnumVariant_structContext,
   StructMemberContext,
   EnumVariant_tupleContext,
-  EnumVariant_unitContext,
   ErrorDefnContext,
   ContractBodyContext,
   EventDefnContext,
@@ -93,12 +91,25 @@ import {
   ImportAllStmtContext,
   ImportItemsStmtContext,
   ImportItemContext,
+  AssignStmt_Context,
+  IdentAssignLHSContext,
+  MemberAssignLHSContext,
+  StateMapAssignLHSContext,
+  StateItemAssignLHSContext,
+  TableAssignLHSContext,
+  StateItemAccessExprContext,
+  StateMapAccessExprContext,
+  InnerAssignContext,
+  InnerPathContext,
+  FnDefnContext,
 } from './grammar/CWScriptParser';
 import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { Parser, ParserRuleContext, Token } from 'antlr4ts';
 import { Tree, TreeList, toData } from './tree';
 import * as _ from 'lodash';
+import { CWScriptEnv } from './semantics/env';
+import { Subspace } from './semantics/scope';
 
 export interface Position {
   a?: number;
@@ -108,7 +119,12 @@ export interface Position {
   column?: number;
 }
 
-export abstract class AST extends Tree<AST> {
+export enum CodegenCtx {
+  TypeName,
+}
+
+export abstract class AST extends Tree<AST>
+  implements Rust.TransformsToRust, IR.TransformsToIR {
   private __position?: Position;
 
   public details(): string {
@@ -143,6 +159,18 @@ export abstract class AST extends Tree<AST> {
   public toData(): any {
     return toData(this, { position: (p: any) => p });
   }
+
+  public validate(): boolean {
+    return true;
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
+    throw new Error(`${this.constructor.name}.toRust() implementation missing`);
+  }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    throw new Error(`${this.constructor.name}.toIR() implementation missing`);
+  }
 }
 
 export class CWSpec extends AST {
@@ -157,6 +185,11 @@ export class Ident extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    let e = env.currentScope().resolve(null, this.text);
+    return new IR.Ident(this.text);
+  }
 }
 
 export class List<T extends AST> extends AST implements TreeList<AST> {
@@ -165,12 +198,188 @@ export class List<T extends AST> extends AST implements TreeList<AST> {
     this.setParentForChildren();
   }
 
-  public override setParentForChildren(): void {
-    this.elements.forEach(x => x.parent = this);
+  public setParentForChildren(): void {
+    this.elements.forEach(x => (x.parent = this));
   }
 
-  public override get children(): T[] {
+  public get children(): T[] {
     return Object.values(this.elements);
+  }
+
+  public map<U>(f: (x: T) => U): U[] {
+    return this.elements.map(f);
+  }
+}
+
+export type TypeExpr =
+  | TypePath
+  | ParamzdTypeExpr
+  | TupleTypeExpr
+  | ShortOptionTypeExpr
+  | ShortVecTypeExpr
+  | RefTypeExpr
+  | ReflectiveTypeExpr
+  | StructDefn
+  | TupleStructDefn
+  | EnumDefn
+  | TypeAliasDefn;
+
+export class TypePath extends AST {
+  constructor(ctx: any, public root: boolean, public paths: List<Ident>) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toString(): string {
+    return this.paths.map(x => x.text).join('::');
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type {
+    let scope = env.currentScope();
+
+    let id = this.paths.map(x => x.text).join('::');
+    let t = scope.resolve(Subspace.TYPE, id);
+    if (t === undefined) {
+      throw new Error(`Type ${id} not found`);
+    } else {
+      return (t as any).rustType;
+    }
+  }
+}
+
+export class ParamzdTypeExpr extends AST {
+  constructor(ctx: any, public type: TypeExpr, public params: List<TypeExpr>) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type {
+    return new Rust.Type(
+      this.type.toRust(env, context).toRustString(),
+      this.params.elements.map(x => x.toRust(env, context) as Rust.Type)
+    );
+  }
+}
+
+export class TupleTypeExpr extends AST {
+  constructor(ctx: any, public members: List<TypeExpr>) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Tuple {
+    return new Rust.Type.Tuple(
+      this.members.elements.map(x => x.toRust(env, context) as Rust.Type)
+    );
+  }
+}
+
+export class ShortOptionTypeExpr extends AST {
+  constructor(ctx: any, public type: TypeExpr) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Option {
+    return new Rust.Type.Option(this.type.toRust(env, context) as Rust.Type);
+  }
+}
+
+export class ShortVecTypeExpr extends AST {
+  constructor(ctx: any, public type: TypeExpr) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Vec {
+    return new Rust.Type.Vec(this.type.toRust(env, context) as Rust.Type);
+  }
+}
+
+export class RefTypeExpr extends AST {
+  constructor(ctx: any, public type: TypeExpr) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Ref {
+    return new Rust.Type.Ref(
+      Rust.REF,
+      this.type.toRust(env, context) as Rust.Type.Ref
+    );
+  }
+}
+
+export class ReflectiveTypeExpr extends AST {
+  constructor(ctx: any, public type: TypeExpr, public member: Ident) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+export class StructDefn extends AST {
+  constructor(
+    ctx: any,
+    public spec: CWSpec | undefined,
+    public name: Ident,
+    public members: List<StructMember>
+  ) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toString(): string {
+    return `${this.name.text}`;
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
+    let s = new Rust.Defn.Struct([], Rust.STRUCT, this.name.text);
+    this.members.elements.forEach(x => {
+      s.addMember(
+        new Rust.Defn.StructMember(
+          [],
+          x.name.text,
+          x.type.toRust(env, context) as Rust.Type
+        )
+      );
+    });
+    return s;
+  }
+}
+
+export class TupleStructDefn extends AST {
+  constructor(
+    ctx: any,
+    public spec: CWSpec | undefined,
+    public name: Ident,
+    public members: List<TypeExpr>
+  ) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+export class EnumDefn extends AST {
+  constructor(
+    ctx: any,
+    public spec: CWSpec | undefined,
+    public name: Ident,
+    public variants: List<EnumVariant>
+  ) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+export class TypeAliasDefn extends AST {
+  constructor(
+    ctx: any,
+    public spec: CWSpec | undefined,
+    public name: Ident,
+    public type: TypeExpr
+  ) {
+    super(ctx);
+    this.setParentForChildren();
   }
 }
 
@@ -188,19 +397,8 @@ export class SourceFile extends AST {
 type TopLevelStmt = InterfaceDefn | ContractDefn | ImportStmt;
 
 //@Node()
-export class InterfaceVal extends AST {
-  constructor(ctx: any, public name: Ident, public mixins?: List<Ident>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
 export class ImportStmt extends AST {
-  constructor(
-    ctx: any,
-    public fileName: string,
-  ) {
+  constructor(ctx: any, public fileName: string) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -232,7 +430,6 @@ export class ImportItem extends AST {
   }
 }
 
-
 //@Node()
 export class InterfaceDefn extends AST {
   constructor(
@@ -240,8 +437,7 @@ export class InterfaceDefn extends AST {
     public spec: CWSpec | undefined,
     public name: Ident,
     public body: List<InterfaceItem>,
-    public baseInterfaces?: List<InterfaceVal>,
-    public mixinName?: Ident
+    public baseInterfaces?: List<Ident>
   ) {
     super(ctx);
     this.setParentForChildren();
@@ -256,7 +452,7 @@ export class ContractDefn extends AST {
     public name: Ident,
     public body: List<ContractItem>,
     public baseContracts?: List<Ident>,
-    public interfaces?: List<InterfaceVal>
+    public interfaces?: List<Ident>
   ) {
     super(ctx);
     this.setParentForChildren();
@@ -291,32 +487,16 @@ export type ContractItem =
   | MigrateDefn;
 
 //@Node()
-export class ErrorDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public enumVariant: EnumVariant
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
+export class ErrorDefn extends StructDefn {}
 
 //@Node()
-export class EventDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public enumVariant: EnumVariant
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
+export class EventDefn extends StructDefn {}
 
 export class StateDefn extends AST {
-  constructor(ctx: any, public key: Ident, public type: TypeExpr) { super(); }
-};
+  constructor(ctx: any, public key: Ident, public type: TypeExpr) {
+    super();
+  }
+}
 
 //@Node()
 export class ItemDefn extends StateDefn {
@@ -347,7 +527,7 @@ export class MapDefn extends StateDefn {
 
 //@Node()
 export class MapDefnKey extends AST {
-  constructor(ctx: any, public name: Ident, public type: TypeExpr) {
+  constructor(ctx: any, public name: Ident | undefined, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -424,7 +604,7 @@ export class LetStmt extends AST {
   }
 }
 
-export type LetLHS = IdentLHS | StructUnpackLHS | TupleUnpackLHS;
+export type LetLHS = IdentLHS | StructUnpackLHS;
 
 //@Node()
 export class IdentLHS extends AST {
@@ -442,21 +622,94 @@ export class StructUnpackLHS extends AST {
   }
 }
 
+export type AssignLHS =
+  | IdentAssignLHS
+  | MemberAssignLHS
+  | TableAssignLHS
+  | StateItemAssignLHS
+  | StateMapAssignLHS;
+
 //@Node()
-export class TupleUnpackLHS extends AST {
-  constructor(ctx: any, public front?: List<Ident>, public back?: List<Ident>) {
+export class AssignStmt extends AST {
+  constructor(
+    ctx: any,
+    public lhs: AssignLHS,
+    public assignOp: string,
+    public rhs: Expr
+  ) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    let rhs = this.rhs.toIR(env);
+
+    if (this.lhs instanceof StateItemAssignLHS) {
+      return new IR.StateItemSave(this.lhs.key.text, rhs);
+    }
+
+    if (this.lhs instanceof StateMapAssignLHS) {
+      let mapKeys = this.lhs.mapKeys.map(x => x.toIR(env));
+      return new IR.StateMapSave(this.lhs.key.text, mapKeys, rhs);
+    }
+
+    throw new Error(
+      `Unimplemented AssignLHS toIR(): ${this.lhs.constructor.name}`
+    );
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
+    return this.toIR(env).toRust(env);
+  }
+}
+
+//@Node()
+export class IdentAssignLHS extends AST {
+  constructor(ctx: any, public ident: Ident) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
 //@Node()
-export class AssignStmt extends AST {
+export class MemberAssignLHS extends AST {
+  constructor(ctx: any, public obj: Expr, public member: Ident) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
+export class TableAssignLHS extends AST {
+  constructor(ctx: any, public table: Expr, public key: Expr) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
+export class InnerPath extends AST {
+  constructor(ctx: any, public name: Ident, public tableKey?: Expr) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
+export class StateItemAssignLHS extends AST {
+  constructor(ctx: any, public key: Ident, public inner?: List<InnerPath>) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
+export class StateMapAssignLHS extends AST {
   constructor(
     ctx: any,
-    public lhs: Expr,
-    public assignOp: string,
-    public rhs: Expr
+    public key: Ident,
+    public mapKeys: List<Expr>,
+    public inner?: List<InnerPath>
   ) {
     super(ctx);
     this.setParentForChildren();
@@ -551,26 +804,26 @@ export class FailStmt extends AST {
 export type Expr = any;
 
 //@Node()
+export class StateItemAccessExpr extends AST {
+  constructor(ctx: any, public key: Ident) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
+export class StateMapAccessExpr extends AST {
+  constructor(ctx: any, public key: Ident, public mapKeys: List<Expr>) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
 export class MemberAccessExpr extends AST {
   constructor(ctx: any, public lhs: Expr, public member: Ident) {
     super(ctx);
     this.setParentForChildren();
-  }
-
-  public isState(): boolean {
-    return (this.lhs instanceof Ident && this.lhs.text === 'state');
-  }
-
-  public isMsg(): boolean {
-    return (this.lhs instanceof Ident && this.lhs.text === 'msg');
-  }
-
-  public isEnv(): boolean {
-    return (this.lhs instanceof Ident && this.lhs.text === 'env');
-  }
-
-  public isApi(): boolean {
-    return (this.lhs instanceof Ident && this.lhs.text === 'api');
   }
 }
 
@@ -672,6 +925,13 @@ export class StructVal extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    return new IR.NewStruct(
+      this.type.toString(),
+      this.members.map(m => [m.name.text, m.value.toIR(env)])
+    );
+  }
 }
 
 //@Node()
@@ -738,7 +998,7 @@ export class BoolVal extends AST {
   }
 }
 
-type EnumVariant = EnumVariantStruct | EnumVariantTuple | EnumVariantUnit;
+type EnumVariant = EnumVariantStruct | EnumVariantTuple;
 
 //@Node()
 export class EnumVariantStruct extends AST {
@@ -761,12 +1021,12 @@ export class EnumVariantTuple extends AST {
 }
 
 //@Node()
-export class EnumVariantUnit extends AST {
-  constructor(ctx: any, public name: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
+// export class EnumVariantUnit extends AST {
+//   constructor(ctx: any, public name: Ident) {
+//     super(ctx);
+//     this.setParentForChildren();
+//   }
+// }
 
 //@Node()
 export class StructMember extends AST {
@@ -782,94 +1042,24 @@ export class StructMember extends AST {
   }
 }
 
-// TODO: change
-export type TypeExpr = TypePath | ParamzdTypeExpr | TupleTypeExpr | ShortOptionTypeExpr | ShortVecTypeExpr | RefTypeExpr | ReflectiveTypeExpr | StructDefn | EnumDefn | TypeAliasDefn;
-export class TypePath extends AST {
-  constructor(ctx: any, public root: boolean, public paths: List<Ident>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ParamzdTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr, public params: List<TypeExpr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class TupleTypeExpr extends AST {
-  constructor(ctx: any, public members: List<TypeExpr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ShortOptionTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ShortVecTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class RefTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ReflectiveTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr, public member: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class StructDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public enumVariant: EnumVariant
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class EnumDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public variants: List<EnumVariant>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class TypeAliasDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public type: TypeExpr
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
 export class EmptyAST extends AST {}
+
+export namespace Ext {
+  export class ExtAST extends AST {}
+  export class State extends ExtAST {
+    constructor(public key: string) {
+      super();
+      this.setParentForChildren();
+    }
+  }
+
+  export class SpecialVariable extends ExtAST {
+    constructor(public ns: string, public member: string) {
+      super();
+      this.setParentForChildren();
+    }
+  }
+}
 
 export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   implements CWScriptParserVisitor<AST> {
@@ -891,30 +1081,22 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitImportAllStmt(ctx: ImportAllStmtContext): ImportAllStmt {
     let fileName = ctx._fileName.text!.replace(/^["'](.+(?=["']$))["']$/, '$1');
-    return new ImportAllStmt(
-      ctx,
-      fileName,
-    );
+    return new ImportAllStmt(ctx, fileName);
   }
 
   visitImportItem(ctx: ImportItemContext): ImportItem {
     return new ImportItem(
       ctx,
       this.visitIdent(ctx._symbol),
-      ctx._alias ? this.visitIdent(ctx._alias) : undefined,
+      ctx._alias ? this.visitIdent(ctx._alias) : undefined
     );
   }
 
   visitImportItemsStmt(ctx: ImportItemsStmtContext): ImportItemsStmt {
     let fileName = ctx._fileName.text!.replace(/^["'](.+(?=["']$))["']$/, '$1');
-    let items = 
-      ctx._items._importItems.map(item => this.visitImportItem(item));
+    let items = ctx._items._importItems.map(item => this.visitImportItem(item));
 
-    return new ImportItemsStmt(
-      ctx,
-      fileName,
-      new List(ctx, items)
-    );
+    return new ImportItemsStmt(ctx, fileName, new List(ctx, items));
   }
 
   visitTypePath(ctx: TypePathContext): TypePath {
@@ -984,21 +1166,6 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     );
   }
 
-  visitInterfaceList(ctx: InterfaceListContext): List<InterfaceVal> {
-    return new List(
-      ctx,
-      ctx.interfaceVal().map(x => this.visitInterfaceVal(x))
-    );
-  }
-
-  visitInterfaceVal(ctx: InterfaceValContext): InterfaceVal {
-    return new InterfaceVal(
-      ctx,
-      this.visitIdent(ctx._interfaceName),
-      ctx._mixins ? this.visitIdentList(ctx._mixins) : undefined
-    );
-  }
-
   visitCwspec(ctx: CwspecContext): CWSpec {
     return new CWSpec(ctx, ctx.text);
   }
@@ -1014,8 +1181,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(ctx._name),
       this.visitInterfaceBody(ctx.interfaceBody()),
-      ctx._baseInterfaces ? this.visitInterfaceList(ctx._baseInterfaces) : undefined,
-      ctx._mixinName ? this.visitIdent(ctx._mixinName) : undefined
+      ctx._baseInterfaces ? this.visitIdentList(ctx._baseInterfaces) : undefined
     );
   }
 
@@ -1031,7 +1197,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       this.visitIdent(ctx._name),
       this.visitContractBody(ctx.contractBody()),
       ctx._baseContracts ? this.visitIdentList(ctx._baseContracts) : undefined,
-      ctx._interfaces ? this.visitInterfaceList(ctx._interfaces) : undefined
+      ctx._interfaces ? this.visitIdentList(ctx._interfaces) : undefined
     );
   }
 
@@ -1045,34 +1211,29 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     );
   }
 
-  visitStructDefn(ctx: StructDefnContext): StructDefn {
+  visitStructDefn(ctx: StructDefnContext): StructDefn | TupleStructDefn {
     let enumVariant = ctx.enumVariant();
-    let variants = { 
+    let variants = {
       struct: enumVariant.enumVariant_struct(),
       tuple: enumVariant.enumVariant_tuple(),
-      unit: enumVariant.enumVariant_unit()
     };
 
     if (variants.struct !== undefined) {
+      let x = this.visitEnumVariant_struct(variants.struct);
+
       return new StructDefn(
         ctx,
         ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
-        this.visitIdent(variants.struct._name),
-        this.visitEnumVariant_struct(variants.struct)
+        x.name,
+        x.members
       );
     } else if (variants.tuple !== undefined) {
-      return new StructDefn(
+      let x = this.visitEnumVariant_tuple(variants.tuple);
+      return new TupleStructDefn(
         ctx,
         ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
-        this.visitIdent(variants.tuple._name),
-        this.visitEnumVariant_tuple(variants.tuple)
-      );
-    } else if (variants.unit !== undefined) {
-      return new StructDefn(
-        ctx,
-        ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
-        this.visitIdent(variants.unit._name),
-        this.visitEnumVariant_unit(variants.unit)
+        x.name,
+        x.members
       );
     }
 
@@ -1120,23 +1281,29 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     );
   }
 
-  visitEnumVariant_unit(ctx: EnumVariant_unitContext): EnumVariantUnit {
-    return new EnumVariantUnit(ctx, this.visitIdent(ctx._name));
-  }
+  // visitEnumVariant_unit(ctx: EnumVariant_unitContext): EnumVariantUnit {
+  //   return new EnumVariantUnit(ctx, this.visitIdent(ctx._name));
+  // }
 
   visitErrorDefn(ctx: ErrorDefnContext): ErrorDefn {
+    let struct = this.visitEnumVariant_struct(ctx.enumVariant_struct());
+
     return new ErrorDefn(
       ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
-      this.visit(ctx.enumVariant()) as EnumVariant
+      struct.name,
+      struct.members
     );
   }
 
   visitEventDefn(ctx: EventDefnContext): EventDefn {
+    let struct = this.visitEnumVariant_struct(ctx.enumVariant_struct());
+
     return new EventDefn(
       ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
-      this.visit(ctx.enumVariant()) as EnumVariant
+      struct.name,
+      struct.members
     );
   }
 
@@ -1198,7 +1365,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   visitMapDefnKey(ctx: MapDefnKeyContext): MapDefnKey {
     return new MapDefnKey(
       ctx,
-      this.visitIdent(ctx._keyName),
+      ctx._keyName ? this.visitIdent(ctx._keyName) : undefined,
       this.visit(ctx._keyType) as TypeExpr
     );
   }
@@ -1230,6 +1397,19 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     return stmt
       ? new List(ctx, [this.visit(stmt)])
       : new List<Stmt>(ctx.stmt(), []);
+  }
+
+  visitFnDefn(ctx: FnDefnContext): FnDefn {
+    let fn = ctx.namedFnDefn();
+    let fnType = fn.fnType();
+    return new ExecDefn(
+      ctx,
+      ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
+      this.visitIdent(fn._fnName),
+      this.visitFnArgs(fn.fnArgs()),
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
+      this.visit(fn.fnBody()) as List<Stmt>
+    );
   }
 
   visitInstantiateDefn(ctx: InstantiateDefnContext): InstantiateDefn {
@@ -1305,7 +1485,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       undefined,
       this.visitFnArgs(ctx.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined
     );
   }
 
@@ -1317,7 +1497,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
       this.visitFnArgs(fn.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined
     );
   }
 
@@ -1356,7 +1536,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       undefined,
       this.visitFnArgs(ctx.fnArgs()),
-      fnType ? (this.visit(fnType) as TypeExpr) : undefined,
+      fnType ? (this.visit(fnType) as TypeExpr) : undefined
     );
   }
 
@@ -1521,15 +1701,44 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     return this.visit(ctx.expr());
   }
 
+  visitStateItemAccessExpr(
+    ctx: StateItemAccessExprContext
+  ): StateItemAccessExpr {
+    return new StateItemAccessExpr(ctx, this.visitIdent(ctx._key));
+  }
+
+  visitStateMapAccessExpr(ctx: StateMapAccessExprContext): StateMapAccessExpr {
+    let mapKeys = new List(
+      ctx,
+      ctx._mapKeys.map(x => this.visit(x))
+    );
+    return new StateMapAccessExpr(ctx, this.visitIdent(ctx._key), mapKeys);
+  }
+
   visitTableLookupExpr(ctx: TableLookupExprContext): TableLookupExpr {
     let table = this.visit(ctx.expr(0));
     let key = this.visit(ctx.expr(1));
     return new TableLookupExpr(ctx, table, key);
   }
 
-  visitMemberAccessExpr(ctx: MemberAccessExprContext): MemberAccessExpr {
+  visitMemberAccessExpr(
+    ctx: MemberAccessExprContext
+  ): MemberAccessExpr | Ext.State | Ext.SpecialVariable {
     let obj = this.visit(ctx.expr());
     let member = this.visitIdent(ctx.ident());
+
+    if (obj instanceof Ident) {
+      switch (obj.text) {
+        case 'state':
+          return new Ext.State(member.text);
+        case 'msg':
+        case 'api':
+        case 'env':
+          return new Ext.SpecialVariable(obj.text, member.text);
+        default:
+          break;
+      }
+    }
     return new MemberAccessExpr(ctx, obj, member);
   }
 
@@ -1583,13 +1792,70 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     return new FailStmt(ctx, this.visit(ctx.expr()));
   }
 
-  visitAssignStmt(ctx: AssignStmtContext): AssignStmt {
-    let assignOp = ctx._assignOp.text as string;
-    return new AssignStmt(
+  visitAssignStmt_(ctx: AssignStmt_Context): AssignStmt {
+    let assignOp = ctx._assignOp.text!;
+    let lhs = this.visit(ctx._lhs) as AssignLHS;
+    let rhs = this.visit(ctx._rhs);
+    return new AssignStmt(ctx, lhs, assignOp, rhs);
+  }
+
+  visitInnerPath(ctx: InnerPathContext): InnerPath {
+    return new InnerPath(
       ctx,
-      this.visit(ctx.expr(0)) as Expr,
-      assignOp,
-      this.visit(ctx.expr(1)) as Expr
+      this.visitIdent(ctx._name),
+      ctx._tableKey ? this.visit(ctx._tableKey) : undefined
+    );
+  }
+
+  visitStateItemAssignLHS(ctx: StateItemAssignLHSContext): StateItemAssignLHS {
+    return new StateItemAssignLHS(
+      ctx,
+      this.visitIdent(ctx.ident()),
+      ctx._inner
+        ? new List(
+            ctx,
+            ctx._inner._paths.map(x => this.visitInnerPath(x))
+          )
+        : undefined
+    );
+  }
+
+  visitStateMapAssignLHS(ctx: StateMapAssignLHSContext): StateMapAssignLHS {
+    let key = this.visitIdent(ctx._key);
+    let mapKeys = new List(
+      ctx._mapKeys,
+      ctx._mapKeys.map(x => this.visit(x))
+    );
+    return new StateMapAssignLHS(
+      ctx,
+      key,
+      mapKeys,
+      ctx._inner
+        ? new List(
+            ctx,
+            ctx._inner._paths.map(x => this.visitInnerPath(x))
+          )
+        : undefined
+    );
+  }
+
+  visitIdentAssignLHS(ctx: IdentAssignLHSContext): IdentAssignLHS {
+    return new IdentAssignLHS(ctx, this.visitIdent(ctx.ident()));
+  }
+
+  visitMemberAssignLHS(ctx: MemberAssignLHSContext): MemberAssignLHS {
+    return new MemberAssignLHS(
+      ctx,
+      this.visit(ctx._obj),
+      this.visitIdent(ctx._member)
+    );
+  }
+
+  visitTableAssignLHS(ctx: TableAssignLHSContext): TableAssignLHS {
+    return new TableAssignLHS(
+      ctx,
+      this.visit(ctx._table),
+      this.visit(ctx._key)
     );
   }
 
@@ -1606,30 +1872,11 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
     return new IdentLHS(
       ctx,
       this.visitIdent(ctx.ident()),
-      typeExpr ? this.visit(typeExpr) as TypeExpr : undefined
+      typeExpr ? (this.visit(typeExpr) as TypeExpr) : undefined
     );
   }
 
   visitStructUnpackLHS(ctx: StructUnpackLHSContext): StructUnpackLHS {
     return new StructUnpackLHS(ctx, this.visit(ctx.identList()) as List<Ident>);
-  }
-
-  visitTupleUnpackLHSFrontBack(
-    ctx: TupleUnpackLHSFrontBackContext
-  ): TupleUnpackLHS {
-    let back = ctx._back;
-    return new TupleUnpackLHS(
-      ctx,
-      this.visit(ctx._front) as List<Ident>,
-      back ? (this.visit(back) as List<Ident>) : undefined
-    );
-  }
-
-  visitTupleUnpackLHSBack(ctx: TupleUnpackLHSBackContext): TupleUnpackLHS {
-    return new TupleUnpackLHS(
-      ctx,
-      undefined,
-      this.visit(ctx._back) as List<Ident>
-    );
   }
 }
