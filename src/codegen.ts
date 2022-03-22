@@ -1,7 +1,5 @@
 import * as AST from './ast';
 
-import { CodegenCtx as CG } from './ast';
-
 import { CWScriptEnv } from './semantics/env';
 import { Subspace } from './semantics/scope';
 import { CWScriptSymbol } from './semantics/symbols';
