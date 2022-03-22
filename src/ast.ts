@@ -149,6 +149,10 @@ export abstract class AST extends Tree<AST> {
   public toData(): any {
     return toData(this, { position: (p: any) => p });
   }
+
+  public validate(): boolean {
+    return true;
+  }
 }
 
 export class CWSpec extends AST {

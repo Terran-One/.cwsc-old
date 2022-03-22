@@ -82,6 +82,27 @@ export class ValNone extends BaseIR {
   public $type: string = 'val.none';
 }
 
+export interface ValStructMember {
+  name: string;
+  value: BaseIR;
+}
+
+export class ValStruct extends BaseIR {
+  public $type: string = 'val.struct';
+
+  constructor(public name: string, public members: ValStructMember[]) {
+    super();
+  }
+
+  toData() {
+    return {
+      $type: this.$type,
+      name: this.name,
+      members: this.members,
+    };
+  }
+}
+
 export class Fail extends BaseIR {
   public $type: string = 'fail';
 

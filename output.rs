@@ -81,6 +81,16 @@ pub mod contract {
         __info: MessageInfo,
         __msg: InstantiateMsg,
     ) -> Result<Response, ContractError> {
-        let __0 = TOKEN_INFO.load(&mut deps.storage, &__ - 1)?;
+        let __0 = name;
+        let __1 = symbol;
+        let __2 = decimals;
+        let __3 = total_supply;
+        let __4 = TokenInfo {
+            name: __0,
+            symbol: __1,
+            decimals: __2,
+            total_supply: __3,
+        };
+        let __5 = TOKEN_INFO.load(&mut deps.storage, &__4)?;
     }
 }

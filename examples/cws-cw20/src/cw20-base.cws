@@ -27,11 +27,11 @@ contract CW20Base {
         initial_balances: struct Cw20Coin { address: Addr, amount: Uint128 }[],
         mint?: String
     ) {
-        let total_supply: Uint128 = Uint128(0)
-        for { address, amount } in initial_balances {
-            state.balances[address] += amount
-            total_supply += amount
-        }
+        // let total_supply: Uint128 = Uint128(0)
+        // for { address, amount } in initial_balances {
+        //     state.balances[address] += amount
+        //     total_supply += amount
+        // }
 
         state.token_info = TokenInfo {
             name: name,
@@ -67,15 +67,15 @@ contract CW20Base {
     }
 
     query balance(address: Addr) -> struct BalanceResponse { balance: Uint128 } {
-        return _ {
-            balance: state.balances[address] or 0
-        }
+        // return _ {
+        //     balance: state.balances[address] or 0
+        // }
     }
 
     query token_info() -> struct TokenInfoResponse { token_info: TokenInfo } {
-        return _ {
-            token_info: state.token_info
-        }
+        // return _ {
+        //     token_info: state.token_info
+        // }
     }
 
 }

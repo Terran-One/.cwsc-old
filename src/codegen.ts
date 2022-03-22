@@ -42,6 +42,16 @@ export class CWScriptCodegen {
 }
 
 export class AST2IR {
+  translateStructVal(ast: AST.StructVal): any {
+    return new IR.ValStruct(
+      ast.type.toString(),
+      ast.members.elements.map(x => ({
+        name: x.name.text,
+        value: this.translate(x.value),
+      }))
+    );
+  }
+
   translateEmitStmt(ast: AST.EmitStmt): any {
     return new IR.EmitEvent(ast.expr.constructor.name, []);
   }
@@ -95,10 +105,10 @@ export class AST2IR {
     if (`translate${ast.constructor.name}` in AST2IR.prototype) {
       return (AST2IR.prototype as any)[`translate${ast.constructor.name}`](ast);
     }
-    return ast.constructor.name;
-    // throw new Error(
-    //   `unsuppored AST -> IR translation (${ast.constructor.name})`
-    // );
+    // return ast.constructor.name;
+    throw new Error(
+      `unsuppored AST -> IR translation (${ast.constructor.name})`
+    );
   }
 }
 export class IR2Rust {
@@ -200,8 +210,19 @@ export class IR2Rust {
     } else if (e instanceof IR.Fail) {
       // TODO: implement
       this.output('return Err(', e.typeName, ' {})');
+    } else if (e instanceof IR.ValStruct) {
+      let members = e.members.map(x => ({
+        name: x.name,
+        value: this.eval(x.value),
+      }));
+      this.output(
+        e.name,
+        ' {',
+        members.map(x => x.name + ': ' + x.value).join(', '),
+        '}'
+      );
     } else {
-      // throw new Error('eval() not implemented for ' + e.constructor.name);
+      throw new Error('eval() not implemented for ' + e.constructor.name);
     }
     return this.lastVar();
   }

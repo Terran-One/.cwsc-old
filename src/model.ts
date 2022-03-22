@@ -1,6 +1,8 @@
 import * as AST from './ast';
 import { AST2IR, IR2Rust } from './codegen';
 import * as IR from './ir';
+import * as Rust from './rust';
+import { snakeToPascal } from './util';
 
 export interface StructMember {
   name: string;
@@ -177,124 +179,186 @@ export class ContractModel {
   }
 
   protected buildModMsg(): string {
-    let res = `pub mod msg {\n`;
-    res += `use schemars::JsonSchema;\n`;
-    res += `use serde::{Deserialize, Serialize};\n`;
+    let module = new Rust.Module('msg');
+    module.addItem(new Rust.UseStmt([], 'schemars::JsonSchema'));
+    module.addItem(new Rust.UseStmt([], 'serde::{Serialize, Deserialize}'));
 
     // build instantiate msg
-    res += `#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]\n`;
-    res += `pub struct InstantiateMsg {\n`;
+    let i = new Rust.Struct(
+      [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
+      Rust.StructType.STRUCT,
+      'InstantiateMsg'
+    );
+
     this.instantiate.args.forEach((arg: any) => {
-      res += `\t${arg.name}: ${arg.type.toString()},\n`;
+      let m = new Rust.StructMember([], arg.name, arg.type);
+      i.addMember(m);
     });
-    res += `}\n\n`; /* instantiate msg */
 
     // build execute msg
-    res += `\n#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]\n`;
-    res += `#[serde(rename_all = "snake_case")]\n`;
-    res += `pub enum ExecuteMsg {\n`;
+    let e = new Rust.Enum(
+      [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
+      'ExecuteMsg'
+    );
     for (let execFn of this.exec) {
       // turn snake-case to pascal case
-      let name_pascal = execFn
-        .name!.split('_')
-        .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-        .join('');
-      res += `\t${name_pascal} {\n`;
+      let s = new Rust.Struct(
+        [],
+        Rust.StructType.STRUCT,
+        snakeToPascal(execFn.name!)
+      );
+
       execFn.args.forEach((arg: any) => {
-        res += `\t\t${arg.name}: ${arg.type.toString()},\n`;
+        s.addMember(new Rust.StructMember([], arg.name, arg.type));
       });
-      res += `\t},\n`; /* exec fn */
+      e.addVariant(s);
     }
-    res += `}\n\n`; /* execute msg */
+
+    module.addItem(e);
 
     // build query msg
-    res += `\n#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]\n`;
-    res += `#[serde(rename_all = "snake_case")]\n`;
-    res += `pub enum QueryMsg {\n`;
+    let q = new Rust.Enum(
+      [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
+      'QueryMsg'
+    );
     for (let queryFn of this.query) {
       // turn snake-case to pascal case
-      let name_pascal = queryFn
-        .name!.split('_')
-        .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-        .join('');
-      res += `\t${name_pascal} {\n`;
+      let s = new Rust.Struct(
+        [],
+        Rust.StructType.STRUCT,
+        snakeToPascal(queryFn.name!)
+      );
+
       queryFn.args.forEach((arg: any) => {
-        res += `\t\t${arg.name}: ${arg.type.toString()},\n`;
+        s.addMember(new Rust.StructMember([], arg.name, arg.type));
       });
-      res += `\t},\n`; /* query fn */
+      q.addVariant(s);
     }
-    res += `}\n\n`; /* query msg */
-    res += `}\n`; /* mod msg */
-    return res;
+
+    module.addItem(q);
+    return module.toString();
   }
 
   protected buildModState(): string {
-    let res = `pub mod state {\n`;
-    res += `use schemars::JsonSchema;\n`;
-    res += `use serde::{Deserialize, Serialize};\n`;
-    res += `use cosmwasm_std::*;\n`;
-    res += `use cw_storage_plus::{Item, Map};\n`;
+    let cw_storage_plus_item = new Rust.RustType('cw_storage_plus::Item');
+    let cw_storage_plus_map = new Rust.RustType('cw_storage_plus::Map');
+
+    let module = new Rust.Module('state');
+    module.addItem(new Rust.UseStmt([], 'schemars::JsonSchema'));
+    module.addItem(new Rust.UseStmt([], 'serde::{Serialize, Deserialize}'));
+    module.addItem(new Rust.UseStmt([], 'cosmwasm_std::*'));
 
     for (let defn of this.state) {
       if (defn instanceof StateItemModel) {
-        res += `pub const ${defn.key.toUpperCase()}: Item<${defn.valueType.toString()}> = Item::new("${
-          defn.key
-        }");\n`;
+        let item_type = cw_storage_plus_item.withTypeParams([
+          new Rust.RustType(defn.valueType),
+        ]);
+
+        module.addItem(
+          new Rust.Const(
+            defn.key.toUpperCase(),
+            item_type,
+            item_type.fnCall('new', [new Rust.StringLiteral(defn.key)])
+          )
+        );
       } else if (defn instanceof StateMapModel) {
-        res += `pub const ${defn.key.toUpperCase()}: Map<${defn.mapKeys[0].toString()}, ${defn.valueType.toString()}> = Map::new("${
-          defn.key
-        }");\n`;
+        let map_type = cw_storage_plus_item.withTypeParams([
+          new Rust.RustType(defn.mapKeys[0]),
+          new Rust.RustType(defn.valueType),
+        ]);
+
+        module.addItem(
+          new Rust.Const(
+            defn.key.toUpperCase(),
+            map_type,
+            map_type.fnCall('new', [new Rust.StringLiteral(defn.key)])
+          )
+        );
       }
     }
 
-    res += `}\n`; /* mod state */
-    return res;
+    return module.toString();
   }
 
   protected buildModError(): string {
-    let res = `pub mod error {\n`;
-    res += `use cosmwasm_std::StdError;\n`;
-    res += `use thiserror::Error;\n\n`;
-    res += `#[derive(Error, Debug)]\n`;
-    res += `pub enum ContractError {\n`;
-    res += `#[error("{0}")]\n`;
-    res += `Std(#[from] StdError),\n\n`;
+    let module = new Rust.Module('error');
+    let DERIVE_ERROR_ANNOTATION = new Rust.Annotation(
+      'derive(thiserror::Error, Debug)'
+    );
+
+    let error_enum = new Rust.Enum([DERIVE_ERROR_ANNOTATION], 'Error');
+    let std = new Rust.Struct(
+      [new Rust.Annotation('error("{0}")')],
+      Rust.StructType.TUPLE,
+      'Std',
+      [
+        new Rust.StructMember(
+          [new Rust.Annotation('from')],
+          null,
+          new Rust.RustType('cosmwasm_std::StdError')
+        ),
+      ]
+    );
+    error_enum.addVariant(std);
 
     for (let err of this.errors) {
-      res += `#[error("${err.name}")]\n`;
-      res += `${err.name} {\n`;
+      let annotation = new Rust.Annotation(`error("${err.name}")`);
+      let error_struct = new Rust.Struct(
+        [annotation],
+        Rust.StructType.STRUCT,
+        err.name
+      );
 
       err.members.forEach((m: any) => {
-        res += `\t${m.name}: ${m.type.toString()},\n`;
+        let member = new Rust.StructMember([], m.name, m.type);
+        error_struct.addMember(member);
       });
-      res += `},\n`; /* error */
+      error_enum.addVariant(error_struct);
     }
-    res += `}\n`; /* ContractError */
-    res += `}\n`; /* mod error */
-    return res;
+    module.addItem(error_enum);
+    return module.toString();
   }
 
   protected buildModContract(): string {
-    let res = `pub mod contract {\n
-#[cfg(not(feature = "library"))]
-use cosmwasm_std::entry_point;
-use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
-
-use crate::error::ContractError;
-use crate::msg::{CountResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{State, STATE};`;
-    res += `\n\n`;
-
-    // build instantiate
-    res += `#[cfg(not(feature = "library"), entry_point)]\n`;
-    res += `pub fn instantiate(__deps: DepsMut, __env: Env, __info: MessageInfo, __msg: InstantiateMsg) -> Result<Response, ContractError> {\n`;
+    let module = new Rust.Module('contract');
+    module.addItem(
+      new Rust.UseStmt(
+        [new Rust.Annotation(`cfg(not(feature = "library"))`)],
+        'cosmwasm_std::entry_point'
+      )
+    );
+    module.addItem(
+      new Rust.UseStmt(
+        [],
+        'cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult}'
+      )
+    );
+    module.addItem(new Rust.UseStmt([], 'crate::error::ContractError'));
+    module.addItem(
+      new Rust.UseStmt([], 'crate::msg::{InstantiateMsg, ExecuteMsg, QueryMsg}')
+    );
+    module.addItem(new Rust.UseStmt([], 'crate::state::{State, STATE}'));
 
     let i2r = new IR2Rust();
-    res += i2r.translate(this.instantiate.body);
-    res += `\n}\n\n`; /* instantiate */
+    let instantiate = new Rust.Function(
+      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      'instantiate',
+      [
+        new Rust.FunctionArg([], '__deps', new Rust.RustType('DepsMut')),
+        new Rust.FunctionArg([], '__env', new Rust.RustType('Env')),
+        new Rust.FunctionArg([], '__info', new Rust.RustType('MessageInfo')),
+        new Rust.FunctionArg([], '__data', new Rust.RustType('Binary')),
+      ],
+      new Rust.RustResult(
+        new Rust.RustType('Response'),
+        new Rust.RustType('ContractError')
+      ),
+      [i2r.translate(this.instantiate.body)]
+    );
 
-    res += '}\n'; /* mod contract */
-    return res;
+    module.addItem(instantiate);
+
+    return module.toString();
   }
 }
 

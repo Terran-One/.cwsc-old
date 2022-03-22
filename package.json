@@ -18,6 +18,7 @@
     "fw": "ts-node src/filewriter.ts",
     "cwam": "ts-node src/cwam.ts",
     "model": "ts-node src/model.ts",
+    "types": "ts-node src/typesystem.ts",
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test",

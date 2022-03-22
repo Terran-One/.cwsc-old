@@ -1,0 +1,12 @@
+/Users/william/t1/cwsc/my-contract-name/target/debug/deps/const_oid-8e4f1b390ace5fa8.rmeta: /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/lib.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/macros.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/arcs.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/encoder.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/error.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/parser.rs
+
+/Users/william/t1/cwsc/my-contract-name/target/debug/deps/libconst_oid-8e4f1b390ace5fa8.rlib: /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/lib.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/macros.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/arcs.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/encoder.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/error.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/parser.rs
+
+/Users/william/t1/cwsc/my-contract-name/target/debug/deps/const_oid-8e4f1b390ace5fa8.d: /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/lib.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/macros.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/arcs.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/encoder.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/error.rs /Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/parser.rs
+
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/lib.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/macros.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/arcs.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/encoder.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/error.rs:
+/Users/william/.cargo/registry/src/github.com-1ecc6299db9ec823/const-oid-0.6.2/src/parser.rs:
