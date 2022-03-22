@@ -169,10 +169,10 @@ export class ContractModel {
   }
 
   public toRust(): string {
-    let modMsg = this.buildModMsg();
-    let modState = this.buildModState();
-    let modError = this.buildModError();
-    let modContract = this.buildModContract();
+    let modMsg = this.buildModMsg(); // interface defns
+    let modState = this.buildModState(); // state defns
+    let modError = this.buildModError(); // error defns
+    let modContract = this.buildModContract(); // logic
     return [modMsg, modState, modError, modContract].join('\n\n');
   }
 

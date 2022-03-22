@@ -60,6 +60,12 @@ contract CW20Base {
         emit Send(msg.sender, contract_addr, amount) 
     }
 
+    exec mint(recipient: Addr, amount: Uint128) {
+        state.balances[mint] += amount
+        state.token_info.total_supply += amount
+        emit Mint(mint, recipient, amount)
+    }
+
     query balance(address: Addr) -> struct BalanceResponse { balance: Uint128 } {
         return _ {
             balance: state.balances[address] or 0
