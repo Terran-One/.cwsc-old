@@ -121,4 +121,14 @@ export namespace Expr {
       return `${this.path}(${this.args.map(x => x.toRustString()).join(', ')})`;
     }
   }
+
+  export class Path extends Expr {
+    constructor(public path: string) {
+      super();
+    }
+
+    toRustString(): string {
+      return this.path;
+    }
+  }
 }

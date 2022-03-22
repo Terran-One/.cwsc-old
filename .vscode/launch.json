@@ -24,5 +24,18 @@
     //   "printParseTree": true,
     //   "visualParseTree": true
     // }
+    {
+      "name": "Debug CWScript Compiler",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "args": ["src/cli.ts", "examples/cws-cw20/src/cw20-base.cws"],
+      "cwd": "${workspaceFolder}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+      }
+    }
   ]
 }

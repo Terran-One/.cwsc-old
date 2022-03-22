@@ -1,7 +1,31 @@
+import { CWScriptEnv } from '../semantics/env';
 import { Type } from './type';
 
 export interface Rust {
   toRustString(): string;
+}
+
+export interface TransformsToRust {
+  toRust(env: CWScriptEnv): Rust;
+}
+
+/**
+ * A bundle of Rust code -- sometimes we need to
+ * generate more than 1 Rust code item.
+ */
+export class CodeGroup implements Rust {
+  public items: Rust[] = [];
+  constructor(...items: Rust[]) {
+    this.items = items;
+  }
+
+  toRustString(): string {
+    return this.items.map(x => x.toRustString()).join('\n');
+  }
+}
+
+export function group(...items: Rust[]): Rust {
+  return new CodeGroup(...items);
 }
 
 export class Annotation {
@@ -67,6 +91,10 @@ export enum StructType {
   UNIT,
 }
 
+export const STRUCT = StructType.STRUCT;
+export const TUPLE = StructType.TUPLE;
+export const UNIT = StructType.UNIT;
+
 export enum IntType {
   U8 = 'u8',
   I8 = 'i8',
@@ -82,7 +110,31 @@ export enum IntType {
   ISIZE = 'isize',
 }
 
+export const U8 = IntType.U8;
+export const I8 = IntType.I8;
+export const U16 = IntType.U16;
+export const I16 = IntType.I16;
+export const U32 = IntType.U32;
+export const I32 = IntType.I32;
+export const U64 = IntType.U64;
+export const I64 = IntType.I64;
+export const U128 = IntType.U128;
+export const I128 = IntType.I128;
+export const USIZE = IntType.USIZE;
+export const ISIZE = IntType.ISIZE;
+
 export enum RefType {
   REF = '&',
   MUT = '&mut ',
 }
+
+export const REF = RefType.REF;
+export const MUT = RefType.MUT;
+
+export enum PointerType {
+  CONST = 'const',
+  MUT = 'mut',
+}
+
+export const P_CONST = PointerType.CONST;
+export const P_MUT = PointerType.MUT;

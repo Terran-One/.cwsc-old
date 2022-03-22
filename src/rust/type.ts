@@ -1,4 +1,21 @@
-import { Rust, RefType, IntType } from './common';
+import {
+  Rust,
+  RefType,
+  IntType,
+  U8,
+  I8,
+  U16,
+  I16,
+  U32,
+  I32,
+  U64,
+  I64,
+  U128,
+  I128,
+  USIZE,
+  ISIZE,
+  PointerType,
+} from './common';
 import { Expr } from './expr';
 
 export class Type implements Rust {
@@ -114,12 +131,12 @@ export namespace Type {
 
     isSigned(): boolean {
       switch (this.intType) {
-        case IntType.I8:
-        case IntType.I16:
-        case IntType.I32:
-        case IntType.I64:
-        case IntType.I128:
-        case IntType.ISIZE:
+        case I8:
+        case I16:
+        case I32:
+        case I64:
+        case I128:
+        case ISIZE:
           return true;
         default:
           return false;
@@ -147,11 +164,6 @@ export namespace Type {
           .join(', ')}) -> ${returnType.toRustString()})`
       );
     }
-  }
-
-  export enum PointerType {
-    CONST = 'const',
-    MUT = 'mut',
   }
 
   export class Pointer extends Primitive {

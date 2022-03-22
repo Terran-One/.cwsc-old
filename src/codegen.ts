@@ -17,7 +17,73 @@ export interface FileSource {
 
 export type Source = FileSource;
 
-export class ContractCodegen {
+export class ASTCodegen<T extends AST.AST> {
+  public env: CWScriptEnv;
+
+  constructor(public ast: T, env?: CWScriptEnv) {
+    if (!!env) {
+      this.env = env;
+    } else {
+      this.env = new CWScriptEnv(CWSCRIPT_GLOBALS);
+    }
+  }
+}
+
+const CW_STD = new Rust.Path('cosmwasm_std');
+const CRATE = new Rust.Path('crate');
+
+export class InstantiateCodegen extends ASTCodegen<AST.InstantiateDefn> {
+  constructor(public ast: AST.InstantiateDefn, env?: CWScriptEnv) {
+    super(ast, env);
+  }
+
+  public generateFunction(): Rust.Defn.Function {
+    // most of the instantiate function below is boilerplate as it follows the
+    // cosmwasm function signature.
+
+    let scope = this.env.enterScope('instantiate');
+
+    // (__deps: cosmwasm_std::DepsMut, __env: cosmwasm_std::Env, __info: cosmwasm_std::MessageInfo, __msg: crate::msg::InstantiateMsg)
+    let args = [
+      new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
+      new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
+      new Rust.FunctionArg([], '__info', CW_STD.join('MessageInfo').toType()),
+      new Rust.FunctionArg(
+        [],
+        '__msg',
+        CRATE.join('msg', 'InstantiateMsg').toType()
+      ),
+    ];
+
+    // -> Result<Response, crate::error::ContractError>
+    let returnType = new Rust.Type.Result(
+      CW_STD.join('Response').toType(),
+      CRATE.join('error', 'ContractError').toType()
+    );
+
+    let instantiate = new Rust.Defn.Function(
+      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      'instantiate',
+      args,
+      returnType
+    );
+
+    // now we begin to create the function body
+    // step 1: load the function arguments (inside the msg) into the local scope
+    this.ast.args.elements.forEach(arg => {
+      scope.define(Subspace.LOCAL, arg.name.text, arg.type.toRust(this.env));
+    });
+
+    // // step 2: start translating statements
+    this.ast.body.elements.forEach(stmt => {
+      instantiate.addBody(stmt.toRust(this.env));
+    });
+
+    return instantiate;
+  }
+}
+
+export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
   public name: string;
   public events: AST.EventDefn[];
   public errors: AST.ErrorDefn[];
@@ -29,14 +95,9 @@ export class ContractCodegen {
   public structs: AST.StructDefn[];
   public enums: AST.EnumDefn[];
   public typeAliases: AST.TypeAliasDefn[];
-  public env: CWScriptEnv;
 
   constructor(public ast: AST.ContractDefn, env?: CWScriptEnv) {
-    if (env !== undefined) {
-      this.env = env;
-    } else {
-      this.env = new CWScriptEnv(CWSCRIPT_GLOBALS);
-    }
+    super(ast, env);
 
     this.name = ast.name.text;
     this.events = ast.descendantsOfType(AST.EventDefn);
@@ -80,46 +141,10 @@ export class ContractCodegen {
     }
 
     // second: start generating code for functions
+    let i_cg = new InstantiateCodegen(this.instantiate, this.env);
 
-    // instantiate
-    this.env.enterScope('instantiate');
-    let args: any = [];
-    this.instantiate.args.elements.forEach(arg => {
-      let argName = arg.name.text;
-      let argType = arg.type.toRust(this.env, CG.TypeName) as Rust.Type;
-      if (arg.option) {
-        argType = argType.option();
-      }
-      args.push(new Rust.FunctionArg([], argName, argType));
-    });
-
-    let instantiate = new Rust.Defn.Function(
-      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
-      'instantiate',
-      [
-        new Rust.FunctionArg(
-          [],
-          '__deps',
-          new Rust.Type('cosmwasm_std::DepsMut')
-        ),
-        new Rust.FunctionArg([], '__env', new Rust.Type('cosmwasm_std::Env')),
-        new Rust.FunctionArg(
-          [],
-          '__info',
-          new Rust.Type('cosmwasm_std::MessageInfo')
-        ),
-        new Rust.FunctionArg(
-          [],
-          '__msg',
-          new Rust.Type('crate::msg::InstantiateMsg')
-        ),
-      ],
-      new Rust.Type.Result(
-        new Rust.Type('cosmwasm_std::Response'),
-        new Rust.Type('crate::error::ContractError')
-      ),
-      []
-    );
+    let fn = i_cg.generateFunction();
+    console.log(fn.toRustString());
   }
 
   protected buildModMsg(): string {
@@ -130,7 +155,7 @@ export class ContractCodegen {
     // build instantiate msg
     let i = new Rust.Defn.Struct(
       [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
-      Rust.StructType.STRUCT,
+      Rust.STRUCT,
       'InstantiateMsg'
     );
 
@@ -148,7 +173,7 @@ export class ContractCodegen {
       // turn snake-case to pascal case
       let s = new Rust.Defn.Struct(
         [],
-        Rust.StructType.STRUCT,
+        Rust.STRUCT,
         snakeToPascal(execFn.name!.text)
       );
 
@@ -169,7 +194,7 @@ export class ContractCodegen {
       // turn snake-case to pascal case
       let s = new Rust.Defn.Struct(
         [],
-        Rust.StructType.STRUCT,
+        Rust.STRUCT,
         snakeToPascal(queryFn.name!.text)
       );
 
@@ -215,7 +240,7 @@ export class ContractCodegen {
           new Rust.Defn.Const(
             defn.key.text.toUpperCase(),
             map_type,
-            map_type.fnCall('new', [new Rust.StrLiteral(defn.key.text)])
+            map_type.fnCall('new', [new Rust.Val.StrLiteral(defn.key.text)])
           )
         );
       }
@@ -233,7 +258,7 @@ export class ContractCodegen {
     let error_enum = new Rust.Defn.Enum([DERIVE_ERROR_ANNOTATION], 'Error');
     let std = new Rust.Defn.Struct(
       [new Rust.Annotation('error("{0}")')],
-      Rust.StructType.TUPLE,
+      Rust.TUPLE,
       'Std',
       [
         new Rust.Defn.StructMember(
@@ -249,7 +274,7 @@ export class ContractCodegen {
       let annotation = new Rust.Annotation(`error("${err.name}")`);
       let error_struct = new Rust.Defn.Struct(
         [annotation],
-        Rust.StructType.STRUCT,
+        Rust.STRUCT,
         err.name.text
       );
 

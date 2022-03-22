@@ -12,7 +12,7 @@ export class Type implements Rust {
   constructor(public path: string = '', public typeParams: Type[] = []) {}
 
   withTypeParams(tps: Type[]): Type {
-    return new RustType(this.path, tps);
+    return new Rust.Type(this.path, tps);
   }
 
   option(): Type.Option {
@@ -24,11 +24,11 @@ export class Type implements Rust {
   }
 
   ref(mut: boolean = false): Type.Ref {
-    return new RustTypeRef(mut ? RefType.MUT : RefType.REF, this);
+    return new Rust.TypeRef(mut ? RefType.MUT : RefType.REF, this);
   }
 
   mut(): Type.Mut {
-    return new RustTypeMut(this);
+    return new Rust.TypeMut(this);
   }
 
   fnCall(fnName: string, args: any, typeParams: Type[] = []): RustFnCall {
@@ -118,12 +118,12 @@ export namespace Type {
 
     isSigned(): boolean {
       switch (this.intType) {
-        case IntType.I8:
-        case IntType.I16:
-        case IntType.I32:
-        case IntType.I64:
-        case IntType.I128:
-        case IntType.ISIZE:
+        case I8:
+        case I16:
+        case I32:
+        case I64:
+        case I128:
+        case ISIZE:
           return true;
         default:
           return false;
@@ -201,128 +201,6 @@ export namespace Type {
   export class Unknown extends Type {}
 }
 
-export abstract class Expr implements Rust {
-  public get rustType(): Type {
-    return new Unknown();
-  }
-
-  asType(type: Type): Expr {
-    return new ExprAs(this, type);
-  }
-
-  q(): ExprQ {
-    return new ExprQ(this);
-  }
-
-  ref(mut: boolean = false): ExprRef {
-    return new ExprRef(mut ? RefType.MUT : RefType.REF, this);
-  }
-
-  mut(): ExprMut {
-    return new ExprMut(this);
-  }
-
-  fnCall(fnName: string, args: any, typeParams: Type[] = []): RustFnCall {
-    let fn_tps = '';
-    if (typeParams.length > 0) {
-      fn_tps = `::<${typeParams.map(x => x.toRustString()).join(', ')}>`;
-    }
-    return new RustFnCall(`${this.toRustString()}.${fnName}${fn_tps}`, args);
-  }
-
-  dot(member: string): ExprDot {
-    return new ExprDot(this, member);
-  }
-
-  toRustString(): string {
-    throw new Error(
-      `${this.constructor.name}.toRustString() implementation is missing`
-    );
-  }
-}
-
-export namespace Expr {
-  export class Dot extends Expr {
-    constructor(public expr: Expr, public member: string) {
-      super();
-    }
-
-    toRustString(): string {
-      return `${this.expr.toRustString()}.${this.member}`;
-    }
-  }
-
-  export class As extends Expr {
-    public get rustType(): Type {
-      return this.castedType;
-    }
-
-    constructor(public inner: Expr, public castedType: Type) {
-      super();
-    }
-
-    toRustString(): string {
-      return `(${this.inner.toRustString()} as ${this.castedType.toRustString()})`;
-    }
-  }
-
-  export class Mut extends Expr {
-    public get rustType(): Type.Mut {
-      return new Type.Mut(this.inner.rustType);
-    }
-
-    constructor(public inner: Expr) {
-      super();
-    }
-
-    toRustString(): string {
-      return `(mut ${this.inner.toRustString()})`;
-    }
-  }
-
-  export class Ref extends Expr {
-    public get rustType(): Type.Ref {
-      return new Type.Ref(this.refType, this.inner.rustType);
-    }
-
-    constructor(public refType: RefType, public inner: Expr) {
-      super();
-    }
-
-    toRustString(): string {
-      return `(${this.refType} ${this.inner.toRustString()})`;
-    }
-
-    isMut(): boolean {
-      return this.refType === RefType.MUT;
-    }
-  }
-
-  export class Q extends Expr {
-    constructor(public inner: Expr) {
-      super();
-    }
-
-    toRustString(): string {
-      return `(${this.inner.toRustString()})?`;
-    }
-  }
-
-  export class FnCall extends Expr {
-    constructor(
-      public path: string,
-      public args: any[],
-      public typeParams: Type[] = []
-    ) {
-      super();
-    }
-
-    toRustString(): string {
-      return `${this.path}(${this.args.map(x => x.toRustString()).join(', ')})`;
-    }
-  }
-}
-
 export class Annotation {
   constructor(public value: string) {}
 
@@ -385,38 +263,38 @@ export namespace Stmt {
 
     toRustString(): string {
       switch (this.type) {
-        case StructType.STRUCT:
+        case STRUCT:
           return this.withAnnotations(
             `pub struct ${this.name} { ${this.members
               .map(x => x.toRustString())
               .join(', ')} }`
           );
-        case StructType.TUPLE:
+        case TUPLE:
           return this.withAnnotations(
             `pub struct ${this.name}(${this.members
               .map(x => x.toRustString())
               .join(', ')});`
           );
-        case StructType.UNIT:
+        case UNIT:
           return this.withAnnotations(`pub struct ${this.name};`);
       }
     }
 
     toEnumVariantString(): string {
       switch (this.type) {
-        case StructType.STRUCT:
+        case STRUCT:
           return this.withAnnotations(
             `${this.name} { ${this.members
               .map(x => x.toRustString())
               .join(', ')} }`
           );
-        case StructType.TUPLE:
+        case TUPLE:
           return this.withAnnotations(
             `${this.name}(${this.members
               .map(x => x.toRustString())
               .join(', ')})`
           );
-        case StructType.UNIT:
+        case UNIT:
           return this.withAnnotations(this.name);
       }
     }
@@ -431,7 +309,7 @@ export namespace Stmt {
       super(annotations);
     }
 
-    addVariant(variant: Struct): EnumDefn {
+    addVariant(variant: Struct): Enum {
       this.variants.push(variant);
       return this;
     }

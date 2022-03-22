@@ -1,4 +1,13 @@
-import { Annotated, Annotation, StructType, FunctionArg } from './common';
+import {
+  Annotated,
+  Annotation,
+  StructType,
+  FunctionArg,
+  STRUCT,
+  TUPLE,
+  UNIT,
+  Rust,
+} from './common';
 import { Type } from './type';
 import { Expr } from './expr';
 
@@ -37,38 +46,38 @@ export namespace Defn {
 
     toRustString(): string {
       switch (this.type) {
-        case StructType.STRUCT:
+        case STRUCT:
           return this.withAnnotations(
             `pub struct ${this.name} { ${this.members
               .map(x => x.toRustString())
               .join(', ')} }`
           );
-        case StructType.TUPLE:
+        case TUPLE:
           return this.withAnnotations(
             `pub struct ${this.name}(${this.members
               .map(x => x.toRustString())
               .join(', ')});`
           );
-        case StructType.UNIT:
+        case UNIT:
           return this.withAnnotations(`pub struct ${this.name};`);
       }
     }
 
     toEnumVariantString(): string {
       switch (this.type) {
-        case StructType.STRUCT:
+        case STRUCT:
           return this.withAnnotations(
             `${this.name} { ${this.members
               .map(x => x.toRustString())
               .join(', ')} }`
           );
-        case StructType.TUPLE:
+        case TUPLE:
           return this.withAnnotations(
             `${this.name}(${this.members
               .map(x => x.toRustString())
               .join(', ')})`
           );
-        case StructType.UNIT:
+        case UNIT:
           return this.withAnnotations(this.name);
       }
     }
@@ -144,9 +153,19 @@ export namespace Defn {
       public name: string,
       public args: FunctionArg[],
       public returnType: Type,
-      public body: any[]
+      public body: Rust[] = []
     ) {
       super(annotations);
+    }
+
+    addArg(arg: FunctionArg): Function {
+      this.args.push(arg);
+      return this;
+    }
+
+    addBody(stmt: Rust): Function {
+      this.body.push(stmt);
+      return this;
     }
 
     toRustString(): string {

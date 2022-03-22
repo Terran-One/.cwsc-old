@@ -4,6 +4,11 @@ import * as AST from '../ast';
 export class CWScriptSymbol {}
 
 export namespace CWScriptSymbol {
+  export class LocalVariable extends CWScriptSymbol {
+    constructor(public name: string, public type: AST.TypeExpr) {
+      super();
+    }
+  }
   export class UserDefinedStruct extends CWScriptSymbol {
     constructor(public defn: AST.StructDefn) {
       super();
@@ -23,7 +28,7 @@ export namespace CWScriptSymbol {
   }
 
   export class BuiltinType extends CWScriptSymbol {
-    constructor(public rustType: Rust.RustType) {
+    constructor(public rustType: Rust.Type) {
       super();
     }
   }

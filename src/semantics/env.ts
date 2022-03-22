@@ -64,6 +64,13 @@ export class CWScriptEnv {
   }
 
   /**
+   * Alias for `currentScope()`.
+   */
+  public get scope(): CWScriptScope {
+    return this.currentScope();
+  }
+
+  /**
    * Closes the current scope, popping it off the stack. The next
    * current scope will be the parent of the closed scope.
    */

@@ -1,4 +1,5 @@
 import * as Rust from './rust';
+import * as IR from './ir';
 
 import {
   CWScriptParser,
@@ -122,7 +123,8 @@ export enum CodegenCtx {
   TypeName,
 }
 
-export abstract class AST extends Tree<AST> {
+export abstract class AST extends Tree<AST>
+  implements Rust.TransformsToRust, IR.TransformsToIR {
   private __position?: Position;
 
   public details(): string {
@@ -165,6 +167,10 @@ export abstract class AST extends Tree<AST> {
   public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
     throw new Error(`${this.constructor.name}.toRust() implementation missing`);
   }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    throw new Error(`${this.constructor.name}.toIR() implementation missing`);
+  }
 }
 
 export class CWSpec extends AST {
@@ -178,6 +184,11 @@ export class Ident extends AST {
   constructor(ctx: any, public text: string) {
     super(ctx);
     this.setParentForChildren();
+  }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    let e = env.currentScope().resolve(null, this.text);
+    return new IR.Ident(this.text);
   }
 }
 
@@ -219,7 +230,11 @@ export class TypePath extends AST {
     this.setParentForChildren();
   }
 
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
+  public toString(): string {
+    return this.paths.map(x => x.text).join('::');
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type {
     let scope = env.currentScope();
 
     let id = this.paths.map(x => x.text).join('::');
@@ -238,10 +253,10 @@ export class ParamzdTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
-    return new Rust.RustType(
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type {
+    return new Rust.Type(
       this.type.toRust(env, context).toRustString(),
-      this.params.elements.map(x => x.toRust(env, context) as Rust.RustType)
+      this.params.elements.map(x => x.toRust(env, context) as Rust.Type)
     );
   }
 }
@@ -252,9 +267,9 @@ export class TupleTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
-    return new Rust.RustTuple(
-      this.members.elements.map(x => x.toRust(env, context) as Rust.RustType)
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Tuple {
+    return new Rust.Type.Tuple(
+      this.members.elements.map(x => x.toRust(env, context) as Rust.Type)
     );
   }
 }
@@ -265,8 +280,8 @@ export class ShortOptionTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
-    return new Rust.RustOption(this.type.toRust(env, context) as Rust.RustType);
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Option {
+    return new Rust.Type.Option(this.type.toRust(env, context) as Rust.Type);
   }
 }
 
@@ -276,8 +291,8 @@ export class ShortVecTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
-    return new Rust.RustVec(this.type.toRust(env, context) as Rust.RustType);
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Vec {
+    return new Rust.Type.Vec(this.type.toRust(env, context) as Rust.Type);
   }
 }
 
@@ -287,10 +302,10 @@ export class RefTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
-    return new Rust.RustTypeRef(
-      Rust.RefType.REF,
-      this.type.toRust(env, context) as Rust.RustType
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Ref {
+    return new Rust.Type.Ref(
+      Rust.REF,
+      this.type.toRust(env, context) as Rust.Type.Ref
     );
   }
 }
@@ -318,13 +333,13 @@ export class StructDefn extends AST {
   }
 
   public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
-    let s = new Rust.Struct([], Rust.StructType.STRUCT, this.name.text);
+    let s = new Rust.Defn.Struct([], Rust.STRUCT, this.name.text);
     this.members.elements.forEach(x => {
       s.addMember(
-        new Rust.StructMember(
+        new Rust.Defn.StructMember(
           [],
           x.name.text,
-          x.type.toRust(env, context) as Rust.RustType
+          x.type.toRust(env, context) as Rust.Type
         )
       );
     });
@@ -625,6 +640,27 @@ export class AssignStmt extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    let rhs = this.rhs.toIR(env);
+
+    if (this.lhs instanceof StateItemAssignLHS) {
+      return new IR.StateItemSave(this.lhs.key.text, rhs);
+    }
+
+    if (this.lhs instanceof StateMapAssignLHS) {
+      let mapKeys = this.lhs.mapKeys.map(x => x.toIR(env));
+      return new IR.StateMapSave(this.lhs.key.text, mapKeys, rhs);
+    }
+
+    throw new Error(
+      `Unimplemented AssignLHS toIR(): ${this.lhs.constructor.name}`
+    );
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
+    return this.toIR(env).toRust(env);
+  }
 }
 
 //@Node()
@@ -888,6 +924,13 @@ export class StructVal extends AST {
   ) {
     super(ctx);
     this.setParentForChildren();
+  }
+
+  public toIR(env: CWScriptEnv): IR.IR {
+    return new IR.NewStruct(
+      this.type.toString(),
+      this.members.map(m => [m.name.text, m.value.toIR(env)])
+    );
   }
 }
 
