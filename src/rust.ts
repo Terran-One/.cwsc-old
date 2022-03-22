@@ -1,3 +1,7 @@
+export interface Rust {
+  toRustString(): string;
+}
+
 export enum StructType {
   STRUCT,
   TUPLE,
@@ -30,16 +34,18 @@ export class RustType {
   fnCall(fnName: string, args: any, typeParams: RustType[] = []): RustFnCall {
     let fn_tps = '';
     if (typeParams.length > 0) {
-      fn_tps = `::<${typeParams.map(x => x.toString()).join(', ')}>`;
+      fn_tps = `::<${typeParams.map(x => x.toRustString()).join(', ')}>`;
     }
-    return new RustFnCall(`<${this.toString()}>::${fnName}${fn_tps}`, args);
+    return new RustFnCall(`<${this.toRustString()}>::${fnName}${fn_tps}`, args);
   }
 
-  toString(): string {
+  toRustString(): string {
     if (this.typeParams.length === 0) {
       return this.path;
     }
-    return `${this.path}<${this.typeParams.map(x => x.toString()).join(', ')}>`;
+    return `${this.path}<${this.typeParams
+      .map(x => x.toRustString())
+      .join(', ')}>`;
   }
 }
 
@@ -49,13 +55,13 @@ export enum RefType {
 }
 export class RustTypeMut extends RustType {
   constructor(public inner: RustType) {
-    super(`mut ${inner.toString()}`);
+    super(`mut ${inner.toRustString()}`);
   }
 }
 
 export class RustTypeRef extends RustType {
   constructor(public refType: RefType, public inner: RustType) {
-    super(`${refType}${inner.toString()}`);
+    super(`${refType}${inner.toRustString()}`);
   }
 
   isMut(): boolean {
@@ -145,8 +151,8 @@ export class RustFn extends RustPrimitive {
   constructor(public args: RustType[], public returnType: RustType) {
     super(
       `(fn(${args
-        .map(x => x.toString())
-        .join(', ')}) -> ${returnType.toString()})`
+        .map(x => x.toRustString())
+        .join(', ')}) -> ${returnType.toRustString()})`
     );
   }
 }
@@ -158,7 +164,7 @@ export enum PointerType {
 
 export class RustPointer extends RustPrimitive {
   constructor(public pointerType: PointerType, public inner: RustType) {
-    super(`*${pointerType} ${inner.toString()}`);
+    super(`*${pointerType} ${inner.toRustString()}`);
   }
 
   isMut(): boolean {
@@ -168,13 +174,13 @@ export class RustPointer extends RustPrimitive {
 
 export class RustArray extends RustPrimitive {
   constructor(public inner: RustType, public size: number) {
-    super(`[${inner.toString()}; ${size}]`);
+    super(`[${inner.toRustString()}; ${size}]`);
   }
 }
 
 export class RustSlice extends RustPrimitive {
   constructor(public inner: RustType) {
-    super(`&[${inner.toString()}]`);
+    super(`&[${inner.toRustString()}]`);
   }
 }
 
@@ -182,9 +188,9 @@ export class RustTuple extends RustPrimitive {
   constructor(public members: RustType[]) {
     let name;
     if (members.length === 1) {
-      name = `(${members[0].toString()},)`;
+      name = `(${members[0].toRustString()},)`;
     } else {
-      name = `(${members.map(x => x.toString()).join(', ')})`;
+      name = `(${members.map(x => x.toRustString()).join(', ')})`;
     }
     super(name);
   }
@@ -198,7 +204,7 @@ export class RustUnit extends RustPrimitive {
 
 export class UnknownType extends RustType {}
 
-export class RustExpr {
+export abstract class RustExpr implements Rust {
   public get rustType(): RustType {
     return new UnknownType();
   }
@@ -222,13 +228,19 @@ export class RustExpr {
   fnCall(fnName: string, args: any, typeParams: RustType[] = []): RustFnCall {
     let fn_tps = '';
     if (typeParams.length > 0) {
-      fn_tps = `::<${typeParams.map(x => x.toString()).join(', ')}>`;
+      fn_tps = `::<${typeParams.map(x => x.toRustString()).join(', ')}>`;
     }
-    return new RustFnCall(`${this.toString()}.${fnName}${fn_tps}`, args);
+    return new RustFnCall(`${this.toRustString()}.${fnName}${fn_tps}`, args);
   }
 
   dot(member: string): RustExprDot {
     return new RustExprDot(this, member);
+  }
+
+  toRustString(): string {
+    throw new Error(
+      `${this.constructor.name}.toRustString() implementation is missing`
+    );
   }
 }
 
@@ -237,8 +249,8 @@ export class RustExprDot extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `${this.expr.toString()}.${this.member}`;
+  toRustString(): string {
+    return `${this.expr.toRustString()}.${this.member}`;
   }
 }
 
@@ -251,8 +263,8 @@ export class RustExprAs extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `(${this.inner.toString()} as ${this.castedType.toString()})`;
+  toRustString(): string {
+    return `(${this.inner.toRustString()} as ${this.castedType.toRustString()})`;
   }
 }
 
@@ -265,8 +277,8 @@ export class RustExprMut extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `(mut ${this.inner.toString()})`;
+  toRustString(): string {
+    return `(mut ${this.inner.toRustString()})`;
   }
 }
 
@@ -279,8 +291,8 @@ export class RustExprRef extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `(${this.refType} ${this.inner.toString()})`;
+  toRustString(): string {
+    return `(${this.refType} ${this.inner.toRustString()})`;
   }
 
   isMut(): boolean {
@@ -293,8 +305,8 @@ export class RustExprQ extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `(${this.inner.toString()})?`;
+  toRustString(): string {
+    return `(${this.inner.toRustString()})?`;
   }
 }
 export class RustFnCall extends RustExpr {
@@ -306,14 +318,14 @@ export class RustFnCall extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `${this.path}(${this.args.map(x => x.toString()).join(', ')})`;
+  toRustString(): string {
+    return `${this.path}(${this.args.map(x => x.toRustString()).join(', ')})`;
   }
 }
 export class Annotation {
   constructor(public value: string) {}
 
-  toString(): string {
+  toRustString(): string {
     return `#[${this.value}]`;
   }
 }
@@ -330,7 +342,7 @@ export abstract class Annotated {
   constructor(public annotations: Annotation[]) {}
 
   withAnnotations(x: string): string {
-    return `${this.annotations.map(x => x.toString()).join(' ')} ${x}`;
+    return `${this.annotations.map(x => x.toRustString()).join(' ')} ${x}`;
   }
 }
 
@@ -343,11 +355,11 @@ export class StructMember extends Annotated {
     super(annotations);
   }
 
-  public toString(): string {
+  public toRustString(): string {
     if (this.name === null) {
-      return this.withAnnotations(this.type.toString());
+      return this.withAnnotations(this.type.toRustString());
     }
-    return this.withAnnotations(`${this.name}: ${this.type.toString()}`);
+    return this.withAnnotations(`${this.name}: ${this.type.toRustString()}`);
   }
 }
 export class Struct extends Annotated {
@@ -365,18 +377,18 @@ export class Struct extends Annotated {
     return this;
   }
 
-  toString(): string {
+  toRustString(): string {
     switch (this.type) {
       case StructType.STRUCT:
         return this.withAnnotations(
           `pub struct ${this.name} { ${this.members
-            .map(x => x.toString())
+            .map(x => x.toRustString())
             .join(', ')} }`
         );
       case StructType.TUPLE:
         return this.withAnnotations(
           `pub struct ${this.name}(${this.members
-            .map(x => x.toString())
+            .map(x => x.toRustString())
             .join(', ')});`
         );
       case StructType.UNIT:
@@ -388,11 +400,13 @@ export class Struct extends Annotated {
     switch (this.type) {
       case StructType.STRUCT:
         return this.withAnnotations(
-          `${this.name} { ${this.members.map(x => x.toString()).join(', ')} }`
+          `${this.name} { ${this.members
+            .map(x => x.toRustString())
+            .join(', ')} }`
         );
       case StructType.TUPLE:
         return this.withAnnotations(
-          `${this.name}(${this.members.map(x => x.toString()).join(', ')})`
+          `${this.name}(${this.members.map(x => x.toRustString()).join(', ')})`
         );
       case StructType.UNIT:
         return this.withAnnotations(this.name);
@@ -414,7 +428,7 @@ export class Enum extends Annotated {
     return this;
   }
 
-  toString(): string {
+  toRustString(): string {
     return this.withAnnotations(
       `pub enum ${this.name} { ${this.variants
         .map(x => x.toEnumVariantString())
@@ -426,8 +440,8 @@ export class Enum extends Annotated {
 export class TypeAlias {
   constructor(public name: string, public type: RustType) {}
 
-  toString(): string {
-    return `pub type ${this.name} = ${this.type.toString()};`;
+  toRustString(): string {
+    return `pub type ${this.name} = ${this.type.toRustString()};`;
   }
 }
 
@@ -439,7 +453,7 @@ export class Module {
     return this;
   }
 
-  toString(): string {
+  toRustString(): string {
     return `pub mod ${this.name} { ${this.items.join('\n')} }`;
   }
 }
@@ -449,7 +463,7 @@ export class UseStmt extends Annotated {
     super(annotations);
   }
 
-  toString(): string {
+  toRustString(): string {
     return this.withAnnotations(`use ${this.path};`);
   }
 }
@@ -457,10 +471,10 @@ export class UseStmt extends Annotated {
 export class Const {
   constructor(public name: string, public type: RustType, public value: any) {}
 
-  toString(): string {
+  toRustString(): string {
     return `pub const ${
       this.name
-    }: ${this.type.toString()} = ${this.value.toString()};`;
+    }: ${this.type.toRustString()} = ${this.value.toRustString()};`;
   }
 }
 
@@ -473,7 +487,7 @@ export class StringLiteral extends RustExpr {
     super();
   }
 
-  toString(): string {
+  toRustString(): string {
     return `"${this.value}"`;
   }
 }
@@ -489,12 +503,14 @@ export class Function extends Annotated {
     super(annotations);
   }
 
-  toString(): string {
+  toRustString(): string {
     return this.withAnnotations(
       `pub fn ${this.name}(${this.args
-        .map(x => x.toString())
-        .join(', ')}) -> ${this.returnType.toString()} { ${this.body
-        .map(x => x.toString())
+        .map(x => x.toRustString())
+        .join(
+          ', '
+        )}) -> ${this.returnType.toRustString()} { ${this.body
+        .map(x => x.toRustString())
         .join('\n')} }`
     );
   }
@@ -509,8 +525,8 @@ export class FunctionArg extends Annotated {
     super(annotations);
   }
 
-  toString(): string {
-    return this.withAnnotations(`${this.name}: ${this.type.toString()}`);
+  toRustString(): string {
+    return this.withAnnotations(`${this.name}: ${this.type.toRustString()}`);
   }
 }
 
@@ -524,7 +540,7 @@ export class SelfArg extends FunctionArg {
     super(annotations, `&${m}self`, new RustType());
   }
 
-  toString(): string {
+  toRustString(): string {
     return this.withAnnotations(this.name);
   }
 }
@@ -537,18 +553,18 @@ export class LetStmt {
     public rhs?: RustExpr
   ) {}
 
-  toString(): string {
+  toRustString(): string {
     let m = '';
     if (this.mut) {
       m = ' mut ';
     }
     let t = '';
     if (this.type !== undefined) {
-      t = `: ${this.type.toString()}`;
+      t = `: ${this.type.toRustString()}`;
     }
     let r = '';
     if (this.rhs !== undefined) {
-      r = ` = ${this.rhs.toString()}`;
+      r = ` = ${this.rhs.toRustString()}`;
     }
     return `let${m}${this.ident}${t}${r};`;
   }
@@ -578,7 +594,7 @@ export class IntLiteral extends RustExpr {
     super();
   }
 
-  toString(): string {
+  toRustString(): string {
     return `${this.value}${this.intType}`;
   }
 }
@@ -591,7 +607,7 @@ export class BinaryIntLiteral extends RustExpr {
     super();
   }
 
-  toString(): string {
+  toRustString(): string {
     return `0b${this.value}`;
   }
 }
@@ -605,7 +621,7 @@ export class OctalIntLiteral extends RustExpr {
     super();
   }
 
-  toString(): string {
+  toRustString(): string {
     return `0o${this.value}`;
   }
 }
@@ -618,7 +634,7 @@ export class HexLiteral extends RustExpr {
     super();
   }
 
-  toString(): string {
+  toRustString(): string {
     return `0x${this.value}`;
   }
 }
@@ -632,7 +648,7 @@ export class BooleanLiteral extends RustExpr {
     super();
   }
 
-  toString(): string {
+  toRustString(): string {
     if (this.value) {
       return 'true';
     } else {
@@ -644,8 +660,8 @@ export class BooleanLiteral extends RustExpr {
 export class StructMemberVal {
   constructor(public name: string, public value: RustExpr) {}
 
-  toString(): string {
-    return `${this.name}: ${this.value.toString()}`;
+  toRustString(): string {
+    return `${this.name}: ${this.value.toRustString()}`;
   }
 }
 
@@ -672,9 +688,9 @@ export class StructVal extends RustExpr {
     return this;
   }
 
-  toString(): string {
-    return `${this.structType.toString()} { ${this.members
-      .map(x => x.toString())
+  toRustString(): string {
+    return `${this.structType.toRustString()} { ${this.members
+      .map(x => x.toRustString())
       .join(', ')} }`;
   }
 }
@@ -688,8 +704,8 @@ export class VecVal extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `vec![${this.values.map(x => x.toString()).join(', ')}]`;
+  toRustString(): string {
+    return `vec![${this.values.map(x => x.toRustString()).join(', ')}]`;
   }
 }
 
@@ -702,7 +718,7 @@ export class TupleVal extends RustExpr {
     super();
   }
 
-  toString(): string {
-    return `(${this.members.map(x => x.toString()).join(', ')})`;
+  toRustString(): string {
+    return `(${this.members.map(x => x.toRustString()).join(', ')})`;
   }
 }

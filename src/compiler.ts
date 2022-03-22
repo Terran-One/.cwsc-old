@@ -1,5 +1,4 @@
 import * as AST from './ast';
-import * as IR from './ir';
 import util from 'util';
 
 export interface FileSource {

@@ -1,3 +1,5 @@
+import * as Rust from './rust';
+
 import {
   CWScriptParser,
   CwspecContext,
@@ -105,6 +107,8 @@ import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor
 import { Parser, ParserRuleContext, Token } from 'antlr4ts';
 import { Tree, TreeList, toData } from './tree';
 import * as _ from 'lodash';
+import { CWScriptEnv } from './semantics/env';
+import { Subspace } from './semantics/scope';
 
 export interface Position {
   a?: number;
@@ -112,6 +116,10 @@ export interface Position {
   length?: number;
   line?: number;
   column?: number;
+}
+
+export enum CodegenCtx {
+  TypeName,
 }
 
 export abstract class AST extends Tree<AST> {
@@ -152,6 +160,10 @@ export abstract class AST extends Tree<AST> {
 
   public validate(): boolean {
     return true;
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
+    throw new Error(`${this.constructor.name}.toRust() implementation missing`);
   }
 }
 
@@ -207,9 +219,16 @@ export class TypePath extends AST {
     this.setParentForChildren();
   }
 
-  public toString(): string {
-    let res = this.root ? '::' : '';
-    return this.paths.map(x => x.text).join('::');
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
+    let scope = env.currentScope();
+
+    let id = this.paths.map(x => x.text).join('::');
+    let t = scope.resolve(Subspace.TYPE, id);
+    if (t === undefined) {
+      throw new Error(`Type ${id} not found`);
+    } else {
+      return (t as any).rustType;
+    }
   }
 }
 
@@ -219,10 +238,11 @@ export class ParamzdTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toString(): string {
-    return `${this.type.toString()}<${this.params
-      .map(x => x.toString())
-      .join(', ')}>`;
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
+    return new Rust.RustType(
+      this.type.toRust(env, context).toRustString(),
+      this.params.elements.map(x => x.toRust(env, context) as Rust.RustType)
+    );
   }
 }
 
@@ -232,8 +252,10 @@ export class TupleTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toString(): string {
-    return `(${this.members.map(x => x.toString()).join(', ')})`;
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
+    return new Rust.RustTuple(
+      this.members.elements.map(x => x.toRust(env, context) as Rust.RustType)
+    );
   }
 }
 
@@ -243,8 +265,8 @@ export class ShortOptionTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toString(): string {
-    return `::std::option::Option<${this.type.toString()}>`;
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
+    return new Rust.RustOption(this.type.toRust(env, context) as Rust.RustType);
   }
 }
 
@@ -254,8 +276,8 @@ export class ShortVecTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toString(): string {
-    return `::std::vec::Vec<${this.type.toString()}>`;
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
+    return new Rust.RustVec(this.type.toRust(env, context) as Rust.RustType);
   }
 }
 
@@ -265,8 +287,11 @@ export class RefTypeExpr extends AST {
     this.setParentForChildren();
   }
 
-  public toString(): string {
-    return `&${this.type.toString()}`;
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.RustType {
+    return new Rust.RustTypeRef(
+      Rust.RefType.REF,
+      this.type.toRust(env, context) as Rust.RustType
+    );
   }
 }
 
@@ -274,10 +299,6 @@ export class ReflectiveTypeExpr extends AST {
   constructor(ctx: any, public type: TypeExpr, public member: Ident) {
     super(ctx);
     this.setParentForChildren();
-  }
-
-  public toString(): string {
-    throw new Error('not implemented');
   }
 }
 
@@ -294,6 +315,20 @@ export class StructDefn extends AST {
 
   public toString(): string {
     return `${this.name.text}`;
+  }
+
+  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
+    let s = new Rust.Struct([], Rust.StructType.STRUCT, this.name.text);
+    this.members.elements.forEach(x => {
+      s.addMember(
+        new Rust.StructMember(
+          [],
+          x.name.text,
+          x.type.toRust(env, context) as Rust.RustType
+        )
+      );
+    });
+    return s;
   }
 }
 

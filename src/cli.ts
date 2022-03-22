@@ -8,7 +8,7 @@ import util from 'util';
 import { parseCWScript } from './parser';
 import { ImportAllStmt, ImportStmt } from './ast';
 import { CompilationRequestBuilder, CompilationRequest } from './compiler';
-import { IR2Rust, CWScriptCodegen } from './codegen';
+import { CWScriptCodegen } from './codegen';
 
 const program = new commander.Command();
 

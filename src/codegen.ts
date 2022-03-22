@@ -1,6 +1,14 @@
-import * as IR from './ir';
 import * as AST from './ast';
-import { ContractModel } from './model';
+
+import { CodegenCtx as CG } from './ast';
+
+import { CWScriptEnv } from './semantics/env';
+import { Subspace } from './semantics/scope';
+import { CWScriptSymbol } from './semantics/symbols';
+import { CWSCRIPT_GLOBALS } from './semantics/globals';
+
+import * as Rust from './rust';
+import { snakeToPascal, pascalToSnake } from './util';
 
 export interface FileSource {
   file: string;
@@ -9,10 +17,302 @@ export interface FileSource {
 
 export type Source = FileSource;
 
+export class ContractCodegen {
+  public name: string;
+  public events: AST.EventDefn[];
+  public errors: AST.ErrorDefn[];
+  public state: AST.StateDefn[];
+  public instantiate: AST.InstantiateDefn;
+  public exec: AST.ExecDefn[];
+  public query: AST.QueryDefn[];
+  public fns: AST.FnDefn[];
+  public structs: AST.StructDefn[];
+  public enums: AST.EnumDefn[];
+  public typeAliases: AST.TypeAliasDefn[];
+  public env: CWScriptEnv;
+
+  constructor(public ast: AST.ContractDefn, env?: CWScriptEnv) {
+    if (env !== undefined) {
+      this.env = env;
+    } else {
+      this.env = new CWScriptEnv(CWSCRIPT_GLOBALS);
+    }
+
+    this.name = ast.name.text;
+    this.events = ast.descendantsOfType(AST.EventDefn);
+    this.errors = ast.descendantsOfType(AST.ErrorDefn);
+    this.state = [
+      ...ast.descendantsOfType(AST.ItemDefn),
+      ...ast.descendantsOfType(AST.MapDefn),
+    ];
+    this.instantiate = ast.descendantsOfType(AST.InstantiateDefn)[0];
+    this.exec = ast.descendantsOfType(AST.ExecDefn);
+    this.query = ast.descendantsOfType(AST.QueryDefn);
+    this.fns = ast.descendantsOfType(AST.FnDefn);
+    this.structs = ast.descendantsOfType(AST.StructDefn);
+    this.enums = ast.descendantsOfType(AST.EnumDefn);
+    this.typeAliases = ast.descendantsOfType(AST.TypeAliasDefn);
+
+    // first: register locally defined symbols in the global scope
+    let globalScope = this.env.globalScope();
+    for (let defn of [
+      ...this.structs,
+      ...this.enums,
+      ...this.typeAliases,
+      ...this.state,
+    ]) {
+      if (defn instanceof AST.StructDefn) {
+        let symbol = new CWScriptSymbol.UserDefinedStruct(defn);
+        globalScope.define(Subspace.TYPE, defn.name.text, symbol);
+      } else if (defn instanceof AST.EnumDefn) {
+        let symbol = new CWScriptSymbol.UserDefinedEnum(defn);
+        globalScope.define(Subspace.TYPE, defn.name.text, symbol);
+      } else if (defn instanceof AST.TypeAliasDefn) {
+        let symbol = new CWScriptSymbol.UserDefinedTypeAlias(defn);
+        globalScope.define(Subspace.TYPE, defn.name.text, symbol);
+      } else if (defn instanceof AST.ItemDefn) {
+        let symbol = new CWScriptSymbol.StateItem(defn);
+        globalScope.define(Subspace.STATE, defn.key.text, symbol);
+      } else if (defn instanceof AST.MapDefn) {
+        let symbol = new CWScriptSymbol.StateMap(defn);
+        globalScope.define(Subspace.STATE, defn.key.text, symbol);
+      }
+    }
+
+    // second: start generating code for functions
+
+    // instantiate
+    this.env.enterScope('instantiate');
+    let args: any = [];
+    this.instantiate.args.elements.forEach(arg => {
+      let argName = arg.name.text;
+      let argType = arg.type.toRust(this.env, CG.TypeName) as Rust.RustType;
+      if (arg.option) {
+        argType = argType.option();
+      }
+      args.push(new Rust.FunctionArg([], argName, argType));
+    });
+
+    let instantiate = new Rust.Function(
+      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      'instantiate',
+      [
+        new Rust.FunctionArg(
+          [],
+          '__deps',
+          new Rust.RustType('cosmwasm_std::DepsMut')
+        ),
+        new Rust.FunctionArg(
+          [],
+          '__env',
+          new Rust.RustType('cosmwasm_std::Env')
+        ),
+        new Rust.FunctionArg(
+          [],
+          '__info',
+          new Rust.RustType('cosmwasm_std::MessageInfo')
+        ),
+        new Rust.FunctionArg(
+          [],
+          '__msg',
+          new Rust.RustType('crate::msg::InstantiateMsg')
+        ),
+      ],
+      new Rust.RustResult(
+        new Rust.RustType('cosmwasm_std::Response'),
+        new Rust.RustType('crate::error::ContractError')
+      ),
+      []
+    );
+  }
+
+  protected buildModMsg(): string {
+    let module = new Rust.Module('msg');
+    module.addItem(new Rust.UseStmt([], 'schemars::JsonSchema'));
+    module.addItem(new Rust.UseStmt([], 'serde::{Serialize, Deserialize}'));
+
+    // build instantiate msg
+    let i = new Rust.Struct(
+      [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
+      Rust.StructType.STRUCT,
+      'InstantiateMsg'
+    );
+
+    this.instantiate.args.elements.forEach((arg: any) => {
+      let m = new Rust.StructMember([], arg.name, arg.type);
+      i.addMember(m);
+    });
+
+    // build execute msg
+    let e = new Rust.Enum(
+      [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
+      'ExecuteMsg'
+    );
+    for (let execFn of this.exec) {
+      // turn snake-case to pascal case
+      let s = new Rust.Struct(
+        [],
+        Rust.StructType.STRUCT,
+        snakeToPascal(execFn.name!.text)
+      );
+
+      execFn.args.elements.forEach((arg: any) => {
+        s.addMember(new Rust.StructMember([], arg.name, arg.type));
+      });
+      e.addVariant(s);
+    }
+
+    module.addItem(e);
+
+    // build query msg
+    let q = new Rust.Enum(
+      [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
+      'QueryMsg'
+    );
+    for (let queryFn of this.query) {
+      // turn snake-case to pascal case
+      let s = new Rust.Struct(
+        [],
+        Rust.StructType.STRUCT,
+        snakeToPascal(queryFn.name!.text)
+      );
+
+      queryFn.args.elements.forEach((arg: any) => {
+        s.addMember(new Rust.StructMember([], arg.name, arg.type));
+      });
+      q.addVariant(s);
+    }
+
+    module.addItem(q);
+    return module.toString();
+  }
+
+  protected buildModState(): string {
+    let cw_storage_plus_item = new Rust.RustType('cw_storage_plus::Item');
+    let cw_storage_plus_map = new Rust.RustType('cw_storage_plus::Map');
+
+    let module = new Rust.Module('state');
+    module.addItem(new Rust.UseStmt([], 'schemars::JsonSchema'));
+    module.addItem(new Rust.UseStmt([], 'serde::{Serialize, Deserialize}'));
+    module.addItem(new Rust.UseStmt([], 'cosmwasm_std::*'));
+
+    for (let defn of this.state) {
+      if (defn instanceof AST.ItemDefn) {
+        let item_type = cw_storage_plus_item.withTypeParams([
+          new Rust.RustType(defn.type.toString()),
+        ]);
+
+        module.addItem(
+          new Rust.Const(
+            defn.key.text.toUpperCase(),
+            item_type,
+            item_type.fnCall('new', [new Rust.StringLiteral(defn.key.text)])
+          )
+        );
+      } else if (defn instanceof AST.MapDefn) {
+        let map_type = cw_storage_plus_item.withTypeParams([
+          new Rust.RustType(defn.mapKeys.elements[0].toString()),
+          new Rust.RustType(defn.type.toString()),
+        ]);
+
+        module.addItem(
+          new Rust.Const(
+            defn.key.text.toUpperCase(),
+            map_type,
+            map_type.fnCall('new', [new Rust.StringLiteral(defn.key.text)])
+          )
+        );
+      }
+    }
+
+    return module.toString();
+  }
+
+  protected buildModError(): string {
+    let module = new Rust.Module('error');
+    let DERIVE_ERROR_ANNOTATION = new Rust.Annotation(
+      'derive(thiserror::Error, Debug)'
+    );
+
+    let error_enum = new Rust.Enum([DERIVE_ERROR_ANNOTATION], 'Error');
+    let std = new Rust.Struct(
+      [new Rust.Annotation('error("{0}")')],
+      Rust.StructType.TUPLE,
+      'Std',
+      [
+        new Rust.StructMember(
+          [new Rust.Annotation('from')],
+          null,
+          new Rust.RustType('cosmwasm_std::StdError')
+        ),
+      ]
+    );
+    error_enum.addVariant(std);
+
+    for (let err of this.errors) {
+      let annotation = new Rust.Annotation(`error("${err.name}")`);
+      let error_struct = new Rust.Struct(
+        [annotation],
+        Rust.StructType.STRUCT,
+        err.name.text
+      );
+
+      err.members.elements.forEach((m: any) => {
+        let member = new Rust.StructMember([], m.name, m.type);
+        error_struct.addMember(member);
+      });
+      error_enum.addVariant(error_struct);
+    }
+    module.addItem(error_enum);
+    return module.toString();
+  }
+
+  protected buildModContract(): string {
+    let module = new Rust.Module('contract');
+    module.addItem(
+      new Rust.UseStmt(
+        [new Rust.Annotation(`cfg(not(feature = "library"))`)],
+        'cosmwasm_std::entry_point'
+      )
+    );
+    module.addItem(
+      new Rust.UseStmt(
+        [],
+        'cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult}'
+      )
+    );
+    module.addItem(new Rust.UseStmt([], 'crate::error::ContractError'));
+    module.addItem(
+      new Rust.UseStmt([], 'crate::msg::{InstantiateMsg, ExecuteMsg, QueryMsg}')
+    );
+    module.addItem(new Rust.UseStmt([], 'crate::state::{State, STATE}'));
+
+    let instantiate = new Rust.Function(
+      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      'instantiate',
+      [
+        new Rust.FunctionArg([], '__deps', new Rust.RustType('DepsMut')),
+        new Rust.FunctionArg([], '__env', new Rust.RustType('Env')),
+        new Rust.FunctionArg([], '__info', new Rust.RustType('MessageInfo')),
+        new Rust.FunctionArg([], '__data', new Rust.RustType('Binary')),
+      ],
+      new Rust.RustResult(
+        new Rust.RustType('Response'),
+        new Rust.RustType('ContractError')
+      ),
+      []
+    );
+
+    module.addItem(instantiate);
+
+    return module.toString();
+  }
+}
+
 export class CWScriptCodegen {
   constructor(public sources: Source[]) {}
 
-  generateContract(name: string, file?: string): string {
+  generateContract(name: string, file?: string) {
     let sourceFiles = this.sources.filter(
       source =>
         source.ast
@@ -36,194 +336,6 @@ export class CWScriptCodegen {
       .descendantsOfType(AST.ContractDefn)
       .find(x => x.name.text === name)!;
 
-    let contractModel = ContractModel.fromAST(contractDefn);
-    return contractModel.toRust();
-  }
-}
-
-export class AST2IR {
-  translateStructVal(ast: AST.StructVal): any {
-    return new IR.ValStruct(
-      ast.type.toString(),
-      ast.members.elements.map(x => ({
-        name: x.name.text,
-        value: this.translate(x.value),
-      }))
-    );
-  }
-
-  translateEmitStmt(ast: AST.EmitStmt): any {
-    return new IR.EmitEvent(ast.expr.constructor.name, []);
-  }
-
-  translateIdent(ast: AST.Ident): any {
-    return new IR.GetRustSymbol(ast.text);
-  }
-
-  translateSpecialVariable(ast: AST.Ext.SpecialVariable): any {
-    return new IR.GetRustSymbol(ast.ns + '.' + ast.member);
-  }
-
-  translateAssignStmt(ast: AST.AssignStmt): any {
-    if (ast.lhs instanceof AST.StateItemAssignLHS) {
-      return new IR.AssignStateItem(ast.lhs.key.text, this.translate(ast.rhs));
-    }
-
-    if (ast.lhs instanceof AST.StateMapAssignLHS) {
-      return new IR.AssignStateMap(
-        ast.lhs.key.text,
-        ast.lhs.mapKeys.map(x => this.translate(x)),
-        this.translate(ast.rhs)
-      );
-    }
-
-    if (ast.lhs instanceof AST.IdentAssignLHS) {
-      return new IR.AssignIdent(ast.lhs.ident.text, this.translate(ast.rhs));
-    }
-
-    if (ast.lhs instanceof AST.MemberAssignLHS) {
-      return new IR.AssignMember(
-        this.translate(ast.lhs.obj),
-        ast.lhs.member.text,
-        this.translate(ast.rhs)
-      );
-    }
-
-    if (ast.lhs instanceof AST.TableAssignLHS) {
-      return new IR.AssignTable(
-        this.translate(ast.lhs.table),
-        this.translate(ast.lhs.key),
-        this.translate(ast.rhs)
-      );
-    }
-
-    // @ts-ignore
-    throw new Error(`unsupported lhs: ${ast.lhs.constructor.name}`);
-  }
-
-  translate(ast: AST.AST): any {
-    if (`translate${ast.constructor.name}` in AST2IR.prototype) {
-      return (AST2IR.prototype as any)[`translate${ast.constructor.name}`](ast);
-    }
-    // return ast.constructor.name;
-    throw new Error(
-      `unsuppored AST -> IR translation (${ast.constructor.name})`
-    );
-  }
-}
-export class IR2Rust {
-  constructor(public items: any[] = [], public tmpVarCount: number = 0) {}
-
-  makeTmpVar() {
-    return `__${this.tmpVarCount++}`;
-  }
-
-  lastVar() {
-    return `__${this.tmpVarCount - 1}`;
-  }
-
-  output(...items: any) {
-    let out = this.makeTmpVar();
-    this.items.push(`let ${out} = ${items.join('')};`);
-  }
-
-  push(...items: any) {
-    this.items.push(items.join(''));
-  }
-
-  cond(predicate: any, true_branch: any, false_branch: any) {
-    let true_ctx = new IR2Rust();
-    let false_ctx = new IR2Rust();
-    let i0 = true_ctx.translate(true_branch);
-    let res = `if (${predicate}) {\n${i0}\n}`;
-    if (!!false_branch) {
-      let i1 = false_ctx.translate(false_branch);
-      res += ` else {\n${i1}\n}`;
-    }
-    this.push(res);
-  }
-
-  translate(items: IR.IR[]): string {
-    items.forEach(item => {
-      this.eval(item);
-    });
-    return this.items.join('\n');
-  }
-
-  eval(e: IR.IR, mut: boolean = false) {
-    if (e instanceof IR.GetRustSymbol) {
-      this.output(e.symbol);
-    } else if (e instanceof IR.GetStructMember) {
-      let i0 = this.eval(e.obj);
-      this.output(i0, '.', e.member);
-    } else if (e instanceof IR.AssignStateItem) {
-      let skUpper = e.key.toUpperCase();
-      let i0 = this.eval(e.rhs);
-      this.output(skUpper, `.load(&mut deps.storage, &${i0})?`);
-    } else if (e instanceof IR.AssignStateMap) {
-      let skUpper = e.key.toUpperCase();
-      let i0 = this.eval(e.mapKeys[0]);
-      let i1 = this.eval(e.rhs);
-      this.output(
-        skUpper,
-        '.save(&mut deps.storage,',
-        '&',
-        i0,
-        ',',
-        '&',
-        i1,
-        ')?'
-      );
-    } else if (e instanceof IR.AssignIdent) {
-      let i0 = this.eval(e.rhs);
-      this.push('let ', e.ident, ' = ', i0, ';');
-      return e.ident;
-    } else if (e instanceof IR.AssignMember) {
-      let i0 = this.eval(e.obj);
-      let i1 = this.eval(e.rhs);
-      this.push(i0, '.', e.member, ' = ', i1);
-    } else if (e instanceof IR.AssignTable) {
-      let i0 = this.eval(e.table);
-      let i1 = this.eval(e.key);
-      let i2 = this.eval(e.rhs);
-      this.push(i0, '[', i1, ']', ' = ', i2);
-    } else if (e instanceof IR.LoadStateMap) {
-      let skUpper = e.key.toUpperCase();
-      let i0 = this.eval(e.mapKeys[0]);
-      this.output(skUpper, '.load(&__deps.storage,', '&', i0, ')?');
-    } else if (e instanceof IR.LoadStateItem) {
-      let skUpper = e.key.toUpperCase();
-      this.output(skUpper, '.load(&deps.storage)?');
-    } else if (e instanceof IR.InfixOp) {
-      let i0 = this.eval(e.rhs);
-      let i1 = this.eval(e.lhs);
-      this.output(i0, e.op, i1);
-    } else if (e instanceof IR.Condition) {
-      let i0 = this.eval(e.predicate);
-      this.cond(i0, e.trueBranch, e.falseBranch);
-    } else if (e instanceof IR.FnCall) {
-      let i0 = this.eval(e.fn);
-      let ix = e.args.map(x => this.eval(x));
-      this.output(i0, '(', ix.join(', '), ')');
-    } else if (e instanceof IR.ValNone) {
-      this.output('None');
-    } else if (e instanceof IR.Fail) {
-      // TODO: implement
-      this.output('return Err(', e.typeName, ' {})');
-    } else if (e instanceof IR.ValStruct) {
-      let members = e.members.map(x => ({
-        name: x.name,
-        value: this.eval(x.value),
-      }));
-      this.output(
-        e.name,
-        ' {',
-        members.map(x => x.name + ': ' + x.value).join(', '),
-        '}'
-      );
-    } else {
-      throw new Error('eval() not implemented for ' + e.constructor.name);
-    }
-    return this.lastVar();
+    let contractCG = new ContractCodegen(contractDefn);
   }
 }
