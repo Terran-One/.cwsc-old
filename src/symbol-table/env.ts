@@ -1,4 +1,5 @@
 import { CWScriptScope, ScopeDefn } from './scope';
+import { CWSCRIPT_STD } from './std';
 
 export const GLOBAL_SCOPE_ID = '__GLOBAL__';
 
@@ -17,7 +18,7 @@ export const GLOBAL_SCOPE_ID = '__GLOBAL__';
 export class CWScriptEnv {
   public scopes: CWScriptScope[] = [];
 
-  constructor(globals: ScopeDefn = {}) {
+  constructor(globals: ScopeDefn = CWSCRIPT_STD) {
     this.enterScope(GLOBAL_SCOPE_ID);
     this.globalScope().applyDefn(globals);
   }
@@ -76,5 +77,15 @@ export class CWScriptEnv {
    */
   public exitScope() {
     this.scopes.pop();
+  }
+
+  /**
+   * Creates a new scope with the provided `id`, and enters it.
+   * Once the function returns, the scope will be exited.
+   */
+  public withScope(id: string, fn: (scope: CWScriptScope) => void) {
+    this.enterScope(id);
+    fn(this.currentScope());
+    this.exitScope();
   }
 }

@@ -1,4 +1,4 @@
-import { CWScriptEnv } from '../semantics/env';
+import { CWScriptEnv } from '../symbol-table/env';
 import { Type } from './type';
 
 export interface Rust {

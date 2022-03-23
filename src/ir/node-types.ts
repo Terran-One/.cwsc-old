@@ -1,5 +1,5 @@
-import * as Rust from './rust';
-import { CWScriptEnv } from './semantics/env';
+import * as Rust from '../rust';
+import { CWScriptEnv } from '../symbol-table/env';
 
 export abstract class IR implements Rust.TransformsToRust {
   toRust(env: CWScriptEnv): Rust.Rust {

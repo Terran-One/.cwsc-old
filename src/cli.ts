@@ -6,9 +6,9 @@ import path from 'path';
 import util from 'util';
 
 import { parseCWScript } from './parser';
-import { ImportAllStmt, ImportStmt } from './ast';
+import { ImportAllStmt, ImportStmt } from './ast/node-types';
 import { CompilationRequestBuilder, CompilationRequest } from './compiler';
-import { CWScriptCodegen } from './codegen';
+import { CWScriptCodegen } from './codegen/codegen';
 
 const program = new commander.Command();
 

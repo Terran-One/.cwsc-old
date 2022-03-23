@@ -1,5 +1,4 @@
-import * as Rust from './rust';
-import * as IR from './ir';
+import * as Rust from '../rust';
 
 import {
   CWScriptParser,
@@ -102,14 +101,14 @@ import {
   InnerAssignContext,
   InnerPathContext,
   FnDefnContext,
-} from './grammar/CWScriptParser';
-import { CWScriptParserVisitor } from './grammar/CWScriptParserVisitor';
+} from '../grammar/CWScriptParser';
+import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { Parser, ParserRuleContext, Token } from 'antlr4ts';
-import { Tree, TreeList, toData } from './tree';
+import { Tree, TreeList, toData } from '../util/tree';
 import * as _ from 'lodash';
-import { CWScriptEnv } from './semantics/env';
-import { Subspace } from './semantics/scope';
+import { CWScriptEnv } from '../symbol-table/env';
+import { Subspace } from '../symbol-table/scope';
 
 export interface Position {
   a?: number;
@@ -123,8 +122,7 @@ export enum CodegenCtx {
   TypeName,
 }
 
-export abstract class AST extends Tree<AST>
-  implements Rust.TransformsToRust, IR.TransformsToIR {
+export abstract class AST extends Tree<AST> {
   private __position?: Position;
 
   public details(): string {
@@ -163,14 +161,6 @@ export abstract class AST extends Tree<AST>
   public validate(): boolean {
     return true;
   }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
-    throw new Error(`${this.constructor.name}.toRust() implementation missing`);
-  }
-
-  public toIR(env: CWScriptEnv): IR.IR {
-    throw new Error(`${this.constructor.name}.toIR() implementation missing`);
-  }
 }
 
 export class CWSpec extends AST {
@@ -184,11 +174,6 @@ export class Ident extends AST {
   constructor(ctx: any, public text: string) {
     super(ctx);
     this.setParentForChildren();
-  }
-
-  public toIR(env: CWScriptEnv): IR.IR {
-    let e = env.currentScope().resolve(null, this.text);
-    return new IR.Ident(this.text);
   }
 }
 
@@ -233,31 +218,12 @@ export class TypePath extends AST {
   public toString(): string {
     return this.paths.map(x => x.text).join('::');
   }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type {
-    let scope = env.currentScope();
-
-    let id = this.paths.map(x => x.text).join('::');
-    let t = scope.resolve(Subspace.TYPE, id);
-    if (t === undefined) {
-      throw new Error(`Type ${id} not found`);
-    } else {
-      return (t as any).rustType;
-    }
-  }
 }
 
 export class ParamzdTypeExpr extends AST {
   constructor(ctx: any, public type: TypeExpr, public params: List<TypeExpr>) {
     super(ctx);
     this.setParentForChildren();
-  }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type {
-    return new Rust.Type(
-      this.type.toRust(env, context).toRustString(),
-      this.params.elements.map(x => x.toRust(env, context) as Rust.Type)
-    );
   }
 }
 
@@ -266,22 +232,12 @@ export class TupleTypeExpr extends AST {
     super(ctx);
     this.setParentForChildren();
   }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Tuple {
-    return new Rust.Type.Tuple(
-      this.members.elements.map(x => x.toRust(env, context) as Rust.Type)
-    );
-  }
 }
 
 export class ShortOptionTypeExpr extends AST {
   constructor(ctx: any, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
-  }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Option {
-    return new Rust.Type.Option(this.type.toRust(env, context) as Rust.Type);
   }
 }
 
@@ -290,23 +246,12 @@ export class ShortVecTypeExpr extends AST {
     super(ctx);
     this.setParentForChildren();
   }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Vec {
-    return new Rust.Type.Vec(this.type.toRust(env, context) as Rust.Type);
-  }
 }
 
 export class RefTypeExpr extends AST {
   constructor(ctx: any, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
-  }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Type.Ref {
-    return new Rust.Type.Ref(
-      Rust.REF,
-      this.type.toRust(env, context) as Rust.Type.Ref
-    );
   }
 }
 
@@ -332,19 +277,19 @@ export class StructDefn extends AST {
     return `${this.name.text}`;
   }
 
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
-    let s = new Rust.Defn.Struct([], Rust.STRUCT, this.name.text);
-    this.members.elements.forEach(x => {
-      s.addMember(
-        new Rust.Defn.StructMember(
-          [],
-          x.name.text,
-          x.type.toRust(env, context) as Rust.Type
-        )
-      );
-    });
-    return s;
-  }
+  // public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
+  //   let s = new Rust.Defn.Struct([], Rust.STRUCT, this.name.text);
+  //   this.members.elements.forEach(x => {
+  //     s.addMember(
+  //       new Rust.Defn.StructMember(
+  //         [],
+  //         x.name.text,
+  //         x.type.toRust(env, context) as Rust.Type
+  //       )
+  //     );
+  //   });
+  //   return s;
+  // }
 }
 
 export class TupleStructDefn extends AST {
@@ -640,27 +585,6 @@ export class AssignStmt extends AST {
     super(ctx);
     this.setParentForChildren();
   }
-
-  public toIR(env: CWScriptEnv): IR.IR {
-    let rhs = this.rhs.toIR(env);
-
-    if (this.lhs instanceof StateItemAssignLHS) {
-      return new IR.StateItemSave(this.lhs.key.text, rhs);
-    }
-
-    if (this.lhs instanceof StateMapAssignLHS) {
-      let mapKeys = this.lhs.mapKeys.map(x => x.toIR(env));
-      return new IR.StateMapSave(this.lhs.key.text, mapKeys, rhs);
-    }
-
-    throw new Error(
-      `Unimplemented AssignLHS toIR(): ${this.lhs.constructor.name}`
-    );
-  }
-
-  public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
-    return this.toIR(env).toRust(env);
-  }
 }
 
 //@Node()
@@ -924,13 +848,6 @@ export class StructVal extends AST {
   ) {
     super(ctx);
     this.setParentForChildren();
-  }
-
-  public toIR(env: CWScriptEnv): IR.IR {
-    return new IR.NewStruct(
-      this.type.toString(),
-      this.members.map(m => [m.name.text, m.value.toIR(env)])
-    );
   }
 }
 

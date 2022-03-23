@@ -1,8 +1,8 @@
 import * as Rust from '../rust';
 import { Subspace, ScopeDefn } from './scope';
-import { CWScriptSymbol } from './symbols';
+import { CWScriptSymbol } from './symbol-types';
 
-export const CWSCRIPT_GLOBALS: ScopeDefn = {
+export const CWSCRIPT_STD: ScopeDefn = {
   [Subspace.TYPE]: {
     String: new CWScriptSymbol.BuiltinType(new Rust.Type.String()),
     u8: new CWScriptSymbol.BuiltinType(new Rust.Type.Int(Rust.U8)),

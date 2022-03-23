@@ -76,6 +76,7 @@
     "cytoscape": "^3.21.0",
     "cytoscape-dagre": "^2.4.0",
     "ejs": "^3.1.6",
+    "immutable": "^4.0.0",
     "lodash": "^4.17.21",
     "omit-deep-lodash": "^1.1.6",
     "source-map": "^0.7.3",

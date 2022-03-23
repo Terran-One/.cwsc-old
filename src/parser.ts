@@ -1,7 +1,7 @@
 import { CWScriptParser } from './grammar/CWScriptParser';
 import { CWScriptLexer } from './grammar/CWScriptLexer';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
-import * as AST from './ast';
+import * as AST from './ast/node-types';
 
 export function parseCWScript(source: string): AST.SourceFile {
   let inputStream = CharStreams.fromString(source);

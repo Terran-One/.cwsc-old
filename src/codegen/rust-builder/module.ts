@@ -1,102 +1,6 @@
-import * as AST from './ast';
-
-import { CWScriptEnv } from './semantics/env';
-import { Subspace } from './semantics/scope';
-import { CWScriptSymbol } from './semantics/symbols';
-import { CWSCRIPT_GLOBALS } from './semantics/globals';
-
-import * as Rust from './rust';
-import { snakeToPascal, pascalToSnake } from './util';
-
-export interface FileSource {
-  file: string;
-  ast: AST.SourceFile;
-}
-
-export type Source = FileSource;
-
-export class ASTCodegen<T extends AST.AST> {
-  public env: CWScriptEnv;
-
-  constructor(public ast: T, env?: CWScriptEnv) {
-    if (!!env) {
-      this.env = env;
-    } else {
-      this.env = new CWScriptEnv(CWSCRIPT_GLOBALS);
-    }
-  }
-}
-
-const CW_STD = new Rust.Path('cosmwasm_std');
-const CRATE = new Rust.Path('crate');
-
-export class InstantiateCodegen extends ASTCodegen<AST.InstantiateDefn> {
-  constructor(public ast: AST.InstantiateDefn, env?: CWScriptEnv) {
-    super(ast, env);
-  }
-
-  public generateFunction(): Rust.Defn.Function {
-    // most of the instantiate function below is boilerplate as it follows the
-    // cosmwasm function signature.
-
-    let scope = this.env.enterScope('instantiate');
-
-    // (__deps: cosmwasm_std::DepsMut, __env: cosmwasm_std::Env, __info: cosmwasm_std::MessageInfo, __msg: crate::msg::InstantiateMsg)
-    let args = [
-      new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
-      new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
-      new Rust.FunctionArg([], '__info', CW_STD.join('MessageInfo').toType()),
-      new Rust.FunctionArg(
-        [],
-        '__msg',
-        CRATE.join('msg', 'InstantiateMsg').toType()
-      ),
-    ];
-
-    // -> Result<Response, crate::error::ContractError>
-    let returnType = new Rust.Type.Result(
-      CW_STD.join('Response').toType(),
-      CRATE.join('error', 'ContractError').toType()
-    );
-
-    let instantiate = new Rust.Defn.Function(
-      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
-      'instantiate',
-      args,
-      returnType
-    );
-
-    // now we begin to create the function body
-    // step 1: load the function arguments (inside the msg) into the local scope
-    this.ast.args.elements.forEach(arg => {
-      scope.define(Subspace.LOCAL, arg.name.text, arg.type.toRust(this.env));
-    });
-
-    // // step 2: start translating statements
-    this.ast.body.elements.forEach(stmt => {
-      instantiate.addBody(stmt.toRust(this.env));
-    });
-
-    return instantiate;
-  }
-}
-
 export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
-  public name: string;
-  public events: AST.EventDefn[];
-  public errors: AST.ErrorDefn[];
-  public state: AST.StateDefn[];
-  public instantiate: AST.InstantiateDefn;
-  public exec: AST.ExecDefn[];
-  public query: AST.QueryDefn[];
-  public fns: AST.FnDefn[];
-  public structs: AST.StructDefn[];
-  public enums: AST.EnumDefn[];
-  public typeAliases: AST.TypeAliasDefn[];
-
-  constructor(public ast: AST.ContractDefn, env?: CWScriptEnv) {
-    super(ast, env);
-
+  public generate(): Rust.Module {
+    let { ast } = this;
     this.name = ast.name.text;
     this.events = ast.descendantsOfType(AST.EventDefn);
     this.errors = ast.descendantsOfType(AST.ErrorDefn);
@@ -114,27 +18,47 @@ export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
 
     // first: register locally defined symbols in the global scope
     let globalScope = this.env.globalScope();
-    for (let defn of [
+    for (let ast of [
       ...this.structs,
       ...this.enums,
       ...this.typeAliases,
       ...this.state,
     ]) {
-      if (defn instanceof AST.StructDefn) {
-        let symbol = new CWScriptSymbol.UserDefinedStruct(defn);
-        globalScope.define(Subspace.TYPE, defn.name.text, symbol);
-      } else if (defn instanceof AST.EnumDefn) {
-        let symbol = new CWScriptSymbol.UserDefinedEnum(defn);
-        globalScope.define(Subspace.TYPE, defn.name.text, symbol);
-      } else if (defn instanceof AST.TypeAliasDefn) {
-        let symbol = new CWScriptSymbol.UserDefinedTypeAlias(defn);
-        globalScope.define(Subspace.TYPE, defn.name.text, symbol);
-      } else if (defn instanceof AST.ItemDefn) {
-        let symbol = new CWScriptSymbol.StateItem(defn);
-        globalScope.define(Subspace.STATE, defn.key.text, symbol);
-      } else if (defn instanceof AST.MapDefn) {
-        let symbol = new CWScriptSymbol.StateMap(defn);
-        globalScope.define(Subspace.STATE, defn.key.text, symbol);
+      if (ast instanceof AST.StructDefn) {
+        let members: any = {};
+        for (let member of ast.members.elements) {
+          members[member.name.text] = toRust(this.env, member.type);
+        }
+        let symbol = new CWScriptSymbol.UserDefinedStruct(
+          ast.name.text,
+          members
+        );
+        globalScope.define(Subspace.TYPE, ast.name.text, symbol);
+      } else if (ast instanceof AST.EnumDefn) {
+        let variants: any = {};
+        for (let variant of ast.variants.elements) {
+          variants[variant.name.text] = toRust(this.env, variant);
+        }
+        let symbol = new CWScriptSymbol.UserDefinedEnum(
+          ast.name.text,
+          variants
+        );
+        globalScope.define(Subspace.TYPE, ast.name.text, symbol);
+      } else if (ast instanceof AST.TypeAliasDefn) {
+        let symbol = new CWScriptSymbol.UserDefinedTypeAlias(
+          ast.name.text,
+          toRust(this.env, ast.type) as Rust.Type
+        );
+        globalScope.define(Subspace.TYPE, ast.name.text, symbol);
+      } else if (ast instanceof AST.ItemDefn) {
+        let symbol = new CWScriptSymbol.StateItem(
+          ast.key.text,
+          toRust(this.env, ast.type) as Rust.Type
+        );
+        globalScope.define(Subspace.STATE, ast.key.text, symbol);
+      } else if (ast instanceof AST.MapDefn) {
+        let symbol = new CWScriptSymbol.StateMap(ast);
+        globalScope.define(Subspace.STATE, ast.key.text, symbol);
       }
     }
 
@@ -328,36 +252,5 @@ export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
     module.addItem(instantiate);
 
     return module.toString();
-  }
-}
-
-export class CWScriptCodegen {
-  constructor(public sources: Source[]) {}
-
-  generateContract(name: string, file?: string) {
-    let sourceFiles = this.sources.filter(
-      source =>
-        source.ast
-          .descendantsOfType(AST.ContractDefn)
-          .find(contract => contract.name.text === name) !== undefined
-    );
-
-    if (sourceFiles.length > 1) {
-      throw new Error(
-        `Multiple source files found for contract ${name}.` +
-          ` Please disambiguate which file to use.`
-      );
-    }
-
-    if (sourceFiles.length === 0) {
-      throw new Error(`No source file found for contract ${name}.`);
-    }
-
-    let sourceFile = sourceFiles[0];
-    let contractDefn = sourceFile.ast
-      .descendantsOfType(AST.ContractDefn)
-      .find(x => x.name.text === name)!;
-
-    let contractCG = new ContractCodegen(contractDefn);
   }
 }

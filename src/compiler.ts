@@ -1,4 +1,4 @@
-import * as AST from './ast';
+import * as AST from './ast/node-types';
 import util from 'util';
 
 export interface FileSource {
