@@ -1,5 +1,5 @@
 import * as Rust from '../rust';
-import * as AST from '../ast/node-types';
+import * as AST from '../ast/nodes';
 
 import { C_TYPES } from '../codegen/helpers';
 

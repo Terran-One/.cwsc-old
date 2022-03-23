@@ -3,7 +3,7 @@
  */
 
 import { CWScriptEnv } from '../symbol-table/env';
-import * as AST from '../ast/node-types';
+import * as AST from '../ast/ast-visitor';
 
 export class CWScriptAbstractMachine {
   constructor(public env: CWScriptEnv) {}

@@ -1,10 +1,13 @@
-import * as AST from '../../ast/node-types';
+import * as AST from '../../ast/nodes';
 import * as Rust from '../../rust';
 import { CWScriptEnv } from '../../symbol-table/env';
 import { ASTCodegen } from './base';
 
+import { snakeToPascal, pascalToSnake } from '../../util/strings';
+
 export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
   public model: any = {};
+
   constructor(ast: AST.ContractDefn, env?: CWScriptEnv) {
     super(ast, env);
 
@@ -24,6 +27,7 @@ export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
     model.enums = ast.descendantsOfType(AST.EnumDefn);
     model.typeAliases = ast.descendantsOfType(AST.TypeAliasDefn);
 
+    this.model = model;
     return model;
   }
 
@@ -37,7 +41,7 @@ export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
       Rust.STRUCT,
       'InstantiateMsg'
     );
-    this.instantiate.args.elements.forEach((arg: any) => {
+    this.model.instantiate.args.elements.forEach((arg: any) => {
       let m = new Rust.Defn.StructMember([], arg.name, arg.type);
       i.addMember(m);
     });
@@ -46,7 +50,7 @@ export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
       [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
       'ExecuteMsg'
     );
-    for (let execFn of this.exec) {
+    for (let execFn of this.model.exec) {
       // turn snake-case to pascal case
       let s = new Rust.Defn.Struct(
         [],
@@ -64,7 +68,7 @@ export class ContractCodegen extends ASTCodegen<AST.ContractDefn> {
       [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
       'QueryMsg'
     );
-    for (let queryFn of this.query) {
+    for (let queryFn of this.model.query) {
       // turn snake-case to pascal case
       let s = new Rust.Defn.Struct(
         [],

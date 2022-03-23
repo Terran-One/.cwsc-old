@@ -1,11 +1,9 @@
-import * as AST from '../ast/node-types';
+import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
 import { Subspace } from '../symbol-table/scope';
-import { CWScriptSymbol } from '../symbol-table/symbol-types';
-
-import { snakeToPascal, pascalToSnake } from '../util/strings';
+import { CWScriptSymbol } from '../symbol-table/resolver';
 
 export interface FileSource {
   file: string;
@@ -100,6 +98,6 @@ export class CWScriptCodegen {
       .descendantsOfType(AST.ContractDefn)
       .find(x => x.name.text === name)!;
 
-    let contractCG = new ContractCodegen(contractDefn);
+    let cg = new ContractCodegen();
   }
 }

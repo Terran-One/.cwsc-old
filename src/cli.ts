@@ -3,12 +3,10 @@
 import * as commander from 'commander';
 import fs from 'fs';
 import path from 'path';
-import util from 'util';
 
 import { parseCWScript } from './parser';
-import { ImportAllStmt, ImportStmt } from './ast/node-types';
-import { CompilationRequestBuilder, CompilationRequest } from './compiler';
-import { CWScriptCodegen } from './codegen/codegen';
+import { ImportStmt } from './ast/nodes';
+import { CWScriptCodegen } from './codegen/ast2rust';
 
 const program = new commander.Command();
 
@@ -40,9 +38,9 @@ function addSourceFile(file: string) {
     ast: ast,
   });
   ast.descendants
-    .filter(x => x instanceof ImportStmt)
-    .map(x => x as ImportStmt)
-    .forEach(i => {
+    .filter((x: any) => x instanceof ImportStmt)
+    .map((x: any) => x as ImportStmt)
+    .forEach((i: any) => {
       const resolvedPath = resolveFileImport(file, i.fileName);
       i.fileName = resolvedPath;
       if (sources.findIndex(x => x.file === resolvedPath) === -1) {
@@ -53,11 +51,6 @@ function addSourceFile(file: string) {
 
 files.forEach(file => {
   addSourceFile(file);
-});
-
-let cr = new CompilationRequestBuilder();
-sources.forEach(s => {
-  cr.addSource(s);
 });
 
 let cg = new CWScriptCodegen(sources);

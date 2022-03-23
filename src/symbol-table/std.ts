@@ -1,6 +1,6 @@
 import * as Rust from '../rust';
 import { Subspace, ScopeDefn } from './scope';
-import { CWScriptSymbol } from './symbol-types';
+import { CWScriptSymbol } from './resolver';
 
 export const CWSCRIPT_STD: ScopeDefn = {
   [Subspace.TYPE]: {

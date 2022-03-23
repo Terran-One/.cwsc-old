@@ -1,5 +1,3 @@
-import * as Rust from '../rust';
-
 import {
   CWScriptParser,
   CwspecContext,
@@ -104,879 +102,97 @@ import {
 } from '../grammar/CWScriptParser';
 import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
-import { Parser, ParserRuleContext, Token } from 'antlr4ts';
-import { Tree, TreeList, toData } from '../util/tree';
 import * as _ from 'lodash';
-import { CWScriptEnv } from '../symbol-table/env';
-import { Subspace } from '../symbol-table/scope';
-
-export interface Position {
-  a?: number;
-  b?: number;
-  length?: number;
-  line?: number;
-  column?: number;
-}
-
-export enum CodegenCtx {
-  TypeName,
-}
-
-export abstract class AST extends Tree<AST> {
-  private __position?: Position;
-
-  public details(): string {
-    return `${this.position?.line}:${this.position?.column}`;
-  }
-
-  constructor(
-    __ctx?: ParserRuleContext,
-    __parent?: AST,
-    __position?: Position
-  ) {
-    super(__parent);
-    if (__position === undefined) {
-      let a = __ctx?.start?.startIndex;
-      let b = __ctx?.stop?.stopIndex;
-      let length = !!a && !!b ? b - a + 1 : undefined;
-      __position = {
-        a,
-        b,
-        length,
-        line: __ctx?.start?.line,
-        column: __ctx?.start?.charPositionInLine,
-      };
-    }
-    this.__position = __position || undefined;
-  }
-
-  public get position(): Position | undefined {
-    return this.__position;
-  }
-
-  public toData(): any {
-    return toData(this, { position: (p: any) => p });
-  }
-
-  public validate(): boolean {
-    return true;
-  }
-}
-
-export class CWSpec extends AST {
-  constructor(ctx: any, public text: string) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class Ident extends AST {
-  constructor(ctx: any, public text: string) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class List<T extends AST> extends AST implements TreeList<AST> {
-  constructor(ctx: any, public elements: T[]) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-
-  public setParentForChildren(): void {
-    this.elements.forEach(x => (x.parent = this));
-  }
-
-  public get children(): T[] {
-    return Object.values(this.elements);
-  }
-
-  public map<U>(f: (x: T) => U): U[] {
-    return this.elements.map(f);
-  }
-}
-
-export type TypeExpr =
-  | TypePath
-  | ParamzdTypeExpr
-  | TupleTypeExpr
-  | ShortOptionTypeExpr
-  | ShortVecTypeExpr
-  | RefTypeExpr
-  | ReflectiveTypeExpr
-  | StructDefn
-  | TupleStructDefn
-  | EnumDefn
-  | TypeAliasDefn;
-
-export class TypePath extends AST {
-  constructor(ctx: any, public root: boolean, public paths: List<Ident>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-
-  public toString(): string {
-    return this.paths.map(x => x.text).join('::');
-  }
-}
-
-export class ParamzdTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr, public params: List<TypeExpr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class TupleTypeExpr extends AST {
-  constructor(ctx: any, public members: List<TypeExpr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ShortOptionTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ShortVecTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class RefTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ReflectiveTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr, public member: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class StructDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public members: List<StructMember>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-
-  public toString(): string {
-    return `${this.name.text}`;
-  }
-
-  // public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
-  //   let s = new Rust.Defn.Struct([], Rust.STRUCT, this.name.text);
-  //   this.members.elements.forEach(x => {
-  //     s.addMember(
-  //       new Rust.Defn.StructMember(
-  //         [],
-  //         x.name.text,
-  //         x.type.toRust(env, context) as Rust.Type
-  //       )
-  //     );
-  //   });
-  //   return s;
-  // }
-}
-
-export class TupleStructDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public members: List<TypeExpr>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class EnumDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public variants: List<EnumVariant>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class TypeAliasDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public type: TypeExpr
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class SourceFile extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public stmts: List<TopLevelStmt>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-type TopLevelStmt = InterfaceDefn | ContractDefn | ImportStmt;
-
-//@Node()
-export class ImportStmt extends AST {
-  constructor(ctx: any, public fileName: string) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class ImportAllStmt extends ImportStmt {
-  constructor(ctx: any, public fileName: string) {
-    super(ctx, fileName);
-    this.setParentForChildren();
-  }
-}
-
-export class ImportItemsStmt extends ImportStmt {
-  constructor(
-    ctx: any,
-    public fileName: string,
-    public items: List<ImportItem>
-  ) {
-    super(ctx, fileName);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ImportItem extends AST {
-  constructor(ctx: any, public symbol: Ident, public alias?: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class InterfaceDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public body: List<InterfaceItem>,
-    public baseInterfaces?: List<Ident>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ContractDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public body: List<ContractItem>,
-    public baseContracts?: List<Ident>,
-    public interfaces?: List<Ident>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export type InterfaceItem =
-  | ErrorDefn
-  | List<ErrorDefn>
-  | EventDefn
-  | List<EventDefn>
-  | StateDefn
-  | List<StateDefn>
-  | InstantiateDecl
-  | ExecDecl
-  | List<ExecDecl>
-  | QueryDecl
-  | List<QueryDecl>
-  | MigrateDecl;
-export type ContractItem =
-  | ErrorDefn
-  | List<ErrorDefn>
-  | EventDefn
-  | List<EventDefn>
-  | StateDefn
-  | List<StateDefn>
-  | InstantiateDefn
-  | ExecDefn
-  | List<ExecDefn>
-  | QueryDefn
-  | List<QueryDefn>
-  | MigrateDefn;
-
-//@Node()
-export class ErrorDefn extends StructDefn {}
-
-//@Node()
-export class EventDefn extends StructDefn {}
-
-export class StateDefn extends AST {
-  constructor(ctx: any, public key: Ident, public type: TypeExpr) {
-    super();
-  }
-}
-
-//@Node()
-export class ItemDefn extends StateDefn {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    key: Ident,
-    type: TypeExpr
-  ) {
-    super(ctx, key, type);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class MapDefn extends StateDefn {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    key: Ident,
-    public mapKeys: List<MapDefnKey>,
-    type: TypeExpr
-  ) {
-    super(ctx, key, type);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class MapDefnKey extends AST {
-  constructor(ctx: any, public name: Ident | undefined, public type: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class FnDefn extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident | undefined,
-    public args: List<FnArg>,
-    public returnType: TypeExpr | undefined,
-    public body: List<Stmt>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class InstantiateDefn extends FnDefn {}
-
-//@Node()
-export class ExecDefn extends FnDefn {}
-
-//@Node()
-export class QueryDefn extends FnDefn {}
-
-export class MigrateDefn extends FnDefn {}
-
-export class FnDecl extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident | undefined,
-    public args: List<FnArg>,
-    public returnType: TypeExpr | undefined
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class InstantiateDecl extends FnDecl {}
-
-export class ExecDecl extends FnDecl {}
-
-export class QueryDecl extends FnDecl {}
-
-export class MigrateDecl extends FnDecl {}
-
-//@Node()
-export class FnArg extends AST {
-  constructor(
-    ctx: any,
-    public name: Ident,
-    public option: boolean,
-    public type: TypeExpr
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//TODO: change
-type Stmt = any;
-
-//@Node()
-export class LetStmt extends AST {
-  constructor(ctx: any, public lhs: LetLHS, public rhs: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export type LetLHS = IdentLHS | StructUnpackLHS;
-
-//@Node()
-export class IdentLHS extends AST {
-  constructor(ctx: any, public name: Ident, public type?: TypeExpr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class StructUnpackLHS extends AST {
-  constructor(ctx: any, public names: List<Ident>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export type AssignLHS =
-  | IdentAssignLHS
-  | MemberAssignLHS
-  | TableAssignLHS
-  | StateItemAssignLHS
-  | StateMapAssignLHS;
-
-//@Node()
-export class AssignStmt extends AST {
-  constructor(
-    ctx: any,
-    public lhs: AssignLHS,
-    public assignOp: string,
-    public rhs: Expr
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class IdentAssignLHS extends AST {
-  constructor(ctx: any, public ident: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class MemberAssignLHS extends AST {
-  constructor(ctx: any, public obj: Expr, public member: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class TableAssignLHS extends AST {
-  constructor(ctx: any, public table: Expr, public key: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class InnerPath extends AST {
-  constructor(ctx: any, public name: Ident, public tableKey?: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class StateItemAssignLHS extends AST {
-  constructor(ctx: any, public key: Ident, public inner?: List<InnerPath>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class StateMapAssignLHS extends AST {
-  constructor(
-    ctx: any,
-    public key: Ident,
-    public mapKeys: List<Expr>,
-    public inner?: List<InnerPath>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class IfExpr extends AST {
-  constructor(
-    ctx: any,
-    public ifClause: IfClauseVariant,
-    public elseIfClauses: List<IfClauseVariant>,
-    public elseClause: List<Stmt>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-type IfClauseVariant = IfClause | IfLetClause;
-
-//@Node()
-export class IfClause extends AST {
-  constructor(ctx: any, public predicate: Expr, public body: List<Stmt>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class IfLetClause extends AST {
-  constructor(ctx: any, public letStmt: LetStmt, public body: List<Stmt>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ForInStmt extends AST {
-  constructor(
-    ctx: any,
-    public lhs: LetLHS,
-    public iterable: Expr,
-    public body: List<Stmt>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ForTimesStmt extends AST {
-  constructor(ctx: any, public expr: Expr, public body: List<Stmt>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ExecStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class EmitStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ReturnStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class FailStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-// TODO: change
-export type Expr = any;
-
-//@Node()
-export class StateItemAccessExpr extends AST {
-  constructor(ctx: any, public key: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class StateMapAccessExpr extends AST {
-  constructor(ctx: any, public key: Ident, public mapKeys: List<Expr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class MemberAccessExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public member: Ident) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class TableLookupExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public key: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class PosArgsFnCallExpr extends AST {
-  constructor(ctx: any, public fn: Expr, public args: List<Expr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class NamedArgsFnCallExpr extends AST {
-  constructor(ctx: any, public fn: Expr, public args: List<NamedExpr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class UnaryExpr extends AST {
-  constructor(ctx: any, public op: string, public expr: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ExpExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class ArithmeticOpExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public op: string, public rhs: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class CompOpExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public op: string, public rhs: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class AndExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class OrExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class QueryExpr extends AST {
-  constructor(ctx: any, public expr: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class UnitVal extends AST {
-  constructor(ctx: any) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class StructVal extends AST {
-  constructor(
-    ctx: any,
-    public type: TypePath,
-    public members: List<StructValMember>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class StructValMember extends AST {
-  constructor(ctx: any, public name: Ident, public value: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class NamedExpr extends AST {
-  constructor(ctx: any, public name: Ident, public value: Expr) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class TupleVal extends AST {
-  constructor(ctx: any, public type: TypePath, public members: List<Expr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class VecVal extends AST {
-  constructor(ctx: any, public elements: List<Expr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class StringVal extends AST {
-  constructor(ctx: any, public value: string) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class IntegerVal extends AST {
-  constructor(ctx: any, public value: string) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class DecimalVal extends AST {
-  constructor(ctx: any, public value: string) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class BoolVal extends AST {
-  constructor(ctx: any, public value: boolean) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-type EnumVariant = EnumVariantStruct | EnumVariantTuple;
-
-//@Node()
-export class EnumVariantStruct extends AST {
-  constructor(
-    ctx: any,
-    public name: Ident,
-    public members: List<StructMember>
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-export class EnumVariantTuple extends AST {
-  constructor(ctx: any, public name: Ident, public members: List<TypeExpr>) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-//@Node()
-// export class EnumVariantUnit extends AST {
-//   constructor(ctx: any, public name: Ident) {
-//     super(ctx);
-//     this.setParentForChildren();
-//   }
-// }
-
-//@Node()
-export class StructMember extends AST {
-  constructor(
-    ctx: any,
-    public spec: CWSpec | undefined,
-    public name: Ident,
-    public option: boolean,
-    public type: TypeExpr
-  ) {
-    super(ctx);
-    this.setParentForChildren();
-  }
-}
-
-export class EmptyAST extends AST {}
-
-export namespace Ext {
-  export class ExtAST extends AST {}
-  export class State extends ExtAST {
-    constructor(public key: string) {
-      super();
-      this.setParentForChildren();
-    }
-  }
-
-  export class SpecialVariable extends ExtAST {
-    constructor(public ns: string, public member: string) {
-      super();
-      this.setParentForChildren();
-    }
-  }
-}
+import { AST, List } from './nodes';
+
+import {
+  Expr,
+  EmptyAST,
+  SourceFile,
+  Stmt,
+  ImportAllStmt,
+  ImportItem,
+  ImportItemsStmt,
+  TypePath,
+  ParamzdTypeExpr,
+  TypeExpr,
+  TupleTypeExpr,
+  ShortOptionTypeExpr,
+  ShortVecTypeExpr,
+  RefTypeExpr,
+  ReflectiveTypeExpr,
+  Ident,
+  CWSpec,
+  InterfaceItem,
+  ContractItem,
+  InterfaceDefn,
+  ContractDefn,
+  StructMember,
+  StructDefn,
+  TupleStructDefn,
+  EnumVariantStruct,
+  EnumVariantTuple,
+  ErrorDefn,
+  EventDefn,
+  ItemDefn,
+  MapDefn,
+  StateDefn,
+  MapDefnKey,
+  FnDefn,
+  ExecDefn,
+  InstantiateDefn,
+  QueryDefn,
+  MigrateDefn,
+  InstantiateDecl,
+  ExecDecl,
+  QueryDecl,
+  MigrateDecl,
+  UnitVal,
+  BoolVal,
+  IntegerVal,
+  DecimalVal,
+  StringVal,
+  TupleVal,
+  VecVal,
+  StructVal,
+  StructValMember,
+  QueryExpr,
+  OrExpr,
+  AndExpr,
+  CompOpExpr,
+  ArithmeticOpExpr,
+  ExpExpr,
+  UnaryExpr,
+  PosArgsFnCallExpr,
+  NamedArgsFnCallExpr,
+  NamedExpr,
+  StateItemAccessExpr,
+  StateMapAccessExpr,
+  TableLookupExpr,
+  MemberAccessExpr,
+  Ext,
+  IfExpr,
+  IfClause,
+  IfLetClause,
+  LetStmt,
+  ExecStmt,
+  ReturnStmt,
+  EmitStmt,
+  FailStmt,
+  AssignStmt,
+  AssignLHS,
+  InnerPath,
+  StateItemAssignLHS,
+  StateMapAssignLHS,
+  IdentAssignLHS,
+  MemberAssignLHS,
+  TableAssignLHS,
+  LetLHS,
+  IdentLHS,
+  StructUnpackLHS,
+  FnArg,
+  IfClauseVariant,
+} from './nodes';
 
 export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   implements CWScriptParserVisitor<AST> {

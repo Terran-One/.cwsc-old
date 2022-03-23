@@ -1,7 +1,8 @@
 import { ASTCodegen } from './base';
-import * as AST from '../../ast/node-types';
+import * as AST from '../../ast/nodes';
 import * as Rust from '../../rust';
 import { CW_STD, CRATE } from '../helpers';
+import { Subspace } from '../../symbol-table/scope';
 
 export class InstantiateCodegen extends ASTCodegen<AST.InstantiateDefn> {
   public generateFunction(): Rust.Defn.Function {
@@ -37,12 +38,12 @@ export class InstantiateCodegen extends ASTCodegen<AST.InstantiateDefn> {
     // now we begin to create the function body
     // step 1: load the function arguments (inside the msg) into the local scope
     this.ast.args.elements.forEach(arg => {
-      scope.define(Subspace.LOCAL, arg.name.text, toRust(this.env, arg.type));
+      scope.define(Subspace.LOCAL, arg.name.text, arg.type);
     });
 
     // // step 2: start translating statements
     this.ast.body.elements.forEach(stmt => {
-      instantiate.addBody(toRust(this.env, stmt));
+      instantiate.addBody(stmt);
     });
 
     this.env.exitScope();

@@ -1,5 +1,5 @@
 import { CWScriptEnv } from '../../symbol-table/env';
-import * as AST from '../../ast/node-types';
+import * as AST from '../../ast/nodes';
 
 export class ASTCodegen<T extends AST.AST> {
   public env: CWScriptEnv;
