@@ -110,6 +110,8 @@ import { Tree, TreeList, toData } from './tree';
 import * as _ from 'lodash';
 import { CWScriptEnv } from './semantics/env';
 import { Subspace } from './semantics/scope';
+import { IValidationVisitable } from './common/IValidationVisitable';
+import { IASTVisitor } from './common/IASTVisitor';
 
 export interface Position {
   a?: number;
@@ -445,7 +447,7 @@ export class InterfaceDefn extends AST {
 }
 
 //@Node()
-export class ContractDefn extends AST {
+export class ContractDefn extends AST implements IValidationVisitable {
   constructor(
     ctx: any,
     public spec: CWSpec | undefined,
@@ -456,6 +458,10 @@ export class ContractDefn extends AST {
   ) {
     super(ctx);
     this.setParentForChildren();
+  }
+
+  accept(astVisitor: IASTVisitor): void {
+    astVisitor.visit(this);
   }
 }
 
@@ -487,10 +493,10 @@ export type ContractItem =
   | MigrateDefn;
 
 //@Node()
-export class ErrorDefn extends StructDefn {}
+export class ErrorDefn extends StructDefn { }
 
 //@Node()
-export class EventDefn extends StructDefn {}
+export class EventDefn extends StructDefn { }
 
 export class StateDefn extends AST {
   constructor(ctx: any, public key: Ident, public type: TypeExpr) {
@@ -549,15 +555,15 @@ export class FnDefn extends AST {
 }
 
 //@Node()
-export class InstantiateDefn extends FnDefn {}
+export class InstantiateDefn extends FnDefn { }
 
 //@Node()
-export class ExecDefn extends FnDefn {}
+export class ExecDefn extends FnDefn { }
 
 //@Node()
-export class QueryDefn extends FnDefn {}
+export class QueryDefn extends FnDefn { }
 
-export class MigrateDefn extends FnDefn {}
+export class MigrateDefn extends FnDefn { }
 
 export class FnDecl extends AST {
   constructor(
@@ -572,13 +578,13 @@ export class FnDecl extends AST {
   }
 }
 
-export class InstantiateDecl extends FnDecl {}
+export class InstantiateDecl extends FnDecl { }
 
-export class ExecDecl extends FnDecl {}
+export class ExecDecl extends FnDecl { }
 
-export class QueryDecl extends FnDecl {}
+export class QueryDecl extends FnDecl { }
 
-export class MigrateDecl extends FnDecl {}
+export class MigrateDecl extends FnDecl { }
 
 //@Node()
 export class FnArg extends AST {
@@ -1042,10 +1048,10 @@ export class StructMember extends AST {
   }
 }
 
-export class EmptyAST extends AST {}
+export class EmptyAST extends AST { }
 
 export namespace Ext {
-  export class ExtAST extends AST {}
+  export class ExtAST extends AST { }
   export class State extends ExtAST {
     constructor(public key: string) {
       super();
@@ -1813,9 +1819,9 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       this.visitIdent(ctx.ident()),
       ctx._inner
         ? new List(
-            ctx,
-            ctx._inner._paths.map(x => this.visitInnerPath(x))
-          )
+          ctx,
+          ctx._inner._paths.map(x => this.visitInnerPath(x))
+        )
         : undefined
     );
   }
@@ -1832,9 +1838,9 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       mapKeys,
       ctx._inner
         ? new List(
-            ctx,
-            ctx._inner._paths.map(x => this.visitInnerPath(x))
-          )
+          ctx,
+          ctx._inner._paths.map(x => this.visitInnerPath(x))
+        )
         : undefined
     );
   }
