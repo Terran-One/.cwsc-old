@@ -85,6 +85,14 @@ export class SelfArg extends FunctionArg {
   }
 }
 
+export class MatchPattern implements Rust {
+  constructor(public pattern: string, public expr: Rust) {}
+
+  toRustString(): string {
+    return `${this.pattern} => ${this.expr.toRustString()}`;
+  }
+}
+
 export enum StructType {
   STRUCT,
   TUPLE,

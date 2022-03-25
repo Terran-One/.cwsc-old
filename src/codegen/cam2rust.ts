@@ -2,6 +2,8 @@ import * as Rust from '../rust';
 import * as CAM from '../cam';
 
 import { snakeToPascal } from '../util/strings';
+import { CW_STD, C_ERROR, C_MSG, C_STATE } from './helpers';
+import { Stmt } from '../rust';
 
 export namespace CAM2Rust {
   export function contract(c: CAM.Contract): any {
@@ -9,7 +11,32 @@ export namespace CAM2Rust {
     code.items.push(buildModMsg(c));
     code.items.push(buildModState(c));
     code.items.push(buildModError(c));
+    code.items.push(buildModContract(c));
     return code;
+  }
+
+  export function stmt(x: CAM.CAM): any {
+    if (x instanceof CAM.Let) {
+      if ('ident' in x.lhs) {
+        return new Rust.Stmt.Let(true, x.lhs.ident);
+      }
+    }
+
+    if (x instanceof CAM.ForIn) {
+      if ('ident' in x.bindings) {
+        return new Rust.Stmt.Let(true, 'forin');
+      }
+
+      if ('structUnpack' in x.bindings) {
+        return new Rust.Stmt.Let(true, 'forin_struct');
+      }
+    }
+
+    if (x instanceof CAM.Assign) {
+      return new Rust.Stmt.Let(true, 'assign');
+    }
+
+    throw new Error(`could not translate ${x.constructor.name}`);
   }
 
   export function type(t: CAM.Type): Rust.Type {
@@ -201,6 +228,81 @@ export namespace CAM2Rust {
       error_enum.addVariant(error_struct);
     }
     module.addItem(error_enum);
+    return module;
+  }
+
+  export function buildModContract(c: CAM.Contract): Rust.Defn.Module {
+    let module = new Rust.Defn.Module('contract');
+    module.addItem(
+      new Rust.Defn.Use(
+        [new Rust.Annotation(`cfg(not(feature = "library"))`)],
+        'cosmwasm_std::entry_point'
+      )
+    );
+    module.addItem(
+      new Rust.Defn.Use(
+        [],
+        'cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult}'
+      )
+    );
+    module.addItem(new Rust.Defn.Use([], 'crate::error::ContractError'));
+
+    let instantiate = new Rust.Defn.Function(
+      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      'instantiate',
+      [
+        new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
+        new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
+        new Rust.FunctionArg([], '__info', CW_STD.join('MessageInfo').toType()),
+        new Rust.FunctionArg(
+          [],
+          '__msg',
+          C_MSG.join('InstantiateMsg').toType()
+        ),
+      ],
+      new Rust.Type.Result(
+        CW_STD.join('Response').toType(),
+        C_ERROR.join('ContractError').toType()
+      )
+    );
+
+    c.instantiate.body.forEach(s => {
+      instantiate.addBody(stmt(s));
+    });
+
+    module.addItem(instantiate);
+
+    let execute = new Rust.Defn.Function(
+      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      'execute',
+      [
+        new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
+        new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
+        new Rust.FunctionArg([], '__info', CW_STD.join('MessageInfo').toType()),
+        new Rust.FunctionArg([], '__msg', C_MSG.join('ExecuteMsg').toType()),
+      ],
+      new Rust.Type.Result(
+        CW_STD.join('Response').toType(),
+        C_ERROR.join('ContractError').toType()
+      )
+    );
+
+    let match = new Rust.Expr.Match(new Rust.Expr.Path('__msg'));
+    c.exec.forEach(x => {
+      let argList = x.args.map(a => a.name);
+      match.addPattern(
+        `${snakeToPascal(x.name)} {${argList.join(',')}}`,
+        new Rust.Expr.FnCall(`exec_${x.name}`, [
+          new Rust.Expr.Path('__deps'),
+          new Rust.Expr.Path('__env'),
+          new Rust.Expr.Path('__info'),
+          ...argList.map(x => new Rust.Expr.Path(x)),
+        ])
+      );
+    });
+    execute.addBody(match);
+    module.addItem(execute);
+
     return module;
   }
 }

@@ -1,7 +1,7 @@
-import { Rust, RefType } from './common';
+import * as Rust from '.';
 import { Type } from './type';
 
-export abstract class Expr implements Rust {
+export abstract class Expr implements Rust.Rust {
   public get rustType(): Type {
     return new Type.Unknown();
   }
@@ -15,7 +15,7 @@ export abstract class Expr implements Rust {
   }
 
   ref(mut: boolean = false): Expr.Ref {
-    return new Expr.Ref(mut ? RefType.MUT : RefType.REF, this);
+    return new Expr.Ref(mut ? Rust.RefType.MUT : Rust.RefType.REF, this);
   }
 
   mut(): Expr.Mut {
@@ -85,7 +85,7 @@ export namespace Expr {
       return new Type.Ref(this.refType, this.inner.rustType);
     }
 
-    constructor(public refType: RefType, public inner: Expr) {
+    constructor(public refType: Rust.RefType, public inner: Expr) {
       super();
     }
 
@@ -94,7 +94,7 @@ export namespace Expr {
     }
 
     isMut(): boolean {
-      return this.refType === RefType.MUT;
+      return this.refType === Rust.RefType.MUT;
     }
   }
 
@@ -119,6 +119,23 @@ export namespace Expr {
 
     toRustString(): string {
       return `${this.path}(${this.args.map(x => x.toRustString()).join(', ')})`;
+    }
+  }
+
+  export class Match extends Expr {
+    constructor(public item: Expr, public patterns: Rust.MatchPattern[] = []) {
+      super();
+    }
+
+    addPattern(pattern: string, expr: Expr): Match {
+      this.patterns.push(new Rust.MatchPattern(pattern, expr));
+      return this;
+    }
+
+    toRustString(): string {
+      return `match (${this.item.toRustString()}) { ${this.patterns
+        .map(x => x.toRustString())
+        .join(',\n')}}`;
     }
   }
 

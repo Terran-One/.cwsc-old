@@ -38,7 +38,7 @@ export class Fn extends CAM {
     public name: string,
     public args: Array<{ name: string; option: boolean; type: Type }> = [],
     public returnType: Type,
-    public body: any
+    public body: CAM[]
   ) {
     super();
   }
