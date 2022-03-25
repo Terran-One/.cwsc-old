@@ -327,7 +327,9 @@ export namespace CAM2Rust {
     c.exec.forEach(x => {
       let argList = x.args.map(a => a.name);
       match.addPattern(
-        `${snakeToPascal(x.name)} {${argList.join(',')}}`,
+        `crate::msg::ExecuteMsg::${snakeToPascal(x.name)} {${argList.join(
+          ','
+        )}}`,
         new Rust.Expr.FnCall(`exec_${x.name}`, [
           new Rust.Expr.Path('__deps'),
           new Rust.Expr.Path('__env'),
@@ -338,6 +340,33 @@ export namespace CAM2Rust {
     });
     execute.addBody(match);
     module.addItem(execute);
+
+    c.exec.forEach(x => {
+      let fn = new Rust.Defn.Function(
+        [],
+        `exec_${x.name}`,
+        [
+          new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
+          new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
+          new Rust.FunctionArg(
+            [],
+            '__info',
+            CW_STD.join('MessageInfo').toType()
+          ),
+          ...x.args.map(a => new Rust.FunctionArg([], a.name, type(a.type))),
+        ],
+        new Rust.Type.Result(
+          CW_STD.join('Response').toType(),
+          C_ERROR.join('ContractError').toType()
+        )
+      );
+
+      x.body.forEach(s => {
+        // fn.addBody(stmt(s));
+      });
+
+      module.addItem(fn);
+    });
 
     let query = new Rust.Defn.Function(
       [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
@@ -356,7 +385,7 @@ export namespace CAM2Rust {
     c.query.forEach(x => {
       let argList = x.args.map(a => a.name);
       match.addPattern(
-        `${snakeToPascal(x.name)} {${argList.join(',')}}`,
+        `crate::msg::QueryMsg::${snakeToPascal(x.name)} {${argList.join(',')}}`,
         new Rust.Expr.FnCall(`query_${x.name}`, [
           new Rust.Expr.Path('__deps'),
           new Rust.Expr.Path('__env'),
@@ -366,6 +395,27 @@ export namespace CAM2Rust {
     });
     query.addBody(match);
     module.addItem(query);
+
+    c.query.forEach(q => {
+      let fn = new Rust.Defn.Function(
+        [],
+        `query_${q.name}`,
+        [
+          new Rust.FunctionArg([], '__deps', CW_STD.join('Deps').toType()),
+          new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
+          ...q.args.map(a => new Rust.FunctionArg([], a.name, type(a.type))),
+        ],
+        CW_STD.join('StdResult')
+          .toType()
+          .withTypeParams([CW_STD.join('Binary').toType()])
+      );
+
+      q.body.forEach(s => {
+        // fn.addBody(stmt(s));
+      });
+
+      module.addItem(fn);
+    });
 
     return module;
   }

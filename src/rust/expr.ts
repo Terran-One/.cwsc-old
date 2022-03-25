@@ -133,7 +133,7 @@ export namespace Expr {
     }
 
     toRustString(): string {
-      return `match (${this.item.toRustString()}) { ${this.patterns
+      return `match ${this.item.toRustString()} { ${this.patterns
         .map(x => x.toRustString())
         .join(',\n')}}`;
     }
