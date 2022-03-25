@@ -3,10 +3,11 @@
 import * as commander from 'commander';
 import fs from 'fs';
 import path from 'path';
+import util from 'util';
 
 import { parseCWScript } from './parser';
 import { ImportStmt } from './ast/nodes';
-import { CWScriptCodegen } from './codegen/ast2rust';
+import { CWScriptCodegen } from './codegen/codegen';
 
 const program = new commander.Command();
 

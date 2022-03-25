@@ -33,7 +33,9 @@ export class CWScriptEnv {
     if (this.scopes.length === 0) {
       this.scopes.push(new CWScriptScope(id));
     } else {
-      this.scopes.push(new CWScriptScope(id, this.currentScope()));
+      this.scopes.push(
+        new CWScriptScope(this.scope.id + '$' + id, this.currentScope())
+      );
     }
     return this.currentScope();
   }

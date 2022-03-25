@@ -58,7 +58,7 @@ export class CWScriptScope {
    * @returns the definition entry, or `undefined` if it does not exist
    */
   resolve(
-    subspace: Subspace | null,
+    subspace: Subspace | Subspace[] | null,
     identifier: string
   ): CWScriptSymbol | undefined {
     if (subspace === null) {
@@ -71,9 +71,18 @@ export class CWScriptScope {
       }
     } else {
       // search only the specified subspace
-      let symbol = this.symbolTable.get(subspace)?.get(identifier);
-      if (symbol !== undefined) {
-        return symbol;
+      if (Array.isArray(subspace)) {
+        for (let ss of subspace) {
+          let symbol = this.symbolTable.get(ss)?.get(identifier);
+          if (symbol !== undefined) {
+            return symbol;
+          }
+        }
+      } else {
+        let symbol = this.symbolTable.get(subspace)?.get(identifier);
+        if (symbol !== undefined) {
+          return symbol;
+        }
       }
     }
 

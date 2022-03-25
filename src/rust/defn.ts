@@ -123,7 +123,9 @@ export namespace Defn {
     }
 
     toRustString(): string {
-      return `pub mod ${this.name} { ${this.items.join('\n')} }`;
+      return `pub mod ${this.name} { ${this.items
+        .map(x => x.toRustString())
+        .join('\n')} }`;
     }
   }
 

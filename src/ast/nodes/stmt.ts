@@ -137,7 +137,7 @@ export class IfLetClause extends AST {
 export class ForInStmt extends AST {
   constructor(
     ctx: any,
-    public lhs: LetLHS,
+    public bindings: LetLHS,
     public iterable: Expr,
     public body: List<Stmt>
   ) {

@@ -99,11 +99,12 @@ import {
   InnerAssignContext,
   InnerPathContext,
   FnDefnContext,
+  ForInStmtContext,
 } from '../grammar/CWScriptParser';
 import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import * as _ from 'lodash';
-import { AST, List } from './nodes';
+import { AST, ForInStmt, List } from './nodes';
 
 import {
   Expr,
@@ -989,6 +990,15 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       ctx,
       this.visit(ctx._table),
       this.visit(ctx._key)
+    );
+  }
+
+  visitForInStmt(ctx: ForInStmtContext): ForInStmt {
+    return new ForInStmt(
+      ctx,
+      this.visit(ctx._item) as LetLHS,
+      this.visit(ctx._iterItems),
+      this.visit(ctx.fnBody()) as List<Stmt>
     );
   }
 
