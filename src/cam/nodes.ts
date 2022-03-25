@@ -8,6 +8,12 @@ export class StateItem extends CAM {
   }
 }
 
+export class StateItemAccess extends CAM {
+  constructor(public key: string) {
+    super();
+  }
+}
+
 export class StateMap extends CAM {
   constructor(
     public key: string,
@@ -89,8 +95,20 @@ export class Assign extends CAM {
   }
 }
 
+export class Return extends CAM {
+  constructor(public expr: CAM) {
+    super();
+  }
+}
+
 export class SpecialVariable extends CAM {
   constructor(public namespace: string, public member: string) {
+    super();
+  }
+}
+
+export class LoadArg extends CAM {
+  constructor(public arg: any) {
     super();
   }
 }

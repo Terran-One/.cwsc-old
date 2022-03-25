@@ -24,7 +24,15 @@ export namespace Stmt {
       if (this.rhs !== undefined) {
         r = ` = ${this.rhs.toRustString()}`;
       }
-      return `let${m}${this.ident}${t}${r};`;
+      return `let ${m} ${this.ident}${t}${r};`;
+    }
+  }
+
+  export class Return implements Rust {
+    constructor(public expr?: Expr) {}
+
+    toRustString(): string {
+      return `return ${this.expr ? this.expr.toRustString() : ''};`;
     }
   }
 }

@@ -14,9 +14,16 @@ export interface TransformsToRust {
  * generate more than 1 Rust code item.
  */
 export class CodeGroup implements Rust {
-  public items: Rust[] = [];
+  public items: Rust[];
   constructor(...items: Rust[]) {
-    this.items = items;
+    this.items = items || [];
+  }
+
+  add(item: Rust) {
+    if (item === undefined) {
+      throw new Error('item is undefined');
+    }
+    this.items.push(item);
   }
 
   toRustString(): string {

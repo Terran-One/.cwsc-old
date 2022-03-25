@@ -181,7 +181,7 @@ export class AST2CAM {
     });
 
     args.forEach(arg => {
-      fnScope.define(Subspace.LOCAL, arg.name, arg);
+      fnScope.define(Subspace.LOCAL, arg.name, new CAM.LoadArg(arg));
     });
 
     let returnType = fn.returnType
@@ -232,6 +232,10 @@ export class AST2CAM {
     };
   }
 
+  translateStateItemAccessExpr(lhs: AST.StateItemAccessExpr) {
+    return new CAM.StateItemAccess(lhs.key.text);
+  }
+
   translateSpecialVariable(x: AST.Ext.SpecialVariable): CAM.SpecialVariable {
     return new CAM.SpecialVariable(x.ns, x.member);
   }
@@ -272,6 +276,10 @@ export class AST2CAM {
         mapKeys: lhs.mapKeys.map(x => this.translate(x)),
       },
     };
+  }
+
+  translateReturnStmt(x: AST.ReturnStmt): CAM.Return {
+    return new CAM.Return(this.translate(x.expr));
   }
 
   translateContractDefn(contract: AST.ContractDefn): CAM.Contract {

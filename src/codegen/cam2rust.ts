@@ -4,39 +4,155 @@ import * as CAM from '../cam';
 import { snakeToPascal } from '../util/strings';
 import { CW_STD, C_ERROR, C_MSG, C_STATE } from './helpers';
 
+export class FnBodyCodegenCtx {
+  protected items: Array<Rust.Rust> = [];
+  constructor(public body: CAM.CAM[], public tmpVariableCount: number = 0) {}
+
+  toRust(): Rust.CodeGroup {
+    let res = new Rust.CodeGroup();
+    for (const stmt of this.body) {
+      res.add(this.generate(stmt));
+    }
+    return res;
+  }
+
+  generate(cam: CAM.CAM): Rust.Rust {
+    let camType = cam.constructor.name;
+    if (`generate${camType}` in this) {
+      return (this as any)[`generate${camType}`](cam);
+    } else {
+      throw new Error(`Could not generate type ${camType}`);
+    }
+  }
+
+  getTmpVar(): Rust.Expr.Path {
+    return new Rust.Expr.Path(`__tmp${this.tmpVariableCount++}`);
+  }
+
+  lastTmpVar(): Rust.Expr.Path {
+    return new Rust.Expr.Path(`__tmp${this.tmpVariableCount - 1}`);
+  }
+
+  letVar(mut: boolean, value?: Rust.Expr, type?: Rust.Type): Rust.CodeGroup {
+    let res = new Rust.CodeGroup();
+    let tmpVar = this.getTmpVar();
+    res.add(new Rust.Stmt.Let(mut, tmpVar.toRustString(), type, value));
+    return res;
+  }
+
+  generateStateItemAccess(stmt: CAM.StateItemAccess) {
+    let { key } = stmt;
+    let res = new Rust.CodeGroup();
+    let deps = new Rust.Expr.Path('__deps');
+    res.add(
+      this.letVar(
+        false,
+        new Rust.Expr.FnCall(`crate::state::${key.toUpperCase()}.load`, [
+          deps.dot('storage'),
+        ]).q()
+      )
+    );
+    return res;
+  }
+
+  generateLet(stmt: CAM.Let) {
+    let res = new Rust.CodeGroup();
+    return res;
+  }
+
+  generateForIn(stmt: CAM.ForIn) {
+    let res = new Rust.CodeGroup();
+    return res;
+  }
+
+  generateEmit(stmt: CAM.Emit) {
+    let res = new Rust.CodeGroup();
+    return res;
+  }
+
+  generateTupleVal(t: CAM.TupleVal) {
+    let res = new Rust.CodeGroup();
+    let members = t.members.map(m => {
+      res.add(this.generate(m));
+      return this.lastTmpVar();
+    });
+    res.add(this.letVar(false, new Rust.Val.Tuple(members)));
+    return res;
+  }
+
+  generateLoadArg(a: CAM.LoadArg) {
+    let { name, option, type } = a.arg;
+    let arg = new Rust.Expr.Path(`${name}`).clone();
+    return this.letVar(false, arg);
+  }
+
+  generateIntegerVal(i: CAM.IntegerVal) {
+    let res = new Rust.CodeGroup();
+    // TODO: change integer type to generic
+    res.add(this.letVar(false, new Rust.Val.IntLiteral(Rust.U64, i.value)));
+    return res;
+  }
+
+  generateStructVal(s: CAM.StructVal) {
+    let res = new Rust.CodeGroup();
+    let type = CAM2Rust.type(s.type);
+    let members = s.members.map(m => {
+      let { name, value } = m;
+      console.log('generate member', name, value);
+      res.add(this.generate(value));
+      let v_value = this.lastTmpVar();
+      let smember = new Rust.Val.StructMember(name, v_value);
+      console.log('struct member', smember);
+      return smember;
+    });
+    res.add(this.letVar(false, new Rust.Val.Struct(type, members)));
+    return res;
+  }
+
+  stateItemSet(key: string, value: Rust.Expr): Rust.CodeGroup {
+    let deps = new Rust.Expr.Path('__deps');
+    return this.letVar(
+      false,
+      new Rust.Expr.FnCall(`crate::state::${key.toUpperCase()}.save`, [
+        deps.dot('storage'),
+        value,
+      ]).q()
+    );
+  }
+
+  generateReturn(stmt: CAM.Return) {
+    let res = new Rust.CodeGroup();
+    let { expr } = stmt;
+    res.add(this.generate(expr));
+    let v_value = this.lastTmpVar();
+    res.add(new Rust.Stmt.Return(v_value.ok()));
+    return res;
+  }
+
+  generateAssign(stmt: CAM.Assign) {
+    let res = new Rust.CodeGroup();
+    let { lhs, rhs } = stmt;
+
+    res.add(this.generate(rhs));
+    let v_rhs = this.lastTmpVar();
+
+    if ('stateItem' in lhs) {
+      let { key } = (lhs as any)['stateItem'];
+      res.add(this.stateItemSet(key, v_rhs.ref()));
+    }
+    return res;
+  }
+}
+
 export namespace CAM2Rust {
   export function contract(c: CAM.Contract): Rust.CodeGroup {
     let code = new Rust.CodeGroup();
-    code.items.push(buildModTypes(c));
-    code.items.push(buildModMsg(c));
-    code.items.push(buildModState(c));
-    code.items.push(buildModError(c));
-    code.items.push(buildModContract(c));
+    code.add(buildModTypes(c));
+    code.add(buildModMsg(c));
+    code.add(buildModState(c));
+    code.add(buildModError(c));
+    code.add(buildModContract(c));
     return code;
-  }
-
-  export function stmt(x: CAM.CAM): any {
-    if (x instanceof CAM.Let) {
-      if ('ident' in x.lhs) {
-        return new Rust.Stmt.Let(true, x.lhs.ident);
-      }
-    }
-
-    if (x instanceof CAM.ForIn) {
-      if ('ident' in x.bindings) {
-        return new Rust.Stmt.Let(true, 'forin');
-      }
-
-      if ('structUnpack' in x.bindings) {
-        return new Rust.Stmt.Let(true, 'forin_struct');
-      }
-    }
-
-    if (x instanceof CAM.Assign) {
-      return new Rust.Stmt.Let(true, 'assign');
-    }
-
-    throw new Error(`could not translate ${x.constructor.name}`);
   }
 
   export function type(t: CAM.Type): Rust.Type {
@@ -105,6 +221,8 @@ export namespace CAM2Rust {
       let m = new Rust.Defn.StructMember([], arg.name, argType);
       i.addMember(m);
     });
+
+    module.addItem(i);
 
     // build execute msg
     let e = new Rust.Defn.Enum(
@@ -283,8 +401,9 @@ export namespace CAM2Rust {
     );
     module.addItem(new Rust.Defn.Use([], 'crate::error::ContractError'));
 
+    // build instantiate
     let instantiate = new Rust.Defn.Function(
-      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      [new Rust.Annotation(`cfg_attr(not(feature = "library"), entry_point)`)],
       'instantiate',
       [
         new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
@@ -302,14 +421,51 @@ export namespace CAM2Rust {
       )
     );
 
-    c.instantiate.body.forEach(s => {
-      instantiate.addBody(stmt(s));
-    });
+    // redirect to our instantiate implementation
+    instantiate.addBody(
+      new Rust.Expr.FnCall('instantiate_impl', [
+        new Rust.Expr.Path('__deps'),
+        new Rust.Expr.Path('__env'),
+        new Rust.Expr.Path('__info'),
+        ...c.instantiate.args.map(x => new Rust.Expr.Path(`__msg`).dot(x.name)),
+      ])
+    );
 
     module.addItem(instantiate);
 
+    // build instantiate implementation
+    let i_impl = new Rust.Defn.Function(
+      [],
+      `instantiate_impl`,
+      [
+        new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
+        new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
+        new Rust.FunctionArg([], '__info', CW_STD.join('MessageInfo').toType()),
+        ...c.instantiate.args.map(
+          a =>
+            new Rust.FunctionArg(
+              [],
+              a.name,
+              a.option ? type(a.type).option() : type(a.type)
+            )
+        ),
+      ],
+      new Rust.Type.Result(
+        CW_STD.join('Response').toType(),
+        C_ERROR.join('ContractError').toType()
+      )
+    );
+
+    let body = new FnBodyCodegenCtx(c.instantiate.body);
+    i_impl.addBody(body.toRust());
+    i_impl.addBody(
+      new Rust.Expr.Path('Ok(::cosmwasm_std::Response::default())')
+    );
+    module.addItem(i_impl);
+
+    // build execute (demux)
     let execute = new Rust.Defn.Function(
-      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      [new Rust.Annotation(`cfg_attr(not(feature = "library"), entry_point)`)],
       'execute',
       [
         new Rust.FunctionArg([], '__deps', CW_STD.join('DepsMut').toType()),
@@ -353,7 +509,14 @@ export namespace CAM2Rust {
             '__info',
             CW_STD.join('MessageInfo').toType()
           ),
-          ...x.args.map(a => new Rust.FunctionArg([], a.name, type(a.type))),
+          ...x.args.map(
+            a =>
+              new Rust.FunctionArg(
+                [],
+                a.name,
+                a.option ? type(a.type).option() : type(a.type)
+              )
+          ),
         ],
         new Rust.Type.Result(
           CW_STD.join('Response').toType(),
@@ -361,15 +524,15 @@ export namespace CAM2Rust {
         )
       );
 
-      x.body.forEach(s => {
-        // fn.addBody(stmt(s));
-      });
+      let body = new FnBodyCodegenCtx(x.body);
+      fn.addBody(body.toRust());
+      fn.addBody(new Rust.Expr.Path('Ok(::cosmwasm_std::Response::default())'));
 
       module.addItem(fn);
     });
 
     let query = new Rust.Defn.Function(
-      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      [new Rust.Annotation(`cfg_attr(not(feature = "library"), entry_point)`)],
       'query',
       [
         new Rust.FunctionArg([], '__deps', CW_STD.join('Deps').toType()),
@@ -386,10 +549,14 @@ export namespace CAM2Rust {
       let argList = x.args.map(a => a.name);
       match.addPattern(
         `crate::msg::QueryMsg::${snakeToPascal(x.name)} {${argList.join(',')}}`,
-        new Rust.Expr.FnCall(`query_${x.name}`, [
-          new Rust.Expr.Path('__deps'),
-          new Rust.Expr.Path('__env'),
-          ...argList.map(x => new Rust.Expr.Path(x)),
+        new Rust.Expr.FnCall(CW_STD.join('to_binary').toRustString(), [
+          new Rust.Expr.FnCall(`query_${x.name}`, [
+            new Rust.Expr.Path('__deps'),
+            new Rust.Expr.Path('__env'),
+            ...argList.map(x => new Rust.Expr.Path(x)),
+          ])
+            .q()
+            .ref(),
         ])
       );
     });
@@ -403,16 +570,22 @@ export namespace CAM2Rust {
         [
           new Rust.FunctionArg([], '__deps', CW_STD.join('Deps').toType()),
           new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
-          ...q.args.map(a => new Rust.FunctionArg([], a.name, type(a.type))),
+          ...q.args.map(
+            a =>
+              new Rust.FunctionArg(
+                [],
+                a.name,
+                a.option ? type(a.type).option() : type(a.type)
+              )
+          ),
         ],
         CW_STD.join('StdResult')
           .toType()
-          .withTypeParams([CW_STD.join('Binary').toType()])
+          .withTypeParams([type(q.returnType)])
       );
 
-      q.body.forEach(s => {
-        // fn.addBody(stmt(s));
-      });
+      let body = new FnBodyCodegenCtx(q.body);
+      fn.addBody(body.toRust());
 
       module.addItem(fn);
     });
