@@ -303,6 +303,34 @@ export namespace CAM2Rust {
     execute.addBody(match);
     module.addItem(execute);
 
+    let query = new Rust.Defn.Function(
+      [new Rust.Annotation(`cfg(not(feature = "library"), entry_point)`)],
+      'query',
+      [
+        new Rust.FunctionArg([], '__deps', CW_STD.join('Deps').toType()),
+        new Rust.FunctionArg([], '__env', CW_STD.join('Env').toType()),
+        new Rust.FunctionArg([], '__msg', C_MSG.join('QueryMsg').toType()),
+      ],
+      CW_STD.join('StdResult')
+        .toType()
+        .withTypeParams([CW_STD.join('Binary').toType()])
+    );
+
+    let qmatch = new Rust.Expr.Match(new Rust.Expr.Path('__msg'));
+    c.query.forEach(x => {
+      let argList = x.args.map(a => a.name);
+      match.addPattern(
+        `${snakeToPascal(x.name)} {${argList.join(',')}}`,
+        new Rust.Expr.FnCall(`query_${x.name}`, [
+          new Rust.Expr.Path('__deps'),
+          new Rust.Expr.Path('__env'),
+          ...argList.map(x => new Rust.Expr.Path(x)),
+        ])
+      );
+    });
+    query.addBody(qmatch);
+    module.addItem(query);
+
     return module;
   }
 }
