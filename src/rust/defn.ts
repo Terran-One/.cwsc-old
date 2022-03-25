@@ -23,6 +23,15 @@ export namespace Defn {
 
     public toRustString(): string {
       if (this.name === null) {
+        return this.withAnnotations(`pub ${this.type.toRustString()}`);
+      }
+      return this.withAnnotations(
+        `pub ${this.name}: ${this.type.toRustString()}`
+      );
+    }
+
+    public toEnumVariantString(): string {
+      if (this.name === null) {
         return this.withAnnotations(this.type.toRustString());
       }
       return this.withAnnotations(`${this.name}: ${this.type.toRustString()}`);
@@ -68,13 +77,13 @@ export namespace Defn {
         case STRUCT:
           return this.withAnnotations(
             `${this.name} { ${this.members
-              .map(x => x.toRustString())
+              .map(x => x.toEnumVariantString())
               .join(', ')} }`
           );
         case TUPLE:
           return this.withAnnotations(
             `${this.name}(${this.members
-              .map(x => x.toRustString())
+              .map(x => x.toEnumVariantString())
               .join(', ')})`
           );
         case UNIT:

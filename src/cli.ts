@@ -8,6 +8,7 @@ import util from 'util';
 import { parseCWScript } from './parser';
 import { ImportStmt } from './ast/nodes';
 import { CWScriptCodegen } from './codegen/codegen';
+import { FileWriter } from './codegen/filewriter';
 
 const program = new commander.Command();
 
@@ -56,4 +57,6 @@ files.forEach(file => {
 
 let cg = new CWScriptCodegen(sources);
 let ct = cg.generateContract('CW20Base');
-console.log(ct);
+
+let fw = new FileWriter();
+fw.writeContract(destination, 'cw20-base', ct);

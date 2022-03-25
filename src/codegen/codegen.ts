@@ -20,7 +20,7 @@ export class CWScriptCodegen {
     });
   }
 
-  generateContract(name: string, file?: string) {
+  generateContract(name: string, file?: string): Rust.CodeGroup {
     let sourceFiles = this.sources.filter(
       source =>
         source.ast
@@ -47,6 +47,6 @@ export class CWScriptCodegen {
     let env = this.envs[sourceFile.file];
     let ast2cam = new AST2CAM(env);
     let contract = ast2cam.translateContractDefn(contractDefn);
-    return CAM2Rust.contract(contract).toRustString();
+    return CAM2Rust.contract(contract);
   }
 }

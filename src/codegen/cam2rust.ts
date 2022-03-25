@@ -5,7 +5,7 @@ import { snakeToPascal } from '../util/strings';
 import { CW_STD, C_ERROR, C_MSG, C_STATE } from './helpers';
 
 export namespace CAM2Rust {
-  export function contract(c: CAM.Contract): any {
+  export function contract(c: CAM.Contract): Rust.CodeGroup {
     let code = new Rust.CodeGroup();
     code.items.push(buildModTypes(c));
     code.items.push(buildModMsg(c));
@@ -190,8 +190,6 @@ export namespace CAM2Rust {
     let cw_storage_plus_map = new Rust.Type('cw_storage_plus::Map');
 
     let module = new Rust.Defn.Module('state');
-    module.addItem(new Rust.Defn.Use([], 'schemars::JsonSchema'));
-    module.addItem(new Rust.Defn.Use([], 'serde::{Serialize, Deserialize}'));
 
     for (let defn of c.state) {
       if (defn instanceof CAM.StateItem) {
@@ -229,7 +227,10 @@ export namespace CAM2Rust {
       'derive(thiserror::Error, Debug)'
     );
 
-    let error_enum = new Rust.Defn.Enum([DERIVE_ERROR_ANNOTATION], 'Error');
+    let error_enum = new Rust.Defn.Enum(
+      [DERIVE_ERROR_ANNOTATION],
+      'ContractError'
+    );
     let std = new Rust.Defn.Struct(
       [new Rust.Annotation('error("{0}")')],
       Rust.TUPLE,
@@ -351,7 +352,7 @@ export namespace CAM2Rust {
         .withTypeParams([CW_STD.join('Binary').toType()])
     );
 
-    let qmatch = new Rust.Expr.Match(new Rust.Expr.Path('__msg'));
+    match = new Rust.Expr.Match(new Rust.Expr.Path('__msg'));
     c.query.forEach(x => {
       let argList = x.args.map(a => a.name);
       match.addPattern(
@@ -363,7 +364,7 @@ export namespace CAM2Rust {
         ])
       );
     });
-    query.addBody(qmatch);
+    query.addBody(match);
     module.addItem(query);
 
     return module;
