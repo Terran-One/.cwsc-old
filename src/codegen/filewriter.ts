@@ -95,5 +95,13 @@ schema = "run --example schema"`
 
     const crateLib = path.join(crateSrc, 'lib.rs');
     fs.writeFileSync(crateLib, contractRustCode.toRustString());
+
+    const crateScript = path.join(crateRoot, 'build-debug.sh');
+    fs.writeFileSync(
+      crateScript,
+      `#!/bin/bash\nRUSTFLAGS='-C link-arg=-s' cargo wasm`
+    );
+
+    fs.chmodSync(crateScript, 0o755);
   }
 }

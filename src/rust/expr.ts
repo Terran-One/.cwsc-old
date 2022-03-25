@@ -19,7 +19,7 @@ export abstract class Expr implements Rust.Rust {
   }
 
   ok(): Expr {
-    return new Expr.FnCall('::std::result::Result::ok', [this]);
+    return new Expr.FnCall('::std::result::Result::Ok', [this]);
   }
 
   ref(mut: boolean = false): Expr.Ref {
@@ -154,6 +154,16 @@ export namespace Expr {
 
     toRustString(): string {
       return this.path;
+    }
+  }
+
+  export class Binop extends Expr {
+    constructor(public op: string, public lhs: Expr, public rhs: Expr) {
+      super();
+    }
+
+    toRustString(): string {
+      return `${this.lhs.toRustString()} ${this.op} ${this.rhs.toRustString()}`;
     }
   }
 }

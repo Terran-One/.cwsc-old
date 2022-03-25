@@ -70,6 +70,37 @@ export class FnBodyCodegenCtx {
     return res;
   }
 
+  generateArithmeticOp(expr: CAM.ArithmeticOp) {
+    let res = new Rust.CodeGroup();
+    let { op, lhs, rhs } = expr;
+    res.add(this.generate(lhs));
+    let v_lhs = this.lastTmpVar();
+    res.add(this.generate(rhs));
+    let v_rhs = this.lastTmpVar();
+    res.add(this.letVar(false, new Rust.Expr.Binop(op, v_lhs, v_rhs)));
+    return res;
+  }
+
+  generateSpecialVariable(stmt: CAM.SpecialVariable) {
+    let res = new Rust.CodeGroup();
+    let { namespace, member } = stmt;
+
+    if (namespace === 'msg') {
+      switch (member) {
+        case 'sender':
+          res.add(
+            this.letVar(
+              false,
+              new Rust.Expr.Path('__info').dot('sender').clone()
+            )
+          );
+          return res;
+      }
+    }
+
+    throw new Error(`Unknown special variable ${namespace}.${member}`);
+  }
+
   generateTupleVal(t: CAM.TupleVal) {
     let res = new Rust.CodeGroup();
     let members = t.members.map(m => {
@@ -98,11 +129,9 @@ export class FnBodyCodegenCtx {
     let type = CAM2Rust.type(s.type);
     let members = s.members.map(m => {
       let { name, value } = m;
-      console.log('generate member', name, value);
       res.add(this.generate(value));
       let v_value = this.lastTmpVar();
       let smember = new Rust.Val.StructMember(name, v_value);
-      console.log('struct member', smember);
       return smember;
     });
     res.add(this.letVar(false, new Rust.Val.Struct(type, members)));

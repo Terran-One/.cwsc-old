@@ -74,6 +74,11 @@ export class Emit extends CAM {
   }
 }
 
+export class ArithmeticOp extends CAM {
+  constructor(public op: string, public lhs: CAM, public rhs: CAM) {
+    super();
+  }
+}
 export class TupleVal extends CAM {
   constructor(public type: Type, public members: CAM[]) {
     super();

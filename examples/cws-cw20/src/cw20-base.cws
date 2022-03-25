@@ -41,47 +41,29 @@ contract CW20Base {
         }
     }
 
-//     exec transfer(recipient: Addr, amount: Uint128) {
-//         state.balances[msg.sender] -= amount
-//         state.balances[recipient] += amount
-//         emit Transfer(msg.sender, recipient, amount)
-//     }
+    exec transfer(recipient: Addr, amount: u64) {
+        state.balances[msg.sender] = state.balances[msg.sender] + amount
+        state.balances[recipient] = state.balances[recipient] + amount
+        // emit Transfer(msg.sender, recipient, amount)
+    }
 
-//     exec burn(amount: Uint128) {
-//         state.balances[msg.sender] -= amount
-//         state.token_info.total_supply -= amount
-//         emit Burn(msg.sender, amount)
-//     }
+    exec burn(amount: u64) {
+        state.balances[msg.sender] = state.balances[msg.sender] - amount
+        state.token_info.total_supply = state.token_info.total_supply - amount
+        // emit Burn(msg.sender, amount)
+    }
 
-//    exec send_test_1(contract_addr: Addr, amount: Uint128, msg: Binary?) {
-//         state.balances[msg.sender] -= amount
-//         state.balances[contract_addr] += amount
-//         emit Send(msg.sender, contract_addr, amount) 
-//     }
+    exec mint(recipient: Addr, amount: u64) {
+        state.balances[recipient] = state.balances[recipient] + amount
+        state.token_info.total_supply = state.token_info.total_supply + amount
+        // emit Mint(recipient, amount)
+    }
 
-//     exec send_test_2(contract_addr: Addr, amount: Uint128, msg: Binary) {
-//         state.balances[msg.sender] -= amount
-//         state.balances[contract_addr] += amount
-//         emit Send(msg.sender, contract_addr, amount) 
-//     }
-
-//     exec send_test_3(contract_addr: Addr, amount: Uint128, msg: Binary) {
-//         state.balances[msg.sender] -= amount
-//         state.balances[contract_addr] += amount
-//         emit Send(msg.sender, contract_addr, amount) 
-//     }
-
-//     exec mint(recipient: Addr, amount: Uint128) {
-//         state.balances[recipient] += amount
-//         state.token_info.total_supply += amount
-//         emit Mint(recipient, amount)
-//     }
-
-//     query balance(address: Addr) -> struct BalanceResponse { balance: Uint128 } {
-//         // return _ {
-//         //     balance: state.balances[address] or 0
-//         // }
-//     }
+    query balance(address: Addr) -> struct BalanceResponse { balance: u64 } {
+        return BalanceResponse {
+            balance: state.balances[address]
+        }
+    }
 
     query token_info() -> struct TokenInfoResponse { token_info: TokenInfo } {
         return TokenInfoResponse {

@@ -1,0 +1,33 @@
+contract CWTemplate {
+  
+    state {
+        count: u64,
+        owner: Addr
+    }
+
+    instantiate(count: u64) {
+        state.count = count
+        state.owner = msg.sender 
+    }
+
+    exec increment() {
+        state.count = state.count + 1
+    }
+
+    exec reset() {
+        state.count = 0
+    }
+
+    query get_count() -> struct CountResponse { count: u64 } {
+      return CountResponse {
+        count: state.count
+      }
+    }
+
+    query get_owner() -> struct OwnerResponse { owner: Addr } {
+      return OwnerResponse {
+        owner: state.owner
+      }
+    }
+
+}

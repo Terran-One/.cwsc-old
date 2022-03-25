@@ -97,6 +97,14 @@ export class AST2CAM {
     return new CAM.StateItem(key, type);
   }
 
+  translateArithmeticOpExpr(f: AST.ArithmeticOpExpr): CAM.ArithmeticOp {
+    let op = f.op;
+    let lhs = this.translate(f.lhs);
+    let rhs = this.translate(f.rhs);
+
+    return new CAM.ArithmeticOp(op, lhs, rhs);
+  }
+
   translateMapDefn(map: AST.MapDefn): CAM.StateMap {
     let key = map.key.text;
     let mapKeys = map.mapKeys.map(x => ({
