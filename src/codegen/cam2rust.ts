@@ -3,11 +3,11 @@ import * as CAM from '../cam';
 
 import { snakeToPascal } from '../util/strings';
 import { CW_STD, C_ERROR, C_MSG, C_STATE } from './helpers';
-import { Stmt } from '../rust';
 
 export namespace CAM2Rust {
   export function contract(c: CAM.Contract): any {
     let code = new Rust.CodeGroup();
+    code.items.push(buildModTypes(c));
     code.items.push(buildModMsg(c));
     code.items.push(buildModState(c));
     code.items.push(buildModError(c));
@@ -92,7 +92,7 @@ export namespace CAM2Rust {
 
     // build instantiate msg
     let i = new Rust.Defn.Struct(
-      [Rust.DERIVE_ANNOTATION, Rust.SERDE_RENAME_ANNOTATION],
+      [Rust.DERIVE_ANNOTATION],
       Rust.STRUCT,
       'InstantiateMsg'
     );
@@ -151,6 +151,37 @@ export namespace CAM2Rust {
     }
 
     module.addItem(q);
+    return module;
+  }
+
+  export function buildModTypes(c: CAM.Contract): Rust.Defn.Module {
+    let module = new Rust.Defn.Module('types');
+    module.addItem(new Rust.Defn.Use([], 'schemars::JsonSchema'));
+    module.addItem(new Rust.Defn.Use([], 'serde::{Serialize, Deserialize}'));
+
+    c.types.forEach(t => {
+      if (t instanceof CAM.Type.Struct) {
+        let struct = new Rust.Defn.Struct(
+          [Rust.DERIVE_ANNOTATION],
+          Rust.STRUCT,
+          t.name
+        );
+        t.members.forEach(m => {
+          let member_type = type(m.type);
+          if (m.option) {
+            member_type = member_type.option();
+          }
+          struct.addMember(new Rust.Defn.StructMember([], m.name, member_type));
+        });
+        module.addItem(struct);
+      }
+
+      if (t instanceof CAM.Type.TypeAlias) {
+        let alias = new Rust.Defn.TypeAlias(t.name, type(t.type));
+        module.addItem(alias);
+      }
+    });
+
     return module;
   }
 
@@ -221,8 +252,12 @@ export namespace CAM2Rust {
         err.name
       );
 
-      err.members.forEach((m: any) => {
-        let member = new Rust.Defn.StructMember([], m.name, m.type);
+      err.members.forEach(m => {
+        let member_type = type(m.type);
+        if (m.option) {
+          member_type = member_type.option();
+        }
+        let member = new Rust.Defn.StructMember([], m.name, member_type);
         error_struct.addMember(member);
       });
       error_enum.addVariant(error_struct);

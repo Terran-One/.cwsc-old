@@ -1,7 +1,7 @@
 contract CW20Base {    
 
     error InvalidZeroAmount()
-    error Unauthorized() 
+    error Unauthorized()
 
     event Transfer(sender: Addr, recipient: Addr, amount: Uint128)
     event Burn(sender: Addr, amount: Uint128)
@@ -53,8 +53,19 @@ contract CW20Base {
         emit Burn(msg.sender, amount)
     }
 
+   exec send_test_1(contract_addr: Addr, amount: Uint128, msg: Binary?) {
+        state.balances[msg.sender] -= amount
+        state.balances[contract_addr] += amount
+        emit Send(msg.sender, contract_addr, amount) 
+    }
 
-    exec send(contract_addr: Addr, amount: Uint128, msg: Binary) {
+    exec send_test_2(contract_addr: Addr, amount: Uint128, msg: Binary) {
+        state.balances[msg.sender] -= amount
+        state.balances[contract_addr] += amount
+        emit Send(msg.sender, contract_addr, amount) 
+    }
+
+    exec send_test_3(contract_addr: Addr, amount: Uint128, msg: Binary) {
         state.balances[msg.sender] -= amount
         state.balances[contract_addr] += amount
         emit Send(msg.sender, contract_addr, amount) 
