@@ -5,7 +5,7 @@ import { StructDefn, TypeExpr } from './type';
 //@Node()
 export class InterfaceDefn extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public body: List<InterfaceItem>,
@@ -19,7 +19,7 @@ export class InterfaceDefn extends AST {
 //@Node()
 export class ContractDefn extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public body: List<ContractItem>,
@@ -65,7 +65,7 @@ export class ErrorDefn extends StructDefn {}
 export class EventDefn extends StructDefn {}
 
 export class StateDefn extends AST {
-  constructor(ctx: any, public key: Ident, public type: TypeExpr) {
+  constructor(public ctx: any, public key: Ident, public type: TypeExpr) {
     super();
   }
 }
@@ -73,7 +73,7 @@ export class StateDefn extends AST {
 //@Node()
 export class ItemDefn extends StateDefn {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     key: Ident,
     type: TypeExpr
@@ -86,7 +86,7 @@ export class ItemDefn extends StateDefn {
 //@Node()
 export class MapDefn extends StateDefn {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     key: Ident,
     public mapKeys: List<MapDefnKey>,
@@ -99,7 +99,11 @@ export class MapDefn extends StateDefn {
 
 //@Node()
 export class MapDefnKey extends AST {
-  constructor(ctx: any, public name: Ident | undefined, public type: TypeExpr) {
+  constructor(
+    public ctx: any,
+    public name: Ident | undefined,
+    public type: TypeExpr
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -118,7 +122,7 @@ export class MigrateDefn extends FnDefn {}
 
 export class FnDecl extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident | undefined,
     public args: List<FnArg>,

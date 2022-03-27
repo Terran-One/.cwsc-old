@@ -1,8 +1,10 @@
 import * as Rust from '../rust';
 import * as CAM from '../cam';
+import { CWScriptEnv } from '../symbol-table/env';
 
 import { snakeToPascal } from '../util/strings';
 import { CW_STD, C_ERROR, C_MSG, C_STATE } from './helpers';
+import { Subspace } from '../symbol-table/scope';
 
 export class FnBodyCodegenCtx {
   protected items: Array<Rust.Rust> = [];
@@ -49,6 +51,26 @@ export class FnBodyCodegenCtx {
         false,
         new Rust.Expr.FnCall(`crate::state::${key.toUpperCase()}.load`, [
           deps.dot('storage'),
+        ]).q()
+      )
+    );
+    return res;
+  }
+
+  generateStateMapAccess(stmt: CAM.StateMapAccess) {
+    let { key, mapKeys } = stmt;
+    let res = new Rust.CodeGroup();
+    let deps = new Rust.Expr.Path('__deps');
+    // generate map key value
+    res.add(this.generate(mapKeys[0]));
+    let v_mapKey = this.lastTmpVar();
+
+    res.add(
+      this.letVar(
+        false,
+        new Rust.Expr.FnCall(`crate::state::${key.toUpperCase()}.load`, [
+          deps.dot('storage'),
+          v_mapKey.ref(),
         ]).q()
       )
     );
@@ -108,6 +130,26 @@ export class FnBodyCodegenCtx {
       return this.lastTmpVar();
     });
     res.add(this.letVar(false, new Rust.Val.Tuple(members)));
+    return res;
+  }
+
+  generateVecVal(v: CAM.VecVal) {
+    let res = new Rust.CodeGroup();
+    let elements = v.elements.map(m => {
+      res.add(this.generate(m));
+      return this.lastTmpVar();
+    });
+
+    res.add(this.letVar(false, new Rust.Val.Vec(elements)));
+    return res;
+  }
+
+  generateMemberAccess(m: CAM.MemberAccess) {
+    let { member, obj } = m;
+    let res = new Rust.CodeGroup();
+    res.add(this.generate(obj));
+    let v_expr = this.lastTmpVar();
+    res.add(this.letVar(false, v_expr.dot(member)));
     return res;
   }
 

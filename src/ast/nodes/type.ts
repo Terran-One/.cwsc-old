@@ -23,7 +23,11 @@ export type TypeExpr =
   | TypeAliasDefn;
 
 export class TypePath extends AST {
-  constructor(ctx: any, public root: boolean, public paths: List<Ident>) {
+  constructor(
+    public ctx: any,
+    public root: boolean,
+    public paths: List<Ident>
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -34,49 +38,53 @@ export class TypePath extends AST {
 }
 
 export class ParamzdTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr, public params: List<TypeExpr>) {
+  constructor(
+    public ctx: any,
+    public type: TypeExpr,
+    public params: List<TypeExpr>
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
 export class TupleTypeExpr extends AST {
-  constructor(ctx: any, public members: List<TypeExpr>) {
+  constructor(public ctx: any, public members: List<TypeExpr>) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
 export class ShortOptionTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
+  constructor(public ctx: any, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
 export class ShortVecTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
+  constructor(public ctx: any, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
 export class RefTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr) {
+  constructor(public ctx: any, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 
 export class ReflectiveTypeExpr extends AST {
-  constructor(ctx: any, public type: TypeExpr, public member: Ident) {
+  constructor(public ctx: any, public type: TypeExpr, public member: Ident) {
     super(ctx);
     this.setParentForChildren();
   }
 }
 export class StructDefn extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public members: List<StructMember>
@@ -106,7 +114,7 @@ export class StructDefn extends AST {
 
 export class TupleStructDefn extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public members: List<TypeExpr>
@@ -118,7 +126,7 @@ export class TupleStructDefn extends AST {
 
 export class EnumDefn extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public variants: List<EnumVariant>
@@ -130,7 +138,7 @@ export class EnumDefn extends AST {
 
 export class TypeAliasDefn extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public spec: CWSpec | undefined,
     public name: Ident,
     public type: TypeExpr

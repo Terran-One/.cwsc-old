@@ -41,21 +41,25 @@ contract CW20Base {
         }
     }
 
-    exec transfer(recipient: Addr, amount: u64) {
-        state.balances[msg.sender] = state.balances[msg.sender] + amount
-        state.balances[recipient] = state.balances[recipient] + amount
-        // emit Transfer(msg.sender, recipient, amount)
-    }
+    // exec transfer(recipient: Addr, amount: u64) {
+    //     state.balances[msg.sender] = state.balances[msg.sender] + amount
+    //     state.balances[recipient] = state.balances[recipient] + amount
+    //     // emit Transfer(msg.sender, recipient, amount)
+    // }
 
-    exec burn(amount: u64) {
-        state.balances[msg.sender] = state.balances[msg.sender] - amount
-        state.token_info.total_supply = state.token_info.total_supply - amount
-        // emit Burn(msg.sender, amount)
-    }
+    // exec burn(amount: u64) {
+    //     state.balances[msg.sender] = state.balances[msg.sender] - amount
+    //     state.token_info.total_supply = state.token_info.total_supply - amount
+    //     // emit Burn(msg.sender, amount)
+    // }
 
     exec mint(recipient: Addr, amount: u64) {
-        state.balances[recipient] = state.balances[recipient] + amount
-        state.token_info.total_supply = state.token_info.total_supply + amount
+        // state.balances[recipient] = state.balances[recipient] + amount
+
+        let token_info = state.token_info
+        token_info.total_supply = token_info.total_supply + amount
+        token_info.decimals = 8
+        state.token_info = token_info
         // emit Mint(recipient, amount)
     }
 

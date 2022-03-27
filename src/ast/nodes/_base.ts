@@ -43,7 +43,7 @@ export abstract class AST extends Tree<AST> {
 }
 
 export class List<T extends AST> extends AST implements TreeList<AST> {
-  constructor(ctx: any, public elements: T[]) {
+  constructor(public ctx: any, public elements: T[]) {
     super(ctx);
     this.setParentForChildren();
   }

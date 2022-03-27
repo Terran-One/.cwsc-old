@@ -4,7 +4,7 @@ import { AST, List, TypePath } from './';
 export type Expr = any;
 
 export class Ident extends AST {
-  constructor(ctx: any, public text: string) {
+  constructor(public ctx: any, public text: string) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -12,7 +12,7 @@ export class Ident extends AST {
 
 //@Node()
 export class StateItemAccessExpr extends AST {
-  constructor(ctx: any, public key: Ident) {
+  constructor(public ctx: any, public key: Ident) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -20,7 +20,7 @@ export class StateItemAccessExpr extends AST {
 
 //@Node()
 export class StateMapAccessExpr extends AST {
-  constructor(ctx: any, public key: Ident, public mapKeys: List<Expr>) {
+  constructor(public ctx: any, public key: Ident, public mapKeys: List<Expr>) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -28,7 +28,7 @@ export class StateMapAccessExpr extends AST {
 
 //@Node()
 export class MemberAccessExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public member: Ident) {
+  constructor(public ctx: any, public lhs: Expr, public member: Ident) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -36,7 +36,7 @@ export class MemberAccessExpr extends AST {
 
 //@Node()
 export class TableLookupExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public key: Expr) {
+  constructor(public ctx: any, public lhs: Expr, public key: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -44,7 +44,7 @@ export class TableLookupExpr extends AST {
 
 //@Node()
 export class PosArgsFnCallExpr extends AST {
-  constructor(ctx: any, public fn: Expr, public args: List<Expr>) {
+  constructor(public ctx: any, public fn: Expr, public args: List<Expr>) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -52,7 +52,7 @@ export class PosArgsFnCallExpr extends AST {
 
 //@Node()
 export class NamedArgsFnCallExpr extends AST {
-  constructor(ctx: any, public fn: Expr, public args: List<NamedExpr>) {
+  constructor(public ctx: any, public fn: Expr, public args: List<NamedExpr>) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -60,7 +60,7 @@ export class NamedArgsFnCallExpr extends AST {
 
 //@Node()
 export class UnaryExpr extends AST {
-  constructor(ctx: any, public op: string, public expr: Expr) {
+  constructor(public ctx: any, public op: string, public expr: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -68,7 +68,7 @@ export class UnaryExpr extends AST {
 
 //@Node()
 export class ExpExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
+  constructor(public ctx: any, public lhs: Expr, public rhs: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -76,7 +76,12 @@ export class ExpExpr extends AST {
 
 //@Node()
 export class ArithmeticOpExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public op: string, public rhs: Expr) {
+  constructor(
+    public ctx: any,
+    public lhs: Expr,
+    public op: string,
+    public rhs: Expr
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -84,7 +89,12 @@ export class ArithmeticOpExpr extends AST {
 
 //@Node()
 export class CompOpExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public op: string, public rhs: Expr) {
+  constructor(
+    public ctx: any,
+    public lhs: Expr,
+    public op: string,
+    public rhs: Expr
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -92,7 +102,7 @@ export class CompOpExpr extends AST {
 
 //@Node()
 export class AndExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
+  constructor(public ctx: any, public lhs: Expr, public rhs: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -100,7 +110,7 @@ export class AndExpr extends AST {
 
 //@Node()
 export class OrExpr extends AST {
-  constructor(ctx: any, public lhs: Expr, public rhs: Expr) {
+  constructor(public ctx: any, public lhs: Expr, public rhs: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -108,7 +118,7 @@ export class OrExpr extends AST {
 
 //@Node()
 export class QueryExpr extends AST {
-  constructor(ctx: any, public expr: Expr) {
+  constructor(public ctx: any, public expr: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -118,7 +128,7 @@ export class QueryExpr extends AST {
 
 //@Node()
 export class UnitVal extends AST {
-  constructor(ctx: any) {
+  constructor(public ctx: any) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -127,7 +137,7 @@ export class UnitVal extends AST {
 //@Node()
 export class StructVal extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public type: TypePath,
     public members: List<StructValMember>
   ) {
@@ -138,7 +148,7 @@ export class StructVal extends AST {
 
 //@Node()
 export class StructValMember extends AST {
-  constructor(ctx: any, public name: Ident, public value: Expr) {
+  constructor(public ctx: any, public name: Ident, public value: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -146,7 +156,7 @@ export class StructValMember extends AST {
 
 //@Node()
 export class NamedExpr extends AST {
-  constructor(ctx: any, public name: Ident, public value: Expr) {
+  constructor(public ctx: any, public name: Ident, public value: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -154,7 +164,11 @@ export class NamedExpr extends AST {
 
 //@Node()
 export class TupleVal extends AST {
-  constructor(ctx: any, public type: TypePath, public members: List<Expr>) {
+  constructor(
+    public ctx: any,
+    public type: TypePath,
+    public members: List<Expr>
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -162,7 +176,7 @@ export class TupleVal extends AST {
 
 //@Node()
 export class VecVal extends AST {
-  constructor(ctx: any, public elements: List<Expr>) {
+  constructor(public ctx: any, public elements: List<Expr>) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -170,7 +184,7 @@ export class VecVal extends AST {
 
 //@Node()
 export class StringVal extends AST {
-  constructor(ctx: any, public value: string) {
+  constructor(public ctx: any, public value: string) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -178,7 +192,7 @@ export class StringVal extends AST {
 
 //@Node()
 export class IntegerVal extends AST {
-  constructor(ctx: any, public value: string) {
+  constructor(public ctx: any, public value: string) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -186,7 +200,7 @@ export class IntegerVal extends AST {
 
 //@Node()
 export class DecimalVal extends AST {
-  constructor(ctx: any, public value: string) {
+  constructor(public ctx: any, public value: string) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -194,7 +208,7 @@ export class DecimalVal extends AST {
 
 //@Node()
 export class BoolVal extends AST {
-  constructor(ctx: any, public value: boolean) {
+  constructor(public ctx: any, public value: boolean) {
     super(ctx);
     this.setParentForChildren();
   }

@@ -2,7 +2,7 @@ import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
-import { AST2CAM } from './ast2cam';
+import { AST2Rust } from './ast2rust';
 import { CAM2Rust } from './cam2rust';
 
 export interface FileSource {
@@ -45,8 +45,6 @@ export class CWScriptCodegen {
       .find(x => x.name.text === name)!;
 
     let env = this.envs[sourceFile.file];
-    let ast2cam = new AST2CAM(env);
-    let contract = ast2cam.translateContractDefn(contractDefn);
-    return CAM2Rust.contract(contract);
+    return new AST2Rust(env).translateContractDefn(contractDefn);
   }
 }

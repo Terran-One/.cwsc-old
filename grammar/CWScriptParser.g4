@@ -238,7 +238,7 @@ expr:
 		COMMA mapKeys += expr
 	)* RBRACK									# StateMapAccessExpr
 	| expr DOT ident							# MemberAccessExpr
-	| expr LBRACK expr RBRACK					# TableLookupExpr
+	| expr LBRACK expr COMMA RBRACK				# TableLookupExpr
 	| expr LPAREN (exprList)? RPAREN			# PosArgsFnCallExpr
 	| expr LPAREN (namedExprList)? RPAREN		# NamedArgsFnCallExpr
 	| op = (PLUS | MINUS | EXCLAM) expr			# UnaryExpr

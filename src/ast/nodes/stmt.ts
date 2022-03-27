@@ -5,7 +5,7 @@ export type Stmt = any;
 
 //@Node()
 export class LetStmt extends AST {
-  constructor(ctx: any, public lhs: LetLHS, public rhs: Expr) {
+  constructor(public ctx: any, public lhs: LetLHS, public rhs: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -15,7 +15,7 @@ export type LetLHS = IdentLHS | StructUnpackLHS;
 
 //@Node()
 export class IdentLHS extends AST {
-  constructor(ctx: any, public name: Ident, public type?: TypeExpr) {
+  constructor(public ctx: any, public name: Ident, public type?: TypeExpr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -23,7 +23,7 @@ export class IdentLHS extends AST {
 
 //@Node()
 export class StructUnpackLHS extends AST {
-  constructor(ctx: any, public names: List<Ident>) {
+  constructor(public ctx: any, public names: List<Ident>) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -39,7 +39,7 @@ export type AssignLHS =
 //@Node()
 export class AssignStmt extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public lhs: AssignLHS,
     public assignOp: string,
     public rhs: Expr
@@ -51,7 +51,7 @@ export class AssignStmt extends AST {
 
 //@Node()
 export class IdentAssignLHS extends AST {
-  constructor(ctx: any, public ident: Ident) {
+  constructor(public ctx: any, public ident: Ident) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -59,7 +59,7 @@ export class IdentAssignLHS extends AST {
 
 //@Node()
 export class MemberAssignLHS extends AST {
-  constructor(ctx: any, public obj: Expr, public member: Ident) {
+  constructor(public ctx: any, public obj: Expr, public member: Ident) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -67,7 +67,7 @@ export class MemberAssignLHS extends AST {
 
 //@Node()
 export class TableAssignLHS extends AST {
-  constructor(ctx: any, public table: Expr, public key: Expr) {
+  constructor(public ctx: any, public table: Expr, public key: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -75,7 +75,7 @@ export class TableAssignLHS extends AST {
 
 //@Node()
 export class InnerPath extends AST {
-  constructor(ctx: any, public name: Ident, public tableKey?: Expr) {
+  constructor(public ctx: any, public name: Ident, public tableKey?: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -83,7 +83,11 @@ export class InnerPath extends AST {
 
 //@Node()
 export class StateItemAssignLHS extends AST {
-  constructor(ctx: any, public key: Ident, public inner?: List<InnerPath>) {
+  constructor(
+    public ctx: any,
+    public key: Ident,
+    public inner?: List<InnerPath>
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -92,7 +96,7 @@ export class StateItemAssignLHS extends AST {
 //@Node()
 export class StateMapAssignLHS extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public key: Ident,
     public mapKeys: List<Expr>,
     public inner?: List<InnerPath>
@@ -105,7 +109,7 @@ export class StateMapAssignLHS extends AST {
 //@Node()
 export class IfExpr extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public ifClause: IfClauseVariant,
     public elseIfClauses: List<IfClauseVariant>,
     public elseClause: List<Stmt>
@@ -119,7 +123,11 @@ export type IfClauseVariant = IfClause | IfLetClause;
 
 //@Node()
 export class IfClause extends AST {
-  constructor(ctx: any, public predicate: Expr, public body: List<Stmt>) {
+  constructor(
+    public ctx: any,
+    public predicate: Expr,
+    public body: List<Stmt>
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -127,7 +135,11 @@ export class IfClause extends AST {
 
 //@Node()
 export class IfLetClause extends AST {
-  constructor(ctx: any, public letStmt: LetStmt, public body: List<Stmt>) {
+  constructor(
+    public ctx: any,
+    public letStmt: LetStmt,
+    public body: List<Stmt>
+  ) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -136,7 +148,7 @@ export class IfLetClause extends AST {
 //@Node()
 export class ForInStmt extends AST {
   constructor(
-    ctx: any,
+    public ctx: any,
     public bindings: LetLHS,
     public iterable: Expr,
     public body: List<Stmt>
@@ -148,7 +160,7 @@ export class ForInStmt extends AST {
 
 //@Node()
 export class ForTimesStmt extends AST {
-  constructor(ctx: any, public expr: Expr, public body: List<Stmt>) {
+  constructor(public ctx: any, public expr: Expr, public body: List<Stmt>) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -156,7 +168,7 @@ export class ForTimesStmt extends AST {
 
 //@Node()
 export class ExecStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
+  constructor(public ctx: any, public expr: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -164,7 +176,7 @@ export class ExecStmt extends AST {
 
 //@Node()
 export class EmitStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
+  constructor(public ctx: any, public expr: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -172,7 +184,7 @@ export class EmitStmt extends AST {
 
 //@Node()
 export class ReturnStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
+  constructor(public ctx: any, public expr: Expr) {
     super(ctx);
     this.setParentForChildren();
   }
@@ -180,7 +192,7 @@ export class ReturnStmt extends AST {
 
 //@Node()
 export class FailStmt extends AST {
-  constructor(ctx: any, public expr: Expr) {
+  constructor(public ctx: any, public expr: Expr) {
     super(ctx);
     this.setParentForChildren();
   }

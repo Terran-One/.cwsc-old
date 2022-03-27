@@ -35,4 +35,12 @@ export namespace Stmt {
       return `return ${this.expr ? this.expr.toRustString() : ''};`;
     }
   }
+
+  export class Assign implements Rust {
+    constructor(public lhs: Expr, public rhs: Expr) {}
+
+    toRustString(): string {
+      return `${this.lhs.toRustString()} = ${this.rhs.toRustString()};`;
+    }
+  }
 }

@@ -14,6 +14,12 @@ export class StateItemAccess extends CAM {
   }
 }
 
+export class StateMapAccess extends CAM {
+  constructor(public key: string, public mapKeys: CAM[]) {
+    super();
+  }
+}
+
 export class StateMap extends CAM {
   constructor(
     public key: string,
@@ -68,6 +74,12 @@ export class IntegerVal extends CAM {
   }
 }
 
+export class VecVal extends CAM {
+  constructor(public elements: CAM[]) {
+    super();
+  }
+}
+
 export class Emit extends CAM {
   constructor(public expr: CAM) {
     super();
@@ -108,6 +120,12 @@ export class Return extends CAM {
 
 export class SpecialVariable extends CAM {
   constructor(public namespace: string, public member: string) {
+    super();
+  }
+}
+
+export class MemberAccess extends CAM {
+  constructor(public obj: CAM, public member: string) {
     super();
   }
 }

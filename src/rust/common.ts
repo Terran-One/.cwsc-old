@@ -35,6 +35,17 @@ export function group(...items: Rust[]): Rust {
   return new CodeGroup(...items);
 }
 
+export function comment(...comments: string[]): Rust {
+  return new CodeGroup(...comments.map(x => new Comment(x)));
+}
+
+export class Comment implements Rust {
+  constructor(public value: string) {}
+
+  toRustString(): string {
+    return `// ${this.value}`;
+  }
+}
 export class Annotation {
   constructor(public value: string) {}
 

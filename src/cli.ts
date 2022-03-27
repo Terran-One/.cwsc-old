@@ -56,7 +56,7 @@ files.forEach(file => {
 });
 
 let cg = new CWScriptCodegen(sources);
-let ct = cg.generateContract('CWTemplate');
+let ct = cg.generateContract('CW20Base');
 
 let fw = new FileWriter();
-fw.writeContract(destination, 'cw-template', ct);
+fw.writeContract(destination, 'cw20-base', ct);

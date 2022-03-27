@@ -82,7 +82,6 @@ import {
   ShortOptionTypeExprContext,
   ShortVecTypeExprContext,
   RefTypeExprContext,
-  ReflectiveTypeExprContext,
   GroupedExprContext,
   StructDefnContext,
   ImportAllStmtContext,
@@ -279,14 +278,6 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitRefTypeExpr(ctx: RefTypeExprContext): RefTypeExpr {
     return new RefTypeExpr(ctx, this.visit(ctx.typeExpr()) as TypeExpr);
-  }
-
-  visitReflectiveTypeExpr(ctx: ReflectiveTypeExprContext): ReflectiveTypeExpr {
-    return new ReflectiveTypeExpr(
-      ctx,
-      this.visit(ctx.typeExpr()) as TypeExpr,
-      this.visitIdent(ctx.ident())
-    );
   }
 
   visitIdent(ctx: IdentContext): Ident {
