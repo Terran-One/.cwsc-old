@@ -43,4 +43,12 @@ export namespace Stmt {
       return `${this.lhs.toRustString()} = ${this.rhs.toRustString()};`;
     }
   }
+
+  export class Expression implements Rust {
+    constructor(public expr: Expr) {}
+
+    toRustString(): string {
+      return `${this.expr.toRustString()};`;
+    }
+  }
 }

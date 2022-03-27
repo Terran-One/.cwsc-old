@@ -26,7 +26,7 @@ export function buildModState(
       );
     } else if (defn instanceof AST.MapDefn) {
       let map_type = cw_storage_plus_map.withTypeParams([
-        ast2rust.resolveType(defn.mapKeys.elements[0].type),
+        ast2rust.resolveType(defn.mapKeys.elements[0].type).ref(),
         ast2rust.resolveType(defn.type),
       ]);
 

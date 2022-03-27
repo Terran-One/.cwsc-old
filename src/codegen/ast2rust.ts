@@ -1,7 +1,6 @@
 import * as AST from '../ast/nodes';
 import * as CAM from '../cam';
 import * as Rust from '../rust';
-import { comment } from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
 import { Subspace } from '../symbol-table/scope';
@@ -25,11 +24,6 @@ import {
 export class UnresolvedType {
   constructor(public ref: AST.TypeExpr, public postResolve: (x: any) => any) {}
 }
-
-export class LocalVariable {
-  constructor(public path: Rust.Expr.Path) {}
-}
-
 export class AST2Rust {
   private tmpVarCount: number = 0;
   constructor(public env: CWScriptEnv) {}
@@ -124,13 +118,6 @@ export class AST2Rust {
     return new CAM.Type.TypeAlias(name, type);
   }
 
-  translateItemDefn(item: AST.ItemDefn): CAM.StateItem {
-    let key = item.key.text;
-    let type = this.resolveType(item.type);
-
-    return new CAM.StateItem(key, type);
-  }
-
   translateArithmeticOpExpr(expr: AST.ArithmeticOpExpr): Rust.CodeGroup {
     let res = new Rust.CodeGroup();
     let { op, lhs, rhs } = expr;
@@ -214,17 +201,33 @@ export class AST2Rust {
       )
     );
 
-    // add body elements
     fn.args.elements.forEach(a => {
       let { name } = a;
-      let arg = new Rust.Expr.Path(`${name.text}`).clone();
-      instantiate.addBody(this.letVar(false, arg));
-      fnScope.define(Subspace.LOCAL, name.text, this.lastTmpVar());
+      let arg = new Rust.Expr.Path(`${name.text}`);
+      fnScope.define(Subspace.LOCAL, name.text, arg);
     });
 
+    // add body elements
+    instantiate.addBody(
+      new Rust.Stmt.Let(
+        true,
+        '__events',
+        new Rust.Type.Vec(new Rust.Type.String()),
+        new Rust.Val.Vec([])
+      )
+    );
     fn.body.elements.forEach(stmt => {
       instantiate.addBody(this.translate(stmt));
     });
+    instantiate.addBody(
+      new Rust.Stmt.Return(
+        new Rust.Expr.FnCall('::std::result::Result::Ok', [
+          CW_STD.join('Response')
+            .toType()
+            .fnCall('new', []),
+        ])
+      )
+    );
 
     this.env.exitScope();
 
@@ -257,18 +260,33 @@ export class AST2Rust {
       )
     );
 
-    // add body elements
     fn.args.elements.forEach(a => {
       let { name } = a;
-      let arg = new Rust.Expr.Path(`${name.text}`).clone();
-      exec.addBody(this.letVar(false, arg));
-      fnScope.define(Subspace.LOCAL, name.text, this.lastTmpVar());
+      let arg = new Rust.Expr.Path(`${name.text}`);
+      fnScope.define(Subspace.LOCAL, name.text, arg);
     });
 
+    // add body elements
+    exec.addBody(
+      new Rust.Stmt.Let(
+        true,
+        '__events',
+        new Rust.Type.Vec(new Rust.Type.String()),
+        new Rust.Val.Vec([])
+      )
+    );
     fn.body.elements.forEach(stmt => {
       exec.addBody(this.translate(stmt));
     });
-
+    exec.addBody(
+      new Rust.Stmt.Return(
+        new Rust.Expr.FnCall('::std::result::Result::Ok', [
+          CW_STD.join('Response')
+            .toType()
+            .fnCall('new', []),
+        ])
+      )
+    );
     return exec;
   }
 
@@ -296,14 +314,13 @@ export class AST2Rust {
         .withTypeParams([this.resolveType(fn.returnType!)])
     );
 
-    // add body elements
     fn.args.elements.forEach(a => {
       let { name } = a;
-      let arg = new Rust.Expr.Path(`${name.text}`).clone();
-      query.addBody(this.letVar(false, arg));
-      fnScope.define(Subspace.LOCAL, name.text, this.lastTmpVar());
+      let arg = new Rust.Expr.Path(`${name.text}`);
+      fnScope.define(Subspace.LOCAL, name.text, arg);
     });
 
+    // add body elements
     fn.body.elements.forEach(stmt => {
       query.addBody(this.translate(stmt));
     });
@@ -314,19 +331,22 @@ export class AST2Rust {
   }
 
   stateItemSet(key: string, value: Rust.Expr): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup(`state-item-set ${key}`);
     let deps = new Rust.Expr.Path('__deps');
     res.add(
-      new Rust.Expr.FnCall(`crate::state::${key.toUpperCase()}.save`, [
-        deps.dot('storage'),
-        value,
-      ]).q()
+      this.letVar(
+        false,
+        new Rust.Expr.FnCall(`crate::state::${key.toUpperCase()}.save`, [
+          deps.dot('storage'),
+          value,
+        ]).q()
+      )
     );
     return res;
   }
 
   translateAssignStmt(stmt: AST.AssignStmt): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('assign-stmt');
     let { lhs, rhs } = stmt;
 
     res.add(this.translate(rhs));
@@ -350,7 +370,7 @@ export class AST2Rust {
   }
 
   translateLetStmt(stmt: AST.LetStmt): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('let-stmt');
     let rhs = res.add(this.translate(stmt.rhs));
     let v_rhs = this.lastTmpVar();
 
@@ -362,14 +382,14 @@ export class AST2Rust {
   }
 
   translateIntegerVal(val: AST.IntegerVal): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('integer-val');
     // TODO: change integer type to generic
     res.add(this.letVar(false, new Rust.Val.IntLiteral(Rust.U64, val.value)));
     return res;
   }
 
   translateVecVal(val: AST.VecVal): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('vec-val');
     let elements = val.elements.map(m => {
       res.add(this.translate(m));
       return this.lastTmpVar();
@@ -389,7 +409,7 @@ export class AST2Rust {
 
   translateStateItemAccessExpr(x: AST.StateItemAccessExpr): Rust.CodeGroup {
     let { key } = x;
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('state-item-access');
     let deps = new Rust.Expr.Path('__deps');
     res.add(
       this.letVar(
@@ -404,7 +424,7 @@ export class AST2Rust {
 
   translateStateMapAccessExpr(x: AST.StateMapAccessExpr): Rust.CodeGroup {
     let { key, mapKeys } = x;
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('state-map-access');
     let deps = new Rust.Expr.Path('__deps');
     // generate map key value
     res.add(this.translate(mapKeys.elements[0]));
@@ -423,7 +443,7 @@ export class AST2Rust {
   }
 
   translateSpecialVariable(x: AST.Ext.SpecialVariable): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('special-variable');
     let { ns, member } = x;
 
     if (ns === 'msg') {
@@ -443,7 +463,7 @@ export class AST2Rust {
   }
 
   translateMemberAccessExpr(m: AST.MemberAccessExpr): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup('member-access');
     let { member, lhs } = m;
     res.add(this.translate(lhs));
     let v_expr = this.lastTmpVar();
@@ -452,7 +472,7 @@ export class AST2Rust {
   }
 
   translateIdent(x: AST.Ident): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup(`ident ${x.text}`);
 
     let resolved = this.env.scope.resolve(null, x.text);
     if (res === undefined) {
@@ -467,8 +487,16 @@ export class AST2Rust {
     return res;
   }
 
-  translateEmitStmt(x: AST.EmitStmt): CAM.Emit {
-    return new CAM.Emit(this.translate(x.expr));
+  translateEmitStmt(x: AST.EmitStmt): Rust.CodeGroup {
+    let res = new Rust.CodeGroup('emit-stmt');
+    res.add(
+      new Rust.Expr.Path('__events')
+        .fnCall('push', [
+          new Rust.Val.StrLiteral('hello').fnCall('to_string', []),
+        ])
+        .toStmt()
+    );
+    return res;
   }
 
   translateTupleVal(x: AST.TupleVal): CAM.TupleVal {
@@ -479,7 +507,7 @@ export class AST2Rust {
   }
 
   translateStructVal(x: AST.StructVal): Rust.CodeGroup {
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup(`struct-val ${x.type.toString()}`);
     let type = this.resolveType(x.type);
     let members = x.members.map(m => {
       let { name, value } = m;
@@ -494,12 +522,16 @@ export class AST2Rust {
 
   translateReturnStmt(x: AST.ReturnStmt): Rust.CodeGroup {
     let res = new Rust.CodeGroup();
+    let { expr } = x;
+    res.add(this.translate(expr));
+    let v_value = this.lastTmpVar();
+    res.add(new Rust.Stmt.Return(v_value.ok()));
     return res; // TODO: handle for different fn context
   }
 
   translateContractDefn(contract: AST.ContractDefn): Rust.CodeGroup {
     let name = contract.name.text;
-    let res = new Rust.CodeGroup();
+    let res = new Rust.CodeGroup(`contract ${name}`);
     this.env.enterScope(name);
 
     let contractScope = this.env.scope;

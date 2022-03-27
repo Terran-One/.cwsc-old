@@ -1,4 +1,4 @@
-import { CWScriptSymbol } from './resolver';
+import { CWScriptSymbol } from './symbols';
 
 /**
  * Common scope subspaces.

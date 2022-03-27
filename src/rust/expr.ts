@@ -14,6 +14,10 @@ export abstract class Expr implements Rust.Rust {
     return new Expr.Q(this);
   }
 
+  toStmt(): Rust.Stmt.Expression {
+    return new Rust.Stmt.Expression(this);
+  }
+
   clone(): Expr {
     return new Expr.FnCall(this.toRustString() + '.clone', []);
   }

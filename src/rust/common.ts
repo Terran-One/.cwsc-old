@@ -14,10 +14,8 @@ export interface TransformsToRust {
  * generate more than 1 Rust code item.
  */
 export class CodeGroup implements Rust {
-  public items: Rust[];
-  constructor(...items: Rust[]) {
-    this.items = items || [];
-  }
+  public items: Rust[] = [];
+  constructor(public title?: string) {}
 
   add(item: Rust) {
     if (item === undefined) {
@@ -27,18 +25,25 @@ export class CodeGroup implements Rust {
   }
 
   toRustString(): string {
-    return this.items.map(x => x.toRustString()).join('\n');
+    let items;
+    if (this.title) {
+      items = [
+        new Comment(`-- begin ${this.title}`),
+        ...this.items,
+        new Comment(`-- end ${this.title}\n`),
+      ];
+    } else {
+      items = this.items;
+    }
+    return items.map(x => x.toRustString()).join('\n');
   }
 }
 
 export function group(...items: Rust[]): Rust {
-  return new CodeGroup(...items);
+  let res = new CodeGroup();
+  items.forEach(x => res.add(x));
+  return res;
 }
-
-export function comment(...comments: string[]): Rust {
-  return new CodeGroup(...comments.map(x => new Comment(x)));
-}
-
 export class Comment implements Rust {
   constructor(public value: string) {}
 

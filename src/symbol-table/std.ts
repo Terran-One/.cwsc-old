@@ -1,6 +1,6 @@
 import * as Rust from '../rust';
 import { Subspace, ScopeDefn } from './scope';
-import { CWScriptSymbol } from './resolver';
+import { CWScriptSymbol } from './symbols';
 import * as CAM from '../cam';
 import { NewStruct } from '../ir/node-types';
 

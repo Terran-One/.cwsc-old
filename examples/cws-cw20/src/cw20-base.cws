@@ -11,7 +11,7 @@ contract CW20Base {
     struct TokenInfo {
         name: String,
         symbol: String,
-        decimals: u8,
+        decimals: u64,
         total_supply: u64,
     }
 
@@ -23,7 +23,7 @@ contract CW20Base {
     instantiate(
         name: String,
         symbol: String,
-        decimals: u8,
+        decimals: u64,
         initial_balances: struct Cw20Coin { address: Addr, amount: u64 }[],
         mint?: String
     ) {
@@ -60,7 +60,7 @@ contract CW20Base {
         token_info.total_supply = token_info.total_supply + amount
         token_info.decimals = 8
         state.token_info = token_info
-        // emit Mint(recipient, amount)
+        emit Mint(recipient, amount)
     }
 
     query balance(address: Addr) -> struct BalanceResponse { balance: u64 } {
