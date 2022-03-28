@@ -95,12 +95,7 @@ export class FunctionArg extends Annotated {
 
 export class SelfArg extends FunctionArg {
   constructor(public annotations: Annotation[], public mut: boolean) {
-    let m = '';
-    if (mut) {
-      m = 'mut ';
-    }
-
-    super(annotations, `&${m}self`, new Type());
+    super(annotations, `&${mut ? 'mut ' : ''}self`, new Type());
   }
 
   toRustString(): string {

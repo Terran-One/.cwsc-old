@@ -44,7 +44,7 @@ export class Type implements Rust {
   fnCall(fnName: string, args: any, typeParams: Type[] = []): Expr.FnCall {
     let fn_tps = '';
     if (typeParams.length > 0) {
-      fn_tps = `::<${typeParams.map(x => x.toRustString()).join(', ')}>`;
+      fn_tps = `::<${typeParams.map((x) => x.toRustString()).join(', ')}>`;
     }
     return new Expr.FnCall(
       `<${this.toRustString()}>::${fnName}${fn_tps}`,
@@ -57,7 +57,7 @@ export class Type implements Rust {
       return this.path;
     }
     return `${this.path}<${this.typeParams
-      .map(x => x.toRustString())
+      .map((x) => x.toRustString())
       .join(', ')}>`;
   }
 }
@@ -116,11 +116,7 @@ export namespace Type {
 
   export class Str extends Primitive {
     constructor(public isStatic: boolean = false) {
-      if (isStatic) {
-        super(`&'static str`);
-      } else {
-        super('&str');
-      }
+      super(isStatic ? "&'static str" : '&str');
     }
   }
 
@@ -160,7 +156,7 @@ export namespace Type {
     constructor(public args: Type[], public returnType: Type) {
       super(
         `(fn(${args
-          .map(x => x.toRustString())
+          .map((x) => x.toRustString())
           .join(', ')}) -> ${returnType.toRustString()})`
       );
     }
@@ -190,11 +186,13 @@ export namespace Type {
 
   export class Tuple extends Primitive {
     constructor(public members: Type[]) {
+      super('');
+
       let name;
       if (members.length === 1) {
         name = `(${members[0].toRustString()},)`;
       } else {
-        name = `(${members.map(x => x.toRustString()).join(', ')})`;
+        name = `(${members.map((x) => x.toRustString()).join(', ')})`;
       }
       super(name);
     }
