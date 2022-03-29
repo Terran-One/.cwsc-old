@@ -1,5 +1,7 @@
 const webpack = require('webpack');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const commonConfig = {
@@ -37,9 +39,6 @@ const webConfig = {
   },
   resolve: {
     ...commonConfig.resolve,
-    alias: {
-      process: 'process/browser',
-    },
     fallback: {
       stream: require.resolve('stream-browserify'),
       buffer: require.resolve('buffer'),
@@ -57,6 +56,16 @@ const webConfig = {
     }),
     // new BundleAnalyzerPlugin(),
   ],
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          keep_classnames: true,
+        },
+      }),
+    ],
+  },
 };
 
 const nodeConfig = {

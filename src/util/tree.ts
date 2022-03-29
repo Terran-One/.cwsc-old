@@ -18,7 +18,7 @@ export function toData(
     }
     return obj;
   } else if (x instanceof Array) {
-    return x.map(x => toData(x, dunders));
+    return x.map((x) => toData(x, dunders));
   } else {
     return x;
   }
@@ -38,8 +38,8 @@ export class Tree<T extends Tree<any>> {
   public get children(): T[] {
     let { __parent, ...rest } = this;
     return Object.values(rest)
-      .filter(x => x instanceof Tree)
-      .map(x => x as T);
+      .filter((x) => x instanceof Tree)
+      .map((x) => x as T);
   }
 
   public *walkAncestors(includeSelf: boolean = false): IterableIterator<T> {
@@ -84,13 +84,13 @@ export class Tree<T extends Tree<any>> {
 
   public descendantsOfType<X extends T>(astType: new (...args: any) => X): X[] {
     return this.descendants
-      .filter(x => x.constructor.name == astType.name)
-      .map(x => x as X);
+      .filter((x) => x.constructor.name === astType.name)
+      .map((x) => x as X);
   }
 
   public setParentForChildren() {
     let { __parent, ...rest } = this;
-    Object.values(this.children).forEach(child => (child.parent = this));
+    Object.values(this.children).forEach((child) => (child.parent = this));
   }
 
   public toData(): any {
