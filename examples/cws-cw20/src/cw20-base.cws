@@ -53,7 +53,13 @@ contract CW20Base {
     //     // emit Burn(msg.sender, amount)
     // }
 
-    exec mint(recipient: Addr, amount: u64) {
+
+    exec mint(recipient: Addr, amount: u64)
+    {
+        if recipient != state.owner {
+            fail Error()
+        }
+
         // state.balances[recipient] = state.balances[recipient] + amount
 
         let token_info = state.token_info
