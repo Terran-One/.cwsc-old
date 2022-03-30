@@ -1,17 +1,28 @@
-import { CWScriptParser } from './grammar/CWScriptParser';
+import { CWScriptParser, SourceFileContext } from './grammar/CWScriptParser';
 import { CWScriptLexer } from './grammar/CWScriptLexer';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import * as AST from './ast/nodes';
 import { CWScriptASTVisitor } from './ast/ast-builder';
 
-export function parseCWScript<T extends AST.AST = AST.SourceFile>(
-  source: string
-): T {
-  let inputStream = CharStreams.fromString(source);
-  let lexer = new CWScriptLexer(inputStream);
-  let tokenStream = new CommonTokenStream(lexer);
-  let parser = new CWScriptParser(tokenStream);
-  let tree = parser.sourceFile();
-  let visitor = new CWScriptASTVisitor();
-  return visitor.visit(tree) as T;
+export class Parser {
+  public antlrLexer: CWScriptLexer;
+  public antlrParser: CWScriptParser;
+  public consumed: boolean = false; // has this parser been run?
+
+  constructor(public sourceInput: string) {
+    this.antlrLexer = new CWScriptLexer(CharStreams.fromString(sourceInput));
+    this.antlrParser = new CWScriptParser(
+      new CommonTokenStream(this.antlrLexer)
+    );
+  }
+
+  public buildAST(): AST.SourceFile {
+    let tree = this.antlrParser.sourceFile();
+    let visitor = new CWScriptASTVisitor();
+    return visitor.visitSourceFile(tree);
+  }
+
+  public static fromString(sourceInput: string): Parser {
+    return new Parser(sourceInput);
+  }
 }

@@ -12,11 +12,7 @@ export interface Position {
 export abstract class AST extends Tree<AST> {
   private __position?: Position;
 
-  constructor(
-    public ctx?: ParserRuleContext,
-    parent?: AST,
-    position?: Position
-  ) {
+  constructor(ctx?: ParserRuleContext, parent?: AST, position?: Position) {
     super(parent);
     if (position === undefined) {
       let a = ctx?.start?.startIndex;

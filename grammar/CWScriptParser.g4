@@ -5,7 +5,7 @@ options {
 }
 
 // Files contain 1 or more topLevelStatement
-sourceFile: (spec = cwspec)? topLevelStmt* EOF;
+sourceFile: (spec = cwspec)? topLevelStmt*;
 topLevelStmt: contractDefn | interfaceDefn | importStmt;
 
 // Contract Block

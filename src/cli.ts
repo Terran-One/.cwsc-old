@@ -4,7 +4,7 @@ import * as commander from 'commander';
 import fs from 'fs';
 import path from 'path';
 
-import { parseCWScript } from './parser';
+import { Parser } from './parser';
 import { ImportStmt } from './ast/nodes';
 import { CWScriptCodegen, Source } from './codegen/codegen';
 import { FileWriter } from './codegen/filewriter';
@@ -34,7 +34,7 @@ let sources: Source[] = [];
 
 function addSourceFile(file: string) {
   const sourceFileText = fs.readFileSync(file).toString();
-  const ast = parseCWScript(sourceFileText);
+  const ast = Parser.fromString(sourceFileText).buildAST();
   sources.push({
     file: path.resolve(file),
     ast: ast,

@@ -1857,6 +1857,13 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
+antlr4-c3@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/antlr4-c3/-/antlr4-c3-2.2.1.tgz#6cc693cc624d80fa727ccf343de4e3ad2ec0bba1"
+  integrity sha512-1I1pWahqrgox35Ewufw31UUikYc2jwQE6V0i5q7tGOpzf8W78isaGZSxQn96Edn5pjQl8MISX17bEv4bLBEp/w==
+  dependencies:
+    antlr4ts "^0.5.0-alpha.4"
+
 antlr4ts-cli@^0.5.0-alpha.4:
   version "0.5.0-alpha.4"
   resolved "https://registry.yarnpkg.com/antlr4ts-cli/-/antlr4ts-cli-0.5.0-alpha.4.tgz#f3bfc37f10131e78d7b981c397a2aaa0450b67f6"
