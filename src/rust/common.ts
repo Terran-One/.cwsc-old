@@ -35,13 +35,13 @@ export class CodeGroup implements Rust {
     } else {
       items = this.items;
     }
-    return items.map(x => x.toRustString()).join('\n');
+    return items.map((x) => x.toRustString()).join('\n');
   }
 }
 
 export function group(...items: Rust[]): Rust {
   let res = new CodeGroup();
-  items.forEach(x => res.add(x));
+  items.forEach((x) => res.add(x));
   return res;
 }
 export class Comment implements Rust {
@@ -71,7 +71,7 @@ export abstract class Annotated implements Rust {
   constructor(public annotations: Annotation[]) {}
 
   withAnnotations(x: string): string {
-    return `${this.annotations.map(x => x.toRustString()).join(' ')} ${x}`;
+    return `${this.annotations.map((x) => x.toRustString()).join(' ')} ${x}`;
   }
 
   toRustString(): string {

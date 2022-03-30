@@ -15,17 +15,17 @@ export class CWScriptCodegen {
   public envs: { [filePath: string]: CWScriptEnv } = {};
 
   constructor(public sources: Source[]) {
-    sources.forEach(source => {
+    sources.forEach((source) => {
       this.envs[source.file] = new CWScriptEnv();
     });
   }
 
   generateContract(name: string, file?: string): Rust.CodeGroup {
     let sourceFiles = this.sources.filter(
-      source =>
+      (source) =>
         source.ast
           .descendantsOfType(AST.ContractDefn)
-          .find(contract => contract.name.text === name) !== undefined
+          .find((contract) => contract.name.text === name) !== undefined
     );
 
     if (sourceFiles.length > 1) {
@@ -42,7 +42,7 @@ export class CWScriptCodegen {
     let sourceFile = sourceFiles[0];
     let contractDefn = sourceFile.ast
       .descendantsOfType(AST.ContractDefn)
-      .find(x => x.name.text === name)!;
+      .find((x) => x.name.text === name)!;
 
     let env = this.envs[sourceFile.file];
     return new AST2Rust(env).translateContractDefn(contractDefn);

@@ -8,6 +8,9 @@ const commonConfig = {
   mode: 'production',
   entry: './src/index.ts',
   devtool: 'source-map',
+  output: {
+    globalObject: 'this',
+  },
   module: {
     rules: [
       {

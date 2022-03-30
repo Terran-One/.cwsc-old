@@ -12,7 +12,11 @@ export interface Position {
 export abstract class AST extends Tree<AST> {
   private __position?: Position;
 
-  constructor(ctx?: ParserRuleContext, parent?: AST, position?: Position) {
+  constructor(
+    public ctx?: ParserRuleContext,
+    parent?: AST,
+    position?: Position
+  ) {
     super(parent);
     if (position === undefined) {
       let a = ctx?.start?.startIndex;
@@ -49,7 +53,7 @@ export class List<T extends AST> extends AST implements TreeList<AST> {
   }
 
   public setParentForChildren(): void {
-    this.elements.forEach(x => (x.parent = this));
+    this.elements.forEach((x) => (x.parent = this));
   }
 
   public get children(): T[] {

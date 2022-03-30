@@ -357,7 +357,6 @@ export class AST2Rust {
       let v_lhs = this.lastTmpVar();
       // redefine if the lhs is an identity
       if (lhs.obj instanceof AST.Ident) {
-        console.log(`redefine ${lhs.obj.text}`);
         this.env.scope.define(Subspace.LOCAL, lhs.obj.text, v_lhs);
       }
       res.add(new Rust.Stmt.Assign(v_lhs.dot(lhs.member.text), v_rhs));

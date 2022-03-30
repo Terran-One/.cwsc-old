@@ -1,3 +1,5 @@
+import { AST } from '..';
+
 export function toData(
   x: any,
   dunders?: { [key: string]: (x: any) => any }
@@ -52,6 +54,23 @@ export class Tree<T extends Tree<any>> {
 
   public get ancestors(): T[] {
     return Array.from(this.walkAncestors());
+  }
+
+  public nearestAncestorWhere(predicate: (x: T) => boolean): T | undefined {
+    for (const ancestor of this.walkAncestors()) {
+      if (predicate(ancestor)) {
+        return ancestor;
+      }
+    }
+    return undefined;
+  }
+
+  public nearestAncestorOfType<X extends T>(
+    astType: new (...args: any) => X
+  ): X | undefined {
+    return this.nearestAncestorWhere(
+      (x) => x.constructor.name === astType.name
+    ) as X | undefined;
   }
 
   /// Breadth-first traversal of descendant nodes.

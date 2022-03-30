@@ -3,12 +3,12 @@
 import * as commander from 'commander';
 import fs from 'fs';
 import path from 'path';
-import util from 'util';
 
 import { parseCWScript } from './parser';
 import { ImportStmt } from './ast/nodes';
-import { CWScriptCodegen } from './codegen/codegen';
+import { CWScriptCodegen, Source } from './codegen/codegen';
 import { FileWriter } from './codegen/filewriter';
+import { SourceValidationContext } from './static-analysis/source-validation';
 
 const program = new commander.Command();
 
@@ -30,7 +30,7 @@ function resolveFileImport(fromFile: string, importedPath: string) {
   return resolvedPath;
 }
 
-let sources: any[] = [];
+let sources: Source[] = [];
 
 function addSourceFile(file: string) {
   const sourceFileText = fs.readFileSync(file).toString();
@@ -45,15 +45,18 @@ function addSourceFile(file: string) {
     .forEach((i: any) => {
       const resolvedPath = resolveFileImport(file, i.fileName);
       i.fileName = resolvedPath;
-      if (sources.findIndex(x => x.file === resolvedPath) === -1) {
+      if (sources.findIndex((x) => x.file === resolvedPath) === -1) {
         addSourceFile(resolvedPath);
       }
     });
 }
 
-files.forEach(file => {
+files.forEach((file) => {
   addSourceFile(file);
 });
+
+let validator = new SourceValidationContext(sources);
+validator.runValidations();
 
 let cg = new CWScriptCodegen(sources);
 let ct = cg.generateContract('CW20Base');
