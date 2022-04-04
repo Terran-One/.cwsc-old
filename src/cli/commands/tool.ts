@@ -3,7 +3,8 @@ import { Command } from 'commander';
 export const command = new Command('tool');
 
 // short form
-command.alias('t');
-command.description('Run a tool of a CWScript project');
+command.alias('x');
+command.description('Run an external CWScript compiler tool');
+command.argument('<name>', 'The name of the tool to run.');
 
 export default command;

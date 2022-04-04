@@ -3,12 +3,16 @@
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "type": "commonjs",
   "files": [
     "dist",
     "src"
   ],
   "engines": {
     "node": ">=10"
+  },
+  "bin": {
+    "cwsc": "bin/cwsc"
   },
   "scripts": {
     "build": "tsc --module commonjs && webpack --mode production",
@@ -33,7 +37,6 @@
     "doc": "typedoc",
     "prepublishOnly": "npm run build"
   },
-  "peerDependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint"
@@ -60,6 +63,7 @@
   ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^7.0.8",
+    "@types/chalk": "^2.2.0",
     "@types/cytoscape": "^3.19.4",
     "@types/cytoscape-dagre": "^2.3.0",
     "@types/ejs": "^3.1.0",
@@ -86,18 +90,23 @@
     "antlr4-c3": "^2.2.1",
     "antlr4ts": "^0.5.0-alpha.4",
     "assert": "^2.0.0",
+    "bluebird": "^3.7.2",
     "buffer": "^6.0.3",
+    "chalk": "4.1.0",
     "commander": "^9.0.0",
     "cytoscape": "^3.21.0",
     "cytoscape-dagre": "^2.4.0",
+    "dot-prop": "^7.2.0",
     "ejs": "^3.1.6",
     "immutable": "^4.0.0",
     "lodash": "^4.17.21",
     "omit-deep-lodash": "^1.1.6",
+    "prettycli": "^1.4.3",
     "process": "^0.11.10",
     "source-map": "^0.7.3",
     "stream-browserify": "^3.0.0",
     "toml": "^3.0.0",
-    "yaml": "^1.10.2"
+    "yaml": "^1.10.2",
+    "yesno": "^0.3.1"
   }
 }

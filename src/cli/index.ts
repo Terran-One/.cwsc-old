@@ -1,40 +1,28 @@
-#!/usr/bin/env node
+import { program, Command } from 'commander';
 
-import * as commander from 'commander';
-import fs from 'fs';
-import path from 'path';
+import commands from './commands';
+import * as logger from '../util/logger';
 
-import { Parser } from '../parser';
-import { ImportStmt } from '../ast/nodes';
-import { CWScriptCodegen, Source } from '../codegen/codegen';
-import { FileWriter } from '../codegen/filewriter';
-import { SourceValidationContext } from '../static-analysis/source-validation';
-
-const program = new commander.Command();
-
-program.name('cwsc');
-program.version('0.0.1');
-program
-  .option('--version', 'Show version')
-  .option('-v', '--verbose', 'Detailed console output');
-
-let newCommand = program
-  .command('new')
-  .description('Create a new CWScript project');
-
-let buildCommand = program
-  .command('build')
-  .description('Build a CWScript project');
-
-let configCommand = program
-  .command('config')
-  .description('Read / edit the configuration of a CWScript project');
-
-let toolCommand = program
-  .command('tool')
-  .description('Run an external tool on a CWScript project');
-
-program.parse(process.argv);
-const options = program.opts();
-const files = program.args;
-const destination = options.outputDir || '.';
+export function run(argv: string[]): void {
+  process.on('unhandledRejection', (error: Error) => {
+    if ((program as any).verbose) {
+      console.error(error);
+      logger.error(error.toString());
+    } else {
+      logger.error(error.toString() + '; use --verbose for more details');
+    }
+  });
+  try {
+    program
+      .name('cwsc')
+      .version('0.1.0')
+      .option('-v,--verbose', 'show verbose error logs')
+      .description('Official CWScript compiler by Terran One');
+    commands.forEach((cmd: Command) => {
+      program.addCommand(cmd);
+    });
+    program.parse(argv);
+  } catch (e) {
+    logger.error((e as Error).message);
+  }
+}

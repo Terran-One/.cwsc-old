@@ -1,14 +1,14 @@
 import {
+  bold,
+  white,
   bgBlueBright,
   bgYellow,
-  white,
-  bold,
   bgRedBright,
+  bgGreenBright,
+  greenBright,
+  yellow,
   redBright,
   blueBright,
-  yellow,
-  greenBright,
-  bgGreenBright,
 } from 'chalk';
 
 export function info(text: string) {

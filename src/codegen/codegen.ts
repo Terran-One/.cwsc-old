@@ -3,7 +3,6 @@ import * as Rust from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
 import { AST2Rust } from './ast2rust';
-import { CAM2Rust } from './cam2rust';
 
 export interface FileSource {
   file: string;
