@@ -4182,7 +4182,7 @@ export class CWScriptParser extends Parser {
 
 			case 5:
 				{
-				_localctx = new IfExpContext(_localctx);
+				_localctx = new IfExprContext(_localctx);
 				this._ctx = _localctx;
 				_prevctx = _localctx;
 				this.state = 862;
@@ -10232,7 +10232,7 @@ export class OrExprContext extends ExprContext {
 		}
 	}
 }
-export class IfExpContext extends ExprContext {
+export class IfExprContext extends ExprContext {
 	public ifExpr_(): IfExpr_Context {
 		return this.getRuleContext(0, IfExpr_Context);
 	}
@@ -10242,20 +10242,20 @@ export class IfExpContext extends ExprContext {
 	}
 	// @Override
 	public enterRule(listener: CWScriptParserListener): void {
-		if (listener.enterIfExp) {
-			listener.enterIfExp(this);
+		if (listener.enterIfExpr) {
+			listener.enterIfExpr(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: CWScriptParserListener): void {
-		if (listener.exitIfExp) {
-			listener.exitIfExp(this);
+		if (listener.exitIfExpr) {
+			listener.exitIfExpr(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: CWScriptParserVisitor<Result>): Result {
-		if (visitor.visitIfExp) {
-			return visitor.visitIfExp(this);
+		if (visitor.visitIfExpr) {
+			return visitor.visitIfExpr(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

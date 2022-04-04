@@ -47,7 +47,7 @@ import { CompExprContext } from "./CWScriptParser";
 import { EqExprContext } from "./CWScriptParser";
 import { AndExprContext } from "./CWScriptParser";
 import { OrExprContext } from "./CWScriptParser";
-import { IfExpContext } from "./CWScriptParser";
+import { IfExprContext } from "./CWScriptParser";
 import { QueryExprContext } from "./CWScriptParser";
 import { ValExprContext } from "./CWScriptParser";
 import { TypePathExprContext } from "./CWScriptParser";
@@ -734,17 +734,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	exitOrExpr?: (ctx: OrExprContext) => void;
 
 	/**
-	 * Enter a parse tree produced by the `IfExp`
+	 * Enter a parse tree produced by the `IfExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 */
-	enterIfExp?: (ctx: IfExpContext) => void;
+	enterIfExpr?: (ctx: IfExprContext) => void;
 	/**
-	 * Exit a parse tree produced by the `IfExp`
+	 * Exit a parse tree produced by the `IfExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 */
-	exitIfExp?: (ctx: IfExpContext) => void;
+	exitIfExpr?: (ctx: IfExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `QueryExpr`

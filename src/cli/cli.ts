@@ -1,10 +1,10 @@
 import { program, Command } from 'commander';
 
 import commands from './commands';
-import * as logger from './util/logger';
+import * as logger from '../util/logger';
 
-process.on('unhandledRejection', (error) => {
-  if (program.verbose) {
+process.on('unhandledRejection', (error: Error) => {
+  if ((program as any).verbose) {
     console.error(error);
     logger.error(error.toString());
   } else {
@@ -15,17 +15,15 @@ process.on('unhandledRejection', (error) => {
 export function run(argv: string[]): void {
   try {
     program
-      .name('mirrorcli')
+      .name('cwsc')
       .version('0.0.1')
       .option('-v,--verbose', 'Show verbose error logs')
-      .description(
-        'Command-line interface for interacting with Mirror Protocol on Terra'
-      );
-    commands.forEach(command: Command) => {
-      program.addCommand(command);
+      .description('Reference CWScript Compiler by Terran One');
+    commands.forEach((cmd: Command) => {
+      program.addCommand(cmd);
     });
     program.parse(argv);
   } catch (e) {
-    logger.error(e.message);
+    logger.error((e as Error).message);
   }
 }

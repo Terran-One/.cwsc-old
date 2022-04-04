@@ -1,5 +1,4 @@
 import * as AST from '../ast/nodes';
-import * as CAM from '../cam';
 import * as Rust from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
@@ -85,38 +84,38 @@ export class AST2Rust {
     throw new Error(`type ${ty.constructor.name} could not be resolved`);
   }
 
-  translateStructDefn(s: AST.StructDefn): CAM.Type.Struct {
-    let name = s.name.text;
-    let members = s.members.map((m) => ({
-      name: m.name.text,
-      option: m.option,
-      type: this.resolveType(m.type),
-    }));
+  // translateStructDefn(s: AST.StructDefn): CAM.Type.Struct {
+  //   let name = s.name.text;
+  //   let members = s.members.map((m) => ({
+  //     name: m.name.text,
+  //     option: m.option,
+  //     type: this.resolveType(m.type),
+  //   }));
 
-    return new CAM.Type.Struct(name, members);
-  }
+  //   return new CAM.Type.Struct(name, members);
+  // }
 
-  translateEnumDefn(e: AST.EnumDefn) {
-    // TODO: process properly
-    let name = e.name.text;
-    let variants = e.variants.map((v) => ({
-      name: v.name.text,
-    }));
+  // translateEnumDefn(e: AST.EnumDefn) {
+  //   // TODO: process properly
+  //   let name = e.name.text;
+  //   let variants = e.variants.map((v) => ({
+  //     name: v.name.text,
+  //   }));
 
-    return {
-      enum: {
-        name,
-        variants,
-      },
-    };
-  }
+  //   return {
+  //     enum: {
+  //       name,
+  //       variants,
+  //     },
+  //   };
+  // }
 
-  translateTypeAliasDefn(t: AST.TypeAliasDefn): CAM.Type.TypeAlias {
-    let name = t.name.text;
-    let type = this.resolveType(t.type);
+  // translateTypeAliasDefn(t: AST.TypeAliasDefn): CAM.Type.TypeAlias {
+  //   let name = t.name.text;
+  //   let type = this.resolveType(t.type);
 
-    return new CAM.Type.TypeAlias(name, type);
-  }
+  //   return new CAM.Type.TypeAlias(name, type);
+  // }
 
   translateArithmeticOpExpr(expr: AST.ArithmeticOpExpr): Rust.CodeGroup {
     let res = new Rust.CodeGroup();
@@ -129,44 +128,44 @@ export class AST2Rust {
     return res;
   }
 
-  translateMapDefn(map: AST.MapDefn): CAM.StateMap {
-    let key = map.key.text;
-    let mapKeys = map.mapKeys.map((x) => ({
-      name: x.name?.text,
-      type: this.resolveType(x.type),
-    }));
-    let type = this.resolveType(map.type);
+  // translateMapDefn(map: AST.MapDefn): CAM.StateMap {
+  //   let key = map.key.text;
+  //   let mapKeys = map.mapKeys.map((x) => ({
+  //     name: x.name?.text,
+  //     type: this.resolveType(x.type),
+  //   }));
+  //   let type = this.resolveType(map.type);
 
-    let res = new CAM.StateMap(key, mapKeys, type);
+  //   let res = new CAM.StateMap(key, mapKeys, type);
 
-    this.env.scope.define(Subspace.STATE, key, res);
-    return res;
-  }
+  //   this.env.scope.define(Subspace.STATE, key, res);
+  //   return res;
+  // }
 
-  translateForInStmt(stmt: AST.ForInStmt): CAM.ForIn {
-    const forScope = this.env.enterScope('for-in');
-    let bindings = this.translate(stmt.bindings);
-    let iterable = this.translate(stmt.iterable);
+  // translateForInStmt(stmt: AST.ForInStmt): CAM.ForIn {
+  //   const forScope = this.env.enterScope('for-in');
+  //   let bindings = this.translate(stmt.bindings);
+  //   let iterable = this.translate(stmt.iterable);
 
-    if ('ident' in bindings) {
-      forScope.define(Subspace.LOCAL, (bindings as any).ident, bindings);
-    }
+  //   if ('ident' in bindings) {
+  //     forScope.define(Subspace.LOCAL, (bindings as any).ident, bindings);
+  //   }
 
-    if ('structUnpack' in bindings) {
-      (bindings as any)['structUnpack'].forEach((x: string) => {
-        let memberType = (iterable as any).type.elementType.members.find(
-          (m: any) => m.name === x
-        )?.type;
+  //   if ('structUnpack' in bindings) {
+  //     (bindings as any)['structUnpack'].forEach((x: string) => {
+  //       let memberType = (iterable as any).type.elementType.members.find(
+  //         (m: any) => m.name === x
+  //       )?.type;
 
-        forScope.define(Subspace.LOCAL, x, memberType);
-      });
-    }
+  //       forScope.define(Subspace.LOCAL, x, memberType);
+  //     });
+  //   }
 
-    let body = stmt.body.map((x) => this.translate(x));
-    this.env.exitScope();
+  //   let body = stmt.body.map((x) => this.translate(x));
+  //   this.env.exitScope();
 
-    return new CAM.ForIn(bindings, iterable, body);
-  }
+  //   return new CAM.ForIn(bindings, iterable, body);
+  // }
 
   translateStructUnpackLHS(lhs: AST.StructUnpackLHS) {
     let names = lhs.names.map((x) => x.text);
@@ -494,12 +493,12 @@ export class AST2Rust {
     return res;
   }
 
-  translateTupleVal(x: AST.TupleVal): CAM.TupleVal {
-    return new CAM.TupleVal(
-      this.resolveType(x.type),
-      x.members.map((y) => this.translate(y))
-    );
-  }
+  // translateTupleVal(x: AST.TupleVal): CAM.TupleVal {
+  //   return new CAM.TupleVal(
+  //     this.resolveType(x.type),
+  //     x.members.map((y) => this.translate(y))
+  //   );
+  // }
 
   translateStructVal(x: AST.StructVal): Rust.CodeGroup {
     let res = new Rust.CodeGroup(x.ctx.text);
@@ -552,7 +551,7 @@ export class AST2Rust {
     let errors = contract.descendantsOfType(AST.ErrorDefn);
 
     errors.forEach((e) => {
-      let err = this.translateStructDefn(e); // TODO: add struct
+      // let err = this.translateStructDefn(e); // TODO: add struct
       // contractScope.define(Subspace.ERROR, err.name, err);
     });
 

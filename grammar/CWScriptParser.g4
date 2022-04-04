@@ -249,7 +249,7 @@ expr:
 	| expr op = (EQEQ | NEQ) expr				# EqExpr
 	| expr AND expr								# AndExpr
 	| expr OR expr								# OrExpr
-	| ifExpr_									# IfExp
+	| ifExpr_									# IfExpr
 	| QUERY expr								# QueryExpr
 	| val										# ValExpr;
 

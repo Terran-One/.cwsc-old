@@ -7,7 +7,6 @@ import { CWScriptASTVisitor } from './ast/ast-builder';
 export class Parser {
   public antlrLexer: CWScriptLexer;
   public antlrParser: CWScriptParser;
-  public consumed: boolean = false; // has this parser been run?
 
   constructor(public sourceInput: string) {
     this.antlrLexer = new CWScriptLexer(CharStreams.fromString(sourceInput));

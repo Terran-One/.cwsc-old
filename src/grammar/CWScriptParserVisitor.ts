@@ -47,7 +47,7 @@ import { CompExprContext } from "./CWScriptParser";
 import { EqExprContext } from "./CWScriptParser";
 import { AndExprContext } from "./CWScriptParser";
 import { OrExprContext } from "./CWScriptParser";
-import { IfExpContext } from "./CWScriptParser";
+import { IfExprContext } from "./CWScriptParser";
 import { QueryExprContext } from "./CWScriptParser";
 import { ValExprContext } from "./CWScriptParser";
 import { TypePathExprContext } from "./CWScriptParser";
@@ -517,12 +517,12 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitOrExpr?: (ctx: OrExprContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by the `IfExp`
+	 * Visit a parse tree produced by the `IfExpr`
 	 * labeled alternative in `CWScriptParser.expr`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitIfExp?: (ctx: IfExpContext) => Result;
+	visitIfExpr?: (ctx: IfExprContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `QueryExpr`

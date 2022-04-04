@@ -5160,6 +5160,12 @@ public class CWScriptParser extends Parser {
 		public TerminalNode AND() { return getToken(CWScriptParser.AND, 0); }
 		public AndExprContext(ExprContext ctx) { copyFrom(ctx); }
 	}
+	public static class IfExprContext extends ExprContext {
+		public IfExpr_Context ifExpr_() {
+			return getRuleContext(IfExpr_Context.class,0);
+		}
+		public IfExprContext(ExprContext ctx) { copyFrom(ctx); }
+	}
 	public static class MultDivModExprContext extends ExprContext {
 		public Token op;
 		public List<ExprContext> expr() {
@@ -5263,12 +5269,6 @@ public class CWScriptParser extends Parser {
 			return getToken(CWScriptParser.COMMA, i);
 		}
 		public StateMapAccessExprContext(ExprContext ctx) { copyFrom(ctx); }
-	}
-	public static class IfExpContext extends ExprContext {
-		public IfExpr_Context ifExpr_() {
-			return getRuleContext(IfExpr_Context.class,0);
-		}
-		public IfExpContext(ExprContext ctx) { copyFrom(ctx); }
 	}
 	public static class StateItemAccessExprContext extends ExprContext {
 		public IdentContext key;
@@ -5452,7 +5452,7 @@ public class CWScriptParser extends Parser {
 				break;
 			case 5:
 				{
-				_localctx = new IfExpContext(_localctx);
+				_localctx = new IfExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(862);
