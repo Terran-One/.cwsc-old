@@ -1,13 +1,18 @@
-export interface FileSource {
-  type: 'file';
-  path: string;
-}
+import { Parser } from '../parser';
+import * as AST from '../ast/nodes';
 
-export type SourceType = FileSource;
+export class CompilationIndex {}
 
 export class CWSCompiler {
-  public index: CompilationIndex;
-  constructor(public sources: SourceType[] = []) {}
+  public index: CompilationIndex | null = null;
+  constructor(public sources: string[] = []) {}
 
-  buildIndex() {}
+  buildIndex() {
+    let ctx = {};
+    for (let src of this.sources) {
+      ctx[src] = 
+    }
+  }
+
+  compileContract(name: string, file?: string) {}
 }

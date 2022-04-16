@@ -1,0 +1,21 @@
+contract TerraswapFactory {
+  state {
+    config: struct Config {
+      owner: Addr,
+      pair_code_id: u64,
+      token_code_id: u64,
+    },
+
+    tmp_pair_info: struct TmpPairInfo {
+      pair_key: Vec<u8>,
+      asset_infos: AssetInfo[]
+    },
+
+    pairs[Vec<u8>]: struct PairInfo {
+      
+    }
+  }
+
+  exec create_pair(asset_infos: AssetInfo[]) {
+  }
+}
