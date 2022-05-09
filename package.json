@@ -35,7 +35,8 @@
     "antlr-parser": "antlr4ts -visitor ./grammar/CWScriptParser.g4 -o ./src -lib ./src/grammar",
     "antlr": "npm run antlr-lexer && npm run antlr-parser",
     "doc": "typedoc",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "jest __tests__"
   },
   "husky": {
     "hooks": {
