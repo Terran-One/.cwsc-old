@@ -23,6 +23,7 @@ export function run(argv: string[]): void {
     });
     program.parse(argv);
   } catch (e) {
+    console.error(e);
     logger.error((e as Error).message);
   }
 }

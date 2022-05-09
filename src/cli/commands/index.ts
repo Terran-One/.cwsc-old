@@ -5,6 +5,7 @@ import configCommand from './config';
 import testCommand from './test';
 import debugCommand from './debug';
 import validateCommand from './validate';
+import compileCommand from './compile';
 
 export default [
   newCommand,
@@ -14,4 +15,5 @@ export default [
   configCommand,
   validateCommand,
   toolCommand,
+  compileCommand,
 ];
