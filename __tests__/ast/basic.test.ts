@@ -15,15 +15,7 @@ describe("ast compiler", () => {
             .filter((contract) => contract.name.text === 'CWTemplate');
 
         expect(cds).toHaveLength(1);
-    });
-
-    it("has correct node structure", () => {
-         // arrange
-         const source = `contract CWTemplate {}`;
-
-         // act
-         const ast = Parser.fromString(source).buildAST();
-         const astAsList = ast.descendants.map(desc => desc.toData());
+        const astAsList = result.descendants.map(desc => desc.toData());
 
         const [
             list,
@@ -31,13 +23,13 @@ describe("ast compiler", () => {
             contractIdent,
             contractBody,
         ] = astAsList;
+        expect(astAsList).toHaveLength(4);
 
-        // assert
         expect(list["$type"]).toBe("List");
         expect(contractDefn["$type"]).toBe("ContractDefn");
         expect(contractIdent.text).toBe("CWTemplate");
-        expect(contractBody.elements.length).toBe(0);
-     });
+        expect(contractBody.elements).toHaveLength(0);
+    });
 
     it("compiles an empty contract with empty instantiate", () => {
         // arrange
@@ -47,9 +39,23 @@ describe("ast compiler", () => {
         const result = Parser.fromString(source).buildAST();
 
         // assert
-        const cds = result
-            .descendantsOfType(AST.ContractDefn)
-            .filter((contract) => contract.name.text === 'CWTemplate');
-        expect(cds).toHaveLength(1);
+        const astAsList = result.descendants.map(desc => desc.toData());
+        expect(astAsList).toHaveLength(7);
+
+        const [
+            contractBody,
+            instantiateDefn, argsLst, instBody
+        ] = astAsList.slice(3);
+
+        expect(contractBody.elements).toHaveLength(1);
+
+        // instantiate{}
+        expect(instantiateDefn['$type']).toBe("InstantiateDefn");
+        expect(instantiateDefn.args['$type']).toBe("List");
+        expect(instantiateDefn.args.elements).toHaveLength(0);
+        expect(argsLst['$type']).toBe("List");
+        expect(argsLst.elements).toHaveLength(0);
+        expect(instBody['$type']).toBe("List");
+        expect(instBody.elements).toHaveLength(0);
     });
 });
