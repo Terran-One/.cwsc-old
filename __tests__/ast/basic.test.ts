@@ -1,17 +1,21 @@
 import { AST } from '../../src';
-import { StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
+import { ExecDefnBlockContext, StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
 import { Parser } from '../../src/parser'
 
 describe("ast compiler", () => {
-    it("compiles an empty contract", () => {
+    it("parses an empty contract", () => {
         // arrange
         const source = `contract CWTemplate {}`;
 
         // act
-        const result = Parser.fromString(source).buildAST();
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
 
         // assert
-        const cds = result
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+
+        // assert
+        const cds = ast
             .descendantsOfType(AST.ContractDefn)
             .filter((contract) => contract.name.text === 'CWTemplate');
 
@@ -26,10 +30,13 @@ describe("ast compiler", () => {
         const source = `contract CWTemplate {}`;
 
         // act
-        const ast = Parser.fromString(source).buildAST();
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
         const astAsList = ast.descendants.map(desc => desc.toData());
 >>>>>>> 9a3000a (ast compiler test update)
 
+        // assert
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
         const [
             list,
             contractDefn,
@@ -46,21 +53,22 @@ describe("ast compiler", () => {
 
     it("doesn't allow two contractDefns identities", () => {
         const source = `contract one two {}`;
-
-        expect(()=>{
-            Parser.fromString(source).buildAST();
-        }).toThrow();
+        let parser = Parser.fromString(source);
+        parser.buildAST();
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(1);
     });
 
-    it("compiles an empty contract with empty instantiate", () => {
+    it("parses an empty contract with empty instantiate", () => {
         // arrange
         const source = `contract CWTemplate {instantiate(){}}`;
 
         // act
-        const result = Parser.fromString(source).buildAST();
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
 
         // assert
-        const astAsList = result.descendants.map(desc => desc.toData());
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
         expect(astAsList).toHaveLength(7);
 
         const [
@@ -80,15 +88,17 @@ describe("ast compiler", () => {
         expect(instBody.elements).toHaveLength(0);
     });
 
-    it("compiles an empty contract with empty state", () => {
+    it("parses an empty contract with empty state", () => {
         // arrange
         const source = `contract CWTemplate {state{}}`;
 
         // act
-        const result = Parser.fromString(source).buildAST();
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
 
         // assert
-        const astAsList = result.descendants.map(desc => desc.toData());
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
         expect(astAsList).toHaveLength(5);
 
         const [
@@ -99,5 +109,149 @@ describe("ast compiler", () => {
         expect(stateDefn['$type']).toBe("List");
         expect(stateDefn.elements).toHaveLength(0);
         expect(stateDefn.ctx).toBeInstanceOf(StateDefnBlockContext);
+    });
+
+    it("parses a contract with an empty exec function", () => {
+        // arrange
+        const source = `
+            contract CWTemplate {
+                exec baz() {}
+            }`;
+
+        // act
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
+
+        // assert
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+        expect(astAsList).toHaveLength(8);
+
+        const [
+            execDefn,
+            nameIdent,
+            argsLst,
+            bodyLst
+        ] = astAsList.slice(4);
+
+        // exec baz() {}
+        expect(execDefn['$type']).toBe("ExecDefn");
+        expect(nameIdent['$type']).toBe("Ident");
+        expect(argsLst['$type']).toBe("List");
+        expect(bodyLst['$type']).toBe("List");
+
+        expect(nameIdent.text).toBe("baz");
+        expect(argsLst.elements).toHaveLength(0);
+        expect(bodyLst.elements).toHaveLength(0);
+    });
+
+    it("parses a contract with an exec block with a function", () => {
+        // arrange
+        const source = `
+            contract CWTemplate {
+                exec {
+                    baz() {}
+                }
+            }`;
+
+        // act
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
+
+        // assert
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+        expect(astAsList).toHaveLength(9);
+
+        const [
+            execBlock,
+            execDefn,
+            nameIdent,
+            argsLst,
+            bodyLst
+        ] = astAsList.slice(4);
+
+        // exec { baz() {} }
+        expect(execBlock['$type']).toBe("List");
+        expect(execDefn['$type']).toBe("ExecDefn");
+        expect(nameIdent['$type']).toBe("Ident");
+        expect(argsLst['$type']).toBe("List");
+        expect(bodyLst['$type']).toBe("List");
+
+        expect(execBlock.elements).toHaveLength(1);
+        expect(execBlock.ctx).toBeInstanceOf(ExecDefnBlockContext);
+
+        expect(nameIdent.text).toBe("baz");
+        expect(argsLst.elements).toHaveLength(0);
+        expect(bodyLst.elements).toHaveLength(0);
+    });
+
+    it("parses a contract with an empty exec block", () => {
+        // arrange
+        const source = `
+            contract CWTemplate {
+                exec {}
+            }`;
+
+        // act
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
+
+        // assert
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+        expect(astAsList).toHaveLength(5);
+
+        const [
+            execDefn
+        ] = astAsList.slice(4);
+
+        // exec {}
+        expect(execDefn['$type']).toBe("List");
+        expect(execDefn.elements).toHaveLength(0);
+        expect(execDefn.ctx).toBeInstanceOf(ExecDefnBlockContext);
+    });
+
+    it("parses a contract with an execute", () => {
+        // arrange
+        const source = `
+            contract CWTemplate {
+                exec baz(remote_contract: Addr) {}
+            }`;
+
+        // act
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
+
+        // assert
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+        expect(astAsList).toHaveLength(13);
+
+        const [
+            arg,
+            argIdent,
+            argTypePath,
+            argTypePathList,
+            argTypeIdent,
+            bodyLst
+        ] = astAsList.slice(7);
+
+        // exec baz() {}
+        expect(arg['$type']).toBe("FnArg");
+        expect(argIdent['$type']).toBe("Ident");
+        expect(argTypePath['$type']).toBe("TypePath");
+        expect(argTypePathList['$type']).toBe("List");
+        expect(argTypeIdent['$type']).toBe("Ident");
+
+
+
+        // expect(nameIdent['$type']).toBe("Ident");
+        // expect(argsLst['$type']).toBe("List");
+        // expect(bodyLst['$type']).toBe("List");
+
+        // expect(nameIdent.text).toBe("baz");
+        // expect(argsLst.elements).toHaveLength(1);
+        // expect(bodyLst.elements).toHaveLength(0);
     });
 });

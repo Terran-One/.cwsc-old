@@ -63,19 +63,19 @@ describe("ast compiler", () => {
         expect(instantiate.args).toBeDefined();
         expect(instantiate.args).toHaveLength(4);
 
-        const depsArg = instantiate.args.find(x => x.name === '__deps');
+        const depsArg = instantiate.args.find((x: any) => x.name === '__deps');
         expect(depsArg).toBeDefined();
         expect(depsArg.type.path).toBe('cosmwasm_std::DepsMut');
 
-        const envArg = instantiate.args.find(x => x.name === '__env');
+        const envArg = instantiate.args.find((x: any) => x.name === '__env');
         expect(envArg).toBeDefined();
         expect(envArg.type.path).toBe('cosmwasm_std::Env');
 
-        const infoArg = instantiate.args.find(x => x.name === '__info');
+        const infoArg = instantiate.args.find((x: any) => x.name === '__info');
         expect(infoArg).toBeDefined();
         expect(infoArg.type.path).toBe('cosmwasm_std::MessageInfo');
 
-        const msgArg = instantiate.args.find(x => x.name === '__msg');
+        const msgArg = instantiate.args.find((x: any) => x.name === '__msg');
         expect(msgArg).toBeDefined();
         expect(msgArg.type.path).toBe('crate::msg::InstantiateMsg');
 
