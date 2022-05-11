@@ -62,6 +62,7 @@ import { AssignStmtContext } from "./CWScriptParser";
 import { IfStmtContext } from "./CWScriptParser";
 import { ForStmtContext } from "./CWScriptParser";
 import { ExecStmtContext } from "./CWScriptParser";
+import { ExecuteNowStmtContext } from "./CWScriptParser";
 import { EmitStmtContext } from "./CWScriptParser";
 import { ReturnStmtContext } from "./CWScriptParser";
 import { FailStmtContext } from "./CWScriptParser";
@@ -137,6 +138,7 @@ import { AssignStmt_Context } from "./CWScriptParser";
 import { AssignLHSContext } from "./CWScriptParser";
 import { InnerAssignContext } from "./CWScriptParser";
 import { InnerPathContext } from "./CWScriptParser";
+import { MsgContext } from "./CWScriptParser";
 import { ExprContext } from "./CWScriptParser";
 import { ValContext } from "./CWScriptParser";
 import { StructVal_Context } from "./CWScriptParser";
@@ -927,6 +929,19 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitExecStmt?: (ctx: ExecStmtContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `ExecuteNowStmt`
+	 * labeled alternative in `CWScriptParser.stmt`.
+	 * @param ctx the parse tree
+	 */
+	enterExecuteNowStmt?: (ctx: ExecuteNowStmtContext) => void;
+	/**
+	 * Exit a parse tree produced by the `ExecuteNowStmt`
+	 * labeled alternative in `CWScriptParser.stmt`.
+	 * @param ctx the parse tree
+	 */
+	exitExecuteNowStmt?: (ctx: ExecuteNowStmtContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `EmitStmt`
@@ -1760,6 +1775,17 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInnerPath?: (ctx: InnerPathContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `CWScriptParser.msg`.
+	 * @param ctx the parse tree
+	 */
+	enterMsg?: (ctx: MsgContext) => void;
+	/**
+	 * Exit a parse tree produced by `CWScriptParser.msg`.
+	 * @param ctx the parse tree
+	 */
+	exitMsg?: (ctx: MsgContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `CWScriptParser.expr`.

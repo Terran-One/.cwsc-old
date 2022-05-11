@@ -175,6 +175,14 @@ export class ExecStmt extends AST {
 }
 
 //@Node()
+export class ExecuteNowStmt extends AST {
+  constructor(public ctx: any, public msg: Msg) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
 export class EmitStmt extends AST {
   constructor(public ctx: any, public expr: Expr) {
     super(ctx);

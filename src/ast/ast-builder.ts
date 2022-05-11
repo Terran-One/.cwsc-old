@@ -99,6 +99,8 @@ import {
   InnerPathContext,
   FnDefnContext,
   ForInStmtContext,
+  ExecuteNowStmtContext,
+  ExecuteNowStmt,
 } from '../grammar/CWScriptParser';
 import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
@@ -902,6 +904,10 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   }
 
   visitExecStmt(ctx: ExecStmtContext): ExecStmt {
+    return new ExecStmt(ctx, this.visit(ctx.expr()));
+  }
+
+  visitExecuteNowStmt(ctx: ExecuteNowStmtContext): ExecuteNowStmt {
     return new ExecStmt(ctx, this.visit(ctx.expr()));
   }
 

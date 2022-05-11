@@ -1,5 +1,5 @@
 import { AST } from '../../src';
-import { ExecDefnBlockContext, StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
+import { ExecDefnBlockContext, NormalFnBodyContext, StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
 import { Parser } from '../../src/parser'
 
 describe("ast compiler", () => {
@@ -244,14 +244,127 @@ describe("ast compiler", () => {
         expect(argTypePathList['$type']).toBe("List");
         expect(argTypeIdent['$type']).toBe("Ident");
 
+        expect(bodyLst['$type']).toBe("List");
+        expect(bodyLst.elements).toHaveLength(0);
+        expect(bodyLst.ctx).toBeInstanceOf(NormalFnBodyContext);
+    });
 
+    it("parses a contract with an exec block with multiple functions", () => {
+        // arrange
+        const source = `
+            contract CWTemplate {
+                exec {
+                    foo() {}
+                    bar() {}
+                    baz() {}
+                }
+            }`;
 
-        // expect(nameIdent['$type']).toBe("Ident");
-        // expect(argsLst['$type']).toBe("List");
-        // expect(bodyLst['$type']).toBe("List");
+        // act
+        let parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
 
-        // expect(nameIdent.text).toBe("baz");
-        // expect(argsLst.elements).toHaveLength(1);
-        // expect(bodyLst.elements).toHaveLength(0);
+        // assert
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+        expect(astAsList).toHaveLength(17);
+
+        const [
+            execBlock,
+            execDefnFoo,
+            nameIdentFoo,
+            argsLstFoo,
+            bodyLstFoo,
+            execDefnBar,
+            nameIdentBar,
+            argsLstBar,
+            bodyLstBar,
+            execDefnBaz,
+            nameIdentBaz,
+            argsLstBaz,
+            bodyLstBaz,
+        ] = astAsList.slice(4);
+
+        // exec { baz() {} }
+        expect(execBlock['$type']).toBe("List");
+        expect(execBlock.elements).toHaveLength(3);
+        expect(execBlock.ctx).toBeInstanceOf(ExecDefnBlockContext);
+
+        expect(execDefnFoo['$type']).toBe("ExecDefn");
+        expect(execDefnFoo.body.elements).toHaveLength(0);
+        expect(nameIdentFoo['$type']).toBe("Ident");
+        expect(nameIdentFoo.text).toBe("foo");
+        expect(argsLstFoo['$type']).toBe("List");
+        expect(argsLstFoo.elements).toHaveLength(0);
+        expect(bodyLstFoo['$type']).toBe("List");
+        expect(bodyLstFoo.elements).toHaveLength(0);
+
+        expect(execDefnBar['$type']).toBe("ExecDefn");
+        expect(execDefnBar.body.elements).toHaveLength(0);
+        expect(nameIdentBar['$type']).toBe("Ident");
+        expect(nameIdentBar.text).toBe("bar");
+        expect(argsLstBar['$type']).toBe("List");
+        expect(argsLstBar.elements).toHaveLength(0);
+        expect(bodyLstBar['$type']).toBe("List");
+        expect(bodyLstBar.elements).toHaveLength(0);
+
+        expect(execDefnBaz['$type']).toBe("ExecDefn");
+        expect(execDefnBaz.body.elements).toHaveLength(0);
+        expect(nameIdentBaz['$type']).toBe("Ident");
+        expect(nameIdentBaz.text).toBe("baz");
+        expect(argsLstBaz['$type']).toBe("List");
+        expect(argsLstBaz.elements).toHaveLength(0);
+        expect(bodyLstBaz['$type']).toBe("List");
+        expect(bodyLstBaz.elements).toHaveLength(0);
+    });
+
+    it("parses an execute function with a call", () => {
+        // arrange
+        const source = `
+            contract CWTemplate {
+                exec baz(remote_contract: Addr) {
+                    execute! #remote_contract.mint(amount)
+                }
+            }`;
+
+        // act
+        const parser = Parser.fromString(source);
+        const ast = parser.buildAST();
+        const astAsList = ast.descendants.map(desc => desc.toData());
+        console.log(astAsList)
+
+        // assert
+        expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+        expect(astAsList).toHaveLength(26);
+
+        const [
+            bodyLst,
+            keyword,
+            execExpr,
+            msgExpr,
+            fnCallExpr,
+            accessExpr,
+            _,  // these identities are redundant
+            __, // this one too
+            argList,
+        ] = astAsList.slice(12);
+
+        // exec baz(...) { execute! #remote_contract.mint(amount) }
+        expect(bodyLst["$type"]).toBe("List");
+
+        // recognizing executing function call
+        expect(keyword.text).toBe("execute");
+        expect(execExpr.op).toBe("!");
+        expect(msgExpr.op).toBe("#");
+        expect(fnCallExpr["$type"]).toBe("PosArgsFnCallExpr");
+
+        // recognizing the accessed function from remote_contract is "mint"
+        expect(accessExpr["$type"]).toBe("MemberAccessExpr");
+        expect(accessExpr.member.text).toBe("mint");
+
+        // checking inside the accessed function
+        expect(argList["$type"]).toBe("List");
+        expect(argList.elements).toHaveLength(1);
+        expect(argList.elements[0].text).toBe("amount");
     });
 });

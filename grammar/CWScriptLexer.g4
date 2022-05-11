@@ -12,6 +12,7 @@ ERROR: 'error';
 EVENT: 'event';
 INSTANTIATE: 'instantiate';
 EXEC: 'exec';
+EXECUTE_NOW: 'execute!';
 QUERY: 'query';
 MIGRATE: 'migrate';
 FOR: 'for';

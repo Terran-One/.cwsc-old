@@ -193,15 +193,16 @@ fnBody: (LBRACE (stmt)* RBRACE)	# NormalFnBody
 
 // Statements
 stmt:
-	letStmt_		# LetStmt
-	| assignStmt_	# AssignStmt
-	| ifExpr_		# IfStmt
-	| forStmt_		# ForStmt
-	| EXEC expr		# ExecStmt
-	| EMIT expr		# EmitStmt
-	| RETURN expr	# ReturnStmt
-	| FAIL expr		# FailStmt
-	| expr			# ExprStmt;
+	letStmt_		   # LetStmt
+	| assignStmt_      # AssignStmt
+	| ifExpr_          # IfStmt
+	| forStmt_         # ForStmt
+	| EXEC expr        # ExecStmt
+	| EXECUTE_NOW msg  # ExecuteNowStmt
+	| EMIT expr        # EmitStmt
+	| RETURN expr	   # ReturnStmt
+	| FAIL expr		   # FailStmt
+	| expr			   # ExprStmt;
 
 letStmt_: LET letLHS EQ expr;
 letLHS:
@@ -230,6 +231,8 @@ assignLHS:
 innerAssign: (DOT paths += innerPath (DOT paths += innerPath)*);
 innerPath: (name = ident) (LBRACK tableKey = expr RBRACK)?;
 
+msg: HASH expr DOT ident LPAREN exprList? RPAREN;
+
 // Expressions
 expr:
 	LPAREN expr RPAREN		# GroupedExpr
@@ -241,7 +244,7 @@ expr:
 	| expr LBRACK expr COMMA RBRACK				# TableLookupExpr
 	| expr LPAREN (exprList)? RPAREN			# PosArgsFnCallExpr
 	| expr LPAREN (namedExprList)? RPAREN		# NamedArgsFnCallExpr
-	| op = (PLUS | MINUS | EXCLAM) expr			# UnaryExpr
+	| op = (PLUS | MINUS | EXCLAM) expr         # UnaryExpr
 	| expr POW expr								# ExpExpr
 	| expr op = (MUL | DIV | MOD) expr			# MultDivModExpr
 	| expr op = (PLUS | MINUS) expr				# AddSubExpr

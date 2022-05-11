@@ -2,6 +2,7 @@ import { AST, List, TypePath } from './';
 
 // TODO: change
 export type Expr = any;
+export type Msg = any;
 
 export class Ident extends AST {
   constructor(public ctx: any, public text: string) {
