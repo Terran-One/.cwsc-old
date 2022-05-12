@@ -2,7 +2,22 @@ import { AST, List, TypePath } from './';
 
 // TODO: change
 export type Expr = any;
-export type Msg = any;
+
+//@Node()
+export class Msg extends AST {
+  constructor(public ctx: any, public klass: Ident, public method: Ident, public args: ExprList) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
+export class ExprList extends AST {
+  constructor(public ctx: any, public elements: Expr[]) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
 
 export class Ident extends AST {
   constructor(public ctx: any, public text: string) {

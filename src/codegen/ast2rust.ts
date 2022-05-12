@@ -1,5 +1,6 @@
 import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
+import { Expr, ExprList } from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
 import { Subspace } from '../symbol-table/scope';
@@ -512,6 +513,13 @@ export class AST2Rust {
     });
     res.add(this.letVar(false, new Rust.Val.Struct(type, members)));
     return res;
+  }
+
+  translateExecuteNowStmt(x: AST.ExecuteNowStmt): Rust.CodeGroup {
+    let res = new Rust.CodeGroup(x.ctx.text);
+    let { msg } = x;
+    res.add(new Rust.Stmt.Return(v_value.ok())); // TODO this is wrong syntax boo
+    return res; // TODO: handle for different fn context
   }
 
   translateReturnStmt(x: AST.ReturnStmt): Rust.CodeGroup {

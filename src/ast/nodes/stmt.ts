@@ -1,4 +1,4 @@
-import { AST, Expr, TypeExpr, Ident, List } from './';
+import { AST, Expr, TypeExpr, Ident, List, Msg } from './';
 
 //TODO: change
 export type Stmt = any;

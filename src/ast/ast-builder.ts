@@ -100,12 +100,13 @@ import {
   FnDefnContext,
   ForInStmtContext,
   ExecuteNowStmtContext,
-  ExecuteNowStmt,
+  MsgContext,
+  ExprListContext,
 } from '../grammar/CWScriptParser';
 import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import * as _ from 'lodash';
-import { AST, ForInStmt, List } from './nodes';
+import { AST, ExecuteNowStmt, ExprList, ForInStmt, List, Msg } from './nodes';
 
 import {
   Expr,
@@ -908,7 +909,15 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   }
 
   visitExecuteNowStmt(ctx: ExecuteNowStmtContext): ExecuteNowStmt {
-    return new ExecStmt(ctx, this.visit(ctx.expr()));
+    return new ExecuteNowStmt(ctx, this.visit(ctx.msg()) as Msg);
+  }
+
+  visitMsg(ctx: MsgContext): Msg {
+    return new Msg(ctx, this.visit(ctx.expr()), this.visit(ctx.ident()) as Ident, this.visit(ctx.exprList()) as ExprList);
+  }
+
+  visitExprList(ctx: ExprListContext): ExprList {
+    return new ExprList(ctx, ctx.expr().map(x => this.visit(x) as Expr));
   }
 
   visitReturnStmt(ctx: ReturnStmtContext): ReturnStmt {

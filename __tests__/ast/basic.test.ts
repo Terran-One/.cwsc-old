@@ -1,5 +1,5 @@
 import { AST } from '../../src';
-import { ExecDefnBlockContext, NormalFnBodyContext, StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
+import { ExecDefnBlockContext, ExprListContext, IdentContext, NormalFnBodyContext, StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
 import { Parser } from '../../src/parser'
 
 describe("ast compiler", () => {
@@ -323,7 +323,7 @@ describe("ast compiler", () => {
         const source = `
             contract CWTemplate {
                 exec baz(remote_contract: Addr) {
-                    execute! #remote_contract.mint(amount)
+                    execute! #testing.mint(amount, denom)
                 }
             }`;
 
@@ -331,40 +331,40 @@ describe("ast compiler", () => {
         const parser = Parser.fromString(source);
         const ast = parser.buildAST();
         const astAsList = ast.descendants.map(desc => desc.toData());
-        console.log(astAsList)
 
         // assert
         expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
-        expect(astAsList).toHaveLength(26);
+        expect(astAsList).toHaveLength(18);
 
         const [
-            bodyLst,
-            keyword,
-            execExpr,
-            msgExpr,
-            fnCallExpr,
-            accessExpr,
-            _,  // these identities are redundant
-            __, // this one too
-            argList,
-        ] = astAsList.slice(12);
+            exeuteNowStmt,
+            msgStmt,
+            klassStmt,
+            methodStmt,
+            exprList,
+        ] = astAsList.slice(13);
 
         // exec baz(...) { execute! #remote_contract.mint(amount) }
-        expect(bodyLst["$type"]).toBe("List");
+        expect(exeuteNowStmt["$type"]).toBe("ExecuteNowStmt");
+        expect(msgStmt["$type"]).toBe("Msg");
+        expect(klassStmt["$type"]).toBe("Ident");
+        expect(methodStmt["$type"]).toBe("Ident");
+        expect(exprList["$type"]).toBe("ExprList");
 
-        // recognizing executing function call
-        expect(keyword.text).toBe("execute");
-        expect(execExpr.op).toBe("!");
-        expect(msgExpr.op).toBe("#");
-        expect(fnCallExpr["$type"]).toBe("PosArgsFnCallExpr");
+        expect(klassStmt.ctx).toBeInstanceOf(IdentContext);
+        expect(klassStmt.text).toBe("testing");
 
-        // recognizing the accessed function from remote_contract is "mint"
-        expect(accessExpr["$type"]).toBe("MemberAccessExpr");
-        expect(accessExpr.member.text).toBe("mint");
+        expect(methodStmt.ctx).toBeInstanceOf(IdentContext);
+        expect(methodStmt.text).toBe("mint");
 
-        // checking inside the accessed function
-        expect(argList["$type"]).toBe("List");
-        expect(argList.elements).toHaveLength(1);
-        expect(argList.elements[0].text).toBe("amount");
+        expect(exprList['$type']).toBe("ExprList");
+        expect(exprList.ctx).toBeInstanceOf(ExprListContext);
+        expect(exprList.elements).toHaveLength(2);
+
+        expect(exprList.elements[0]['$type']).toBe("Ident");
+        expect(exprList.elements[0].text).toBe("amount");
+
+        expect(exprList.elements[1]['$type']).toBe("Ident");
+        expect(exprList.elements[1].text).toBe("denom");
     });
 });

@@ -231,7 +231,7 @@ assignLHS:
 innerAssign: (DOT paths += innerPath (DOT paths += innerPath)*);
 innerPath: (name = ident) (LBRACK tableKey = expr RBRACK)?;
 
-msg: HASH expr DOT ident LPAREN exprList? RPAREN;
+msg: HASH expr DOT ident LPAREN exprList RPAREN;
 
 // Expressions
 expr:
