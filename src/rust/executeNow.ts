@@ -1,12 +1,27 @@
 import { Expr } from "rust";
 import { Type } from "./type";
 
-export class Params {
+export class Payload {
   constructor(
     public methodName: String,
     public type: Type,
     public params: Expr.Path[],
   ) {}
+
+  toRustString(): string {
+    let foo = '';
+    let bar = '';
+
+    for (const param of this.params) {
+      foo += param.toRustString();
+      bar += `${param.path}: ${this.lastTmpVar()}`
+    }
+    console.log(foo);
+
+    foo += `let _tmp5 = ${this.type.path}::${this.methodName} {;`
+    foo += `};`;
+    return foo;
+  }
 }
 
 export class CreateMsg {

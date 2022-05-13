@@ -1,6 +1,7 @@
+import { AST2Int } from '../intermediate/ast2int';
 import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
-import { Expr, ExprList } from '../rust';
+import { CodeGroup, Defn, Expr, Type, Val } from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
 import { Subspace } from '../symbol-table/scope';
@@ -20,20 +21,21 @@ import {
   buildModError,
   buildModContract,
 } from './module-builders';
+import { ContractDefn, ExecDecl, ExecDefn, ParamzdTypeExpr, TypePath } from '../ast/nodes';
 
 export class UnresolvedType {
   constructor(public ref: AST.TypeExpr, public postResolve: (x: any) => any) {}
 }
 export class AST2Rust {
   private tmpVarCount: number = 0;
-  constructor(public env: CWScriptEnv) {}
+  constructor(public env: CWScriptEnv, public inter: AST2Int) {}
 
   getTmpVar(): Rust.Expr.Path {
-    return new Rust.Expr.Path(`__tmp${this.tmpVarCount++}`);
+    return new Rust.Expr.Path(`___tmp${this.tmpVarCount++}`);
   }
 
   lastTmpVar(): Rust.Expr.Path {
-    return new Rust.Expr.Path(`__tmp${this.tmpVarCount - 1}`);
+    return new Rust.Expr.Path(`___tmp${this.tmpVarCount - 1}`);
   }
 
   letVar(mut: boolean, value?: Rust.Expr, type?: Rust.Type): Rust.CodeGroup {
@@ -44,11 +46,20 @@ export class AST2Rust {
   }
 
   resolveType(ty: AST.TypeExpr): Rust.Type {
-    if (ty instanceof AST.TypePath) {
+    if (ty instanceof AST.TypePath || ty instanceof AST.ParamzdTypeExpr) {
       let x = this.env.scope.resolve(
         [Subspace.TYPE, Subspace.ERROR, Subspace.EVENT],
         ty.toString()
       );
+
+      if (x === undefined) {
+        // TODO: this only works if the parametrized type is interface (which is the only one implemented)
+        // once actual parameterized types exist, this needs to change
+        x = this.env.scope.resolve(
+          [Subspace.TYPE, Subspace.ERROR, Subspace.EVENT],
+          (ty as AST.ParamzdTypeExpr).type.toString()
+        );
+      }
 
       if (x === undefined) {
         throw new Error(`type ${ty} could not be resolved`);
@@ -81,6 +92,7 @@ export class AST2Rust {
     ) {
       return C_TYPES.join(ty.name.text).toType();
     }
+
 
     throw new Error(`type ${ty.constructor.name} could not be resolved`);
   }
@@ -260,7 +272,7 @@ export class AST2Rust {
 
     fn.args.elements.forEach((a) => {
       let { name } = a;
-      let arg = new Rust.Expr.Path(`${name.text}`);
+      let arg = new Rust.Expr.Path(name.text);
       fnScope.define(Subspace.LOCAL, name.text, arg);
     });
 
@@ -276,13 +288,6 @@ export class AST2Rust {
     fn.body.elements.forEach((stmt) => {
       exec.addBody(this.translate(stmt));
     });
-    exec.addBody(
-      new Rust.Stmt.Return(
-        new Rust.Expr.FnCall('::std::result::Result::Ok', [
-          CW_STD.join('Response').toType().fnCall('new', []),
-        ])
-      )
-    );
     return exec;
   }
 
@@ -380,6 +385,13 @@ export class AST2Rust {
     let res = new Rust.CodeGroup(val.ctx.text);
     // TODO: change integer type to generic
     res.add(this.letVar(false, new Rust.Val.IntLiteral(Rust.U64, val.value)));
+    return res;
+  }
+
+  translateStringVal(val: AST.StringVal): Rust.CodeGroup {
+    let res = new Rust.CodeGroup(val.ctx.text);
+    // TODO: change integer type to generic
+    res.add(this.letVar(false, new Rust.Val.StrLiteral(val.value)));
     return res;
   }
 
@@ -516,10 +528,127 @@ export class AST2Rust {
   }
 
   translateExecuteNowStmt(x: AST.ExecuteNowStmt): Rust.CodeGroup {
+    const res = new Rust.CodeGroup(x.ctx.text);
+    const { msg } = x;
+    
+    res.add(this.translate(msg));
+    const msgVar = this.lastTmpVar();
+
+    const responseVar1 = this.getTmpVar();
+    res.add(new Defn.Let(
+      true,
+      responseVar1.toRustString(),
+      undefined,
+      new Expr.InstantiateStruct("Response")));
+
+    const responseVar2 = this.getTmpVar();
+    res.add(new Defn.Let(
+      true,
+      responseVar2.toRustString(),
+      undefined,
+      responseVar1.fnCall("add_message", [msgVar])
+    ));
+
+    res.add(new Rust.Stmt.Return(responseVar2.ok()));
+
+    return res;
+  }
+
+  translateMsg(x: AST.Msg): Rust.CodeGroup {
     let res = new Rust.CodeGroup(x.ctx.text);
-    let { msg } = x;
-    res.add(new Rust.Stmt.Return(v_value.ok())); // TODO this is wrong syntax boo
-    return res; // TODO: handle for different fn context
+    let { klass, method, args } = x;
+
+    /*
+    let ___tmp0 = 20u128;
+    let ___tmp1 = String::from(__tmp0);
+    let ___tmp2 = 'LUNA';
+    let ___tmp3 = String::from(__tmp2);
+    */
+    const contract = this.inter.contracts.get(x.nearestAncestorOfType(ContractDefn)!.name.text)!;
+    console.log(contract);
+    const exec = contract.execs.find((y: any) => y.name === x.nearestAncestorOfType(ExecDefn)!.name!.text)!;
+    console.log(exec);
+    const addr = exec.args.find((z: any) => z.name === klass.text)!;
+    console.log(addr); // ToDo: verify that it's an Addr
+    const contractInterface = this.inter.interfaces.get(addr.type.types[0])!;
+    console.log(contractInterface);
+    const msgArgs = contractInterface.execs.find((zz: any) => zz.name === method.text)!.args;
+    console.log(msgArgs);
+
+    for (const arg of args.elements) {
+      res.add(this.translate(arg));
+
+      const target = this.lastTmpVar();
+      res.add(new Defn.Let(
+        true,
+        this.getTmpVar().toRustString(),
+        undefined,
+        new Expr.FnCall("String::from", [target]))); // ToDo: derive String::from (or whatever) instead of hard-coding
+    }
+
+    /*
+    let ___tmp4 = CW20::Mint {
+      amount: ___tmp1,
+      denom: ___tmp3,
+    };
+    */
+    const structMembers = [];
+    for (let i = 0; i < msgArgs.length; i++) {
+      const name = msgArgs[i].name;
+      const idx = (i + 1)*2 - 1;
+      structMembers.push(new Val.StructMember(
+        name,
+        new Expr.Path(`__tmp${idx}`)));
+    }
+
+    const struct = new Rust.Val.Struct(
+      new Type(`${contract.name}::${method.text[0].toUpperCase() + method.text.slice(1)}`),
+      structMembers
+    );
+
+    res.add(new Defn.Let(
+      true,
+      this.getTmpVar().toRustString(),
+      undefined,
+      struct));
+
+    // let ___tmp5 = to_binary(&___tmp4);
+    const target = this.lastTmpVar();
+    res.add(new Defn.Let(
+      true,
+      this.getTmpVar().toRustString(),
+      undefined,
+      new Expr.FnCall("to_binary", [new Expr.Path(`&${target.toRustString()}`)])));
+
+    // let ___tmp6 = remote_contract.to_string();
+    const msgBinary = this.lastTmpVar();
+    res.add(new Defn.Let(
+      true,
+      this.getTmpVar().toRustString(),
+      undefined,
+      new Expr.FnCall(`${klass.text}.to_string`)));
+
+    /*
+    let ___tmp7 = WasmMsg::Execute {
+      contract_addr: ___tmp6,
+      msg: ___tmp5,
+      funds: vec![]
+    };
+    */
+    const contractAddr = this.lastTmpVar();
+    res.add(new Defn.Let(
+      true,
+      this.getTmpVar().toRustString(),
+      undefined,
+      new Rust.Val.Struct(
+        new Type(`WasmMsg::Execute`),
+        [
+          new Val.StructMember('contract_addr', contractAddr),
+          new Val.StructMember('msg', msgBinary),
+          new Val.StructMember('funds', new Expr.Path('vec![]')),
+        ])));
+
+    return res;
   }
 
   translateReturnStmt(x: AST.ReturnStmt): Rust.CodeGroup {

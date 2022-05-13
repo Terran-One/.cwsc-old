@@ -90,11 +90,15 @@ describe("ast compiler", () => {
     it("compiles a contract with an execute message", () => {
         // arrange
         const code = `
+            interface CW20 {
+                exec mint(amount: String, denom: String)
+            }
+
             contract CWTemplate {
                 instantiate() {}
 
-                exec baz(remote_contract: Addr, amount: Uint128, denom: String) {
-                    execute! #testing.mint(amount, denom)
+                exec baz(remote_contract: Addr<CW20>) {
+                    execute! #remote_contract.mint("20", "LUNA")
                 }
             }`;
 
@@ -106,6 +110,8 @@ describe("ast compiler", () => {
 
         // act
         const codeGroup = codegen.generateContract('CWTemplate', '/dev/null');
+        console.log(codeGroup)
+        console.log(codeGroup.toRustString())
 
         // assert
         type Named = CodeGroup & { name: String };

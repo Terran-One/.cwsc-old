@@ -1,3 +1,4 @@
+import { AST2Int } from '../intermediate/ast2int';
 import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
 
@@ -44,6 +45,11 @@ export class CWScriptCodegen {
       .find((x) => x.name.text === name)!;
 
     let env = this.envs[sourceFile.file];
-    return new AST2Rust(env).translateContractDefn(contractDefn);
+    let inter = new AST2Int();
+    sourceFile.ast.descendantsOfType(AST.InterfaceDefn).map(i => inter.translateInterface(i));
+    sourceFile.ast.descendantsOfType(AST.ContractDefn).map(i => inter.translateContractDefn(i));
+
+    console.log(inter.interfaces);
+    return new AST2Rust(env, inter).translateContractDefn(contractDefn);
   }
 }

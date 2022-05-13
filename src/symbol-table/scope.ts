@@ -113,6 +113,8 @@ export class CWScriptScope {
       this.symbolTable.set(subspace, new Map<string, CWScriptSymbol>());
     }
     // add the symbol to the subspace
+    console.log(identifier)
+    console.log(symbol)
     this.symbolTable.get(subspace)!.set(identifier, symbol);
   }
 

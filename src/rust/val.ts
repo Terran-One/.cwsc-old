@@ -1,6 +1,7 @@
 import { IntType } from './common';
 import { Type } from './type';
 import { Expr } from './expr';
+import { stringify } from 'yaml';
 
 export class Val extends Expr {}
 
@@ -10,12 +11,25 @@ export namespace Val {
       return new Type.Str(true);
     }
 
-    constructor(public value: string) {
+    value: string;
+
+    constructor(value: string) {
+      const match = /^\"(.*)\"$/.exec(value);
+      if (!match || !match.length) {
+        throw new Error("Syntax Error: missing quotes around string");
+      }
+
+      const noQuotes = match[1];
+      if (/(\"+)/g.exec(noQuotes)?.filter(x => x.length % 2 == 1).length) {
+        throw new Error("Syntax Error: unbalanced quotes inside string");
+      }
+
       super();
+      this.value = match[1].replace(/""/g,'"');
     }
 
     toRustString(): string {
-      return `"${this.value}"`;
+      return `"${this.value.replace(/\\/g,'\\\\').replace(/\"/g,'\\"')}"`;
     }
   }
 

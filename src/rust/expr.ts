@@ -123,7 +123,7 @@ export namespace Expr {
   export class FnCall extends Expr {
     constructor(
       public path: string,
-      public args: any[],
+      public args: any[] = [],
       public typeParams: Type[] = []
     ) {
       super();
@@ -131,6 +131,20 @@ export namespace Expr {
 
     toRustString(): string {
       return `${this.path}(${this.args.map(x => x.toRustString()).join(', ')})`;
+    }
+  }
+
+  export class InstantiateStruct extends Expr {
+    constructor(
+      public path: string,
+      public args: any[] = [],
+      public typeParams: Type[] = []
+    ) {
+      super();
+    }
+
+    toRustString(): string {
+      return `${this.path}::new(${this.args.map(x => x.toRustString()).join(', ')})`;
     }
   }
 

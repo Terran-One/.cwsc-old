@@ -322,8 +322,8 @@ describe("ast compiler", () => {
         // arrange
         const source = `
             contract CWTemplate {
-                exec baz(remote_contract: Addr) {
-                    execute! #testing.mint(amount, denom)
+                exec baz(remote_contract: Contract<CW20>, amount: String, denom: String) {
+                    execute! #remote_contract.mint(amount, denom)
                 }
             }`;
 
@@ -334,15 +334,16 @@ describe("ast compiler", () => {
 
         // assert
         expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
-        expect(astAsList).toHaveLength(18);
+        expect(astAsList).toHaveLength(33);
 
+        // ToDo: update test to cover Contract<CW20>
         const [
             exeuteNowStmt,
             msgStmt,
             klassStmt,
             methodStmt,
             exprList,
-        ] = astAsList.slice(13);
+        ] = astAsList.slice(28);
 
         // exec baz(...) { execute! #remote_contract.mint(amount) }
         expect(exeuteNowStmt["$type"]).toBe("ExecuteNowStmt");
@@ -352,7 +353,7 @@ describe("ast compiler", () => {
         expect(exprList["$type"]).toBe("ExprList");
 
         expect(klassStmt.ctx).toBeInstanceOf(IdentContext);
-        expect(klassStmt.text).toBe("testing");
+        expect(klassStmt.text).toBe("remote_contract");
 
         expect(methodStmt.ctx).toBeInstanceOf(IdentContext);
         expect(methodStmt.text).toBe("mint");
