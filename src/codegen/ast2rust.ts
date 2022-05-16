@@ -1,4 +1,4 @@
-import { AST2Int } from '../intermediate/ast2int';
+import { AST2Intermediate } from '../intermediate/ast2intermediate';
 import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
 import { CodeGroup, Defn, Expr, Type, Val } from '../rust';
@@ -22,20 +22,21 @@ import {
   buildModContract,
 } from './module-builders';
 import { ContractDefn, ExecDecl, ExecDefn, ParamzdTypeExpr, TypePath } from '../ast/nodes';
+import { TypeConversion } from '../rust/typeConversion';
 
 export class UnresolvedType {
   constructor(public ref: AST.TypeExpr, public postResolve: (x: any) => any) {}
 }
 export class AST2Rust {
   private tmpVarCount: number = 0;
-  constructor(public env: CWScriptEnv, public inter: AST2Int) {}
+  constructor(public env: CWScriptEnv, public intermediate: AST2Intermediate) {}
 
   getTmpVar(): Rust.Expr.Path {
-    return new Rust.Expr.Path(`___tmp${this.tmpVarCount++}`);
+    return new Rust.Expr.Path(`__tmp${this.tmpVarCount++}`);
   }
 
   lastTmpVar(): Rust.Expr.Path {
-    return new Rust.Expr.Path(`___tmp${this.tmpVarCount - 1}`);
+    return new Rust.Expr.Path(`__tmp${this.tmpVarCount - 1}`);
   }
 
   letVar(mut: boolean, value?: Rust.Expr, type?: Rust.Type): Rust.CodeGroup {
@@ -513,10 +514,10 @@ export class AST2Rust {
   //   );
   // }
 
-  translateStructVal(x: AST.StructVal): Rust.CodeGroup {
-    let res = new Rust.CodeGroup(x.ctx.text);
-    let type = this.resolveType(x.type);
-    let members = x.members.map((m) => {
+  translateStructVal(astStructVal: AST.StructVal): Rust.CodeGroup {
+    let res = new Rust.CodeGroup(astStructVal.ctx.text);
+    let type = this.resolveType(astStructVal.type);
+    let members = astStructVal.members.map((m) => {
       let { name, value } = m;
       res.add(this.translate(value));
       let v_value = this.lastTmpVar();
@@ -554,47 +555,46 @@ export class AST2Rust {
     return res;
   }
 
-  translateMsg(x: AST.Msg): Rust.CodeGroup {
-    let res = new Rust.CodeGroup(x.ctx.text);
-    let { klass, method, args } = x;
+  translateMsg(astMsg: AST.Msg): Rust.CodeGroup {
+    let res = new Rust.CodeGroup(astMsg.ctx.text);
+    let { klass, method, args } = astMsg;
 
     /*
-    let ___tmp0 = 20u128;
-    let ___tmp1 = String::from(__tmp0);
-    let ___tmp2 = 'LUNA';
-    let ___tmp3 = String::from(__tmp2);
+    let __tmp0 = 20u128;
+    let __tmp1 = String::from(__tmp0);
+    let __tmp2 = 'LUNA';
+    let __tmp3 = String::from(__tmp2);
     */
-    const contract = this.inter.contracts.get(x.nearestAncestorOfType(ContractDefn)!.name.text)!;
-    console.log(contract);
-    const exec = contract.execs.find((y: any) => y.name === x.nearestAncestorOfType(ExecDefn)!.name!.text)!;
-    console.log(exec);
-    const addr = exec.args.find((z: any) => z.name === klass.text)!;
-    console.log(addr); // ToDo: verify that it's an Addr
-    const contractInterface = this.inter.interfaces.get(addr.type.types[0])!;
-    console.log(contractInterface);
-    const msgArgs = contractInterface.execs.find((zz: any) => zz.name === method.text)!.args;
-    console.log(msgArgs);
+    // ToDo: validation/error-handling
+    const contract = this.intermediate.contracts.get(astMsg.nearestAncestorOfType(ContractDefn)!.name.text)!;
+    const exec = contract.execs.find(e => e.name === astMsg.nearestAncestorOfType(ExecDefn)!.name!.text)!;
+    const addr = exec.args.find(a => a.name === klass.text || a.type.name === 'Addr')!;
+    const contractInterface = this.intermediate.interfaces.get(addr.type.types[0])!;
+    const argDefs = contractInterface.execs.find(e => e.name === method.text)!.args;
 
-    for (const arg of args.elements) {
+    for (let i = 0; i < args.elements.length; i++) {
+      const arg = args.elements[i];
       res.add(this.translate(arg));
 
       const target = this.lastTmpVar();
+      const type = argDefs[i].type.name;
+
       res.add(new Defn.Let(
         true,
         this.getTmpVar().toRustString(),
         undefined,
-        new Expr.FnCall("String::from", [target]))); // ToDo: derive String::from (or whatever) instead of hard-coding
+        new TypeConversion(target.path, type)))
     }
 
     /*
-    let ___tmp4 = CW20::Mint {
-      amount: ___tmp1,
-      denom: ___tmp3,
+    let __tmp4 = CW20::Mint {
+      amount: __tmp1,
+      denom: __tmp3,
     };
     */
     const structMembers = [];
-    for (let i = 0; i < msgArgs.length; i++) {
-      const name = msgArgs[i].name;
+    for (let i = 0; i < argDefs.length; i++) {
+      const name = argDefs[i].name;
       const idx = (i + 1)*2 - 1;
       structMembers.push(new Val.StructMember(
         name,
@@ -612,7 +612,7 @@ export class AST2Rust {
       undefined,
       struct));
 
-    // let ___tmp5 = to_binary(&___tmp4);
+    // let __tmp5 = to_binary(&__tmp4);
     const target = this.lastTmpVar();
     res.add(new Defn.Let(
       true,
@@ -620,7 +620,7 @@ export class AST2Rust {
       undefined,
       new Expr.FnCall("to_binary", [new Expr.Path(`&${target.toRustString()}`)])));
 
-    // let ___tmp6 = remote_contract.to_string();
+    // let __tmp6 = remote_contract.to_string();
     const msgBinary = this.lastTmpVar();
     res.add(new Defn.Let(
       true,
@@ -629,9 +629,9 @@ export class AST2Rust {
       new Expr.FnCall(`${klass.text}.to_string`)));
 
     /*
-    let ___tmp7 = WasmMsg::Execute {
-      contract_addr: ___tmp6,
-      msg: ___tmp5,
+    let __tmp7 = WasmMsg::Execute {
+      contract_addr: __tmp6,
+      msg: __tmp5,
       funds: vec![]
     };
     */
