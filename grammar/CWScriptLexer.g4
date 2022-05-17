@@ -5,8 +5,6 @@ CONTRACT: 'contract';
 INTERFACE: 'interface';
 IMPORT: 'import';
 IMPLEMENTS: 'implements';
-EXTENSION: 'extension';
-REQUIRES: 'requires';
 EXTENDS: 'extends';
 ERROR: 'error';
 EVENT: 'event';

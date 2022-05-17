@@ -1,11 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as toml from '@iarna/toml';
+import * as glob from 'glob';
 
 export interface ICWSProjectConfig {
   project: {
     name: string;
-    version?: string;
+    version: string;
     description?: string;
     authors?: string[];
     license?: string;
@@ -51,12 +52,17 @@ export class CWSProjectManager {
     let pCwsprojectToml = path.join(pRoot, 'cwsproject.toml');
 
     fs.mkdirSync(pSrc, { recursive: true });
-    fs.writeFileSync(pCwsprojectToml, toml.stringify({ project: { name } }));
+    fs.writeFileSync(
+      pCwsprojectToml,
+      toml.stringify({ project: { name, version: '0.1.0' } })
+    );
     return new CWSProjectManager(pRoot);
   }
 
   public static isProject(dir: string): boolean {
-    return fs.existsSync(path.join(dir, 'cwsproject.toml'));
+    let hasToml = fs.existsSync(path.join(dir, 'cwsproject.toml'));
+    let hasSrc = fs.existsSync(path.join(dir, 'src'));
+    return hasToml && hasSrc;
   }
 
   public static readProject(dir: string): CWSProjectManager {
@@ -72,5 +78,10 @@ export class CWSProjectManager {
   public getConfig(): CWSProjectConfig {
     let pCwsprojectToml = path.join(this.rootPath, 'cwsproject.toml');
     return CWSProjectConfig.read(pCwsprojectToml);
+  }
+
+  public getSources(): string[] {
+    let pSrc = path.join(this.rootPath, 'src');
+    return glob.sync('**/*.cws', { cwd: pSrc, absolute: true, nodir: true });
   }
 }

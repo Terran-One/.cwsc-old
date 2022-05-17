@@ -1,0 +1,41 @@
+contract TSFactory {
+  enum AssetInfo {
+    Token { contract_addr: Addr },
+    NativeToken { denom: String }
+  }
+
+  instantiate(
+    pair_code_id: u64,
+    token_ßcode_id: u64,
+  ) {}
+
+  exec update_config(
+    owner?: String,
+    token_code_id?: u64,
+    pair_code_id?: u64
+  ) {
+
+  }
+
+  exec create_pair(
+    asset_infos: AssetInfo[]
+  ) {
+
+  }
+
+  query config() -> struct ConfigResponse {
+    owner: String,
+    pair_code_id: u64,
+    token_code_id: u64   
+  } {
+  }
+
+  query pair(asset_infos: AssetInfo[]) -> struct PairInfo {} {
+  }
+
+  query pairs(start_after: AssetInfo[], limit?: u32) -> struct PairsResponse {
+    pairs: PairInfo[]
+  } {
+  }
+
+}

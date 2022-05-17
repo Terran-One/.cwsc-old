@@ -238,7 +238,7 @@ expr:
 		COMMA mapKeys += expr
 	)* RBRACK									# StateMapAccessExpr
 	| expr DOT ident							# MemberAccessExpr
-	| expr LBRACK expr COMMA RBRACK				# TableLookupExpr
+	| expr LBRACK expr RBRACK					# TableLookupExpr
 	| expr LPAREN (exprList)? RPAREN			# PosArgsFnCallExpr
 	| expr LPAREN (namedExprList)? RPAREN		# NamedArgsFnCallExpr
 	| op = (PLUS | MINUS | EXCLAM) expr			# UnaryExpr
@@ -257,13 +257,13 @@ val: // Values
 	LPAREN RPAREN									# UnitVal
 	| structVal_									# StructVal
 	| tupleType = typePath LPAREN exprList RPAREN	# TupleVal
-	| LBRACK exprList RBRACK						# VecVal
-	| StringLiteral									# StringVal
-	| IntegerLiteral								# IntegerVal
-	| DecimalLiteral								# DecimalVal
-	| TRUE											# TrueVal
-	| FALSE											# FalseVal
-	| ident											# IdentVal;
+	// | LBRACK exprList RBRACK						# VecVal
+	| StringLiteral		# StringVal
+	| IntegerLiteral	# IntegerVal
+	| DecimalLiteral	# DecimalVal
+	| TRUE				# TrueVal
+	| FALSE				# FalseVal
+	| ident				# IdentVal;
 
 // Struct Val
 structVal_: (structType = typePath) LBRACE (
@@ -290,7 +290,7 @@ forStmt_:
 identList: (symbols += ident) (COMMA (symbols += ident))*;
 
 // Function Calls
-exprList: expr (COMMA expr)*;
+exprList: expr (COMMA expr)+;
 namedExprList: namedExpr (COMMA namedExpr)*;
 namedExpr: (name = ident COLON value = expr);
 

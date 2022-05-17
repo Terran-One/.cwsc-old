@@ -19,7 +19,6 @@ import { StateMapDefnContext } from "./CWScriptParser";
 import { UnitValContext } from "./CWScriptParser";
 import { StructValContext } from "./CWScriptParser";
 import { TupleValContext } from "./CWScriptParser";
-import { VecValContext } from "./CWScriptParser";
 import { StringValContext } from "./CWScriptParser";
 import { IntegerValContext } from "./CWScriptParser";
 import { DecimalValContext } from "./CWScriptParser";
@@ -368,19 +367,6 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitTupleVal?: (ctx: TupleValContext) => void;
-
-	/**
-	 * Enter a parse tree produced by the `VecVal`
-	 * labeled alternative in `CWScriptParser.val`.
-	 * @param ctx the parse tree
-	 */
-	enterVecVal?: (ctx: VecValContext) => void;
-	/**
-	 * Exit a parse tree produced by the `VecVal`
-	 * labeled alternative in `CWScriptParser.val`.
-	 * @param ctx the parse tree
-	 */
-	exitVecVal?: (ctx: VecValContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `StringVal`

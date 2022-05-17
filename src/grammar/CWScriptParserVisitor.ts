@@ -19,7 +19,6 @@ import { StateMapDefnContext } from "./CWScriptParser";
 import { UnitValContext } from "./CWScriptParser";
 import { StructValContext } from "./CWScriptParser";
 import { TupleValContext } from "./CWScriptParser";
-import { VecValContext } from "./CWScriptParser";
 import { StringValContext } from "./CWScriptParser";
 import { IntegerValContext } from "./CWScriptParser";
 import { DecimalValContext } from "./CWScriptParser";
@@ -291,14 +290,6 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitTupleVal?: (ctx: TupleValContext) => Result;
-
-	/**
-	 * Visit a parse tree produced by the `VecVal`
-	 * labeled alternative in `CWScriptParser.val`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitVecVal?: (ctx: VecValContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `StringVal`

@@ -1,0 +1,131 @@
+namespace CW20 {
+
+  struct BalanceResponse {
+    balance: Uint128
+  }
+
+  struct TokenInfoResponse {
+    name: String,
+    symbol: String,
+    decimals: u8,
+    total_supply: Uint128
+  }
+
+  error {
+    InvalidZeroAmount(actual: Uint128, expected: Uint128) {
+      return "Invalid Zero Amount"
+    },
+    SampleError,
+
+  }
+
+  interface ICW20Base {
+    exec {
+      transfer(recipient: Addr, amount: Uint128)
+      send(contract: ICW20BaseReceiver, amount: Uint128, msg: Binary)
+      burn(amount: Uint128)
+    }
+
+    query {
+      balance(address: Addr) -> BalanceResponse
+      token_info() -> TokenInfoResponse 
+    }
+  }
+
+  interface ICW20BaseReceiver {
+    exec {
+      receive(sender: Addr, amount: Uint128, msg: Binary)
+    }
+  }
+
+  contract aUSTContract implements ICW20Base {
+
+    event Transfer(from: Addr, to: Addr, amount: Uint128)
+    event Send(from: Addr, to: Addr, amount: Uint128)
+    event Burn(amount: Uint128)
+
+    exec {
+      transfer(recipient: Addr, amount: Uint128) {
+        if (amount == 0) {
+          fail InvalidZeroAmount
+        }
+
+        state.balances[$msg.sender] -= amount
+        state.balances[reciptient] += amount
+         
+        emit Transfer($msg.sender, recipient, amount)
+      }
+
+      burn(amount: Uint128) {
+        // let res = Response::new()
+        // .add_attribute("action", "send")
+
+        if (amount == 0) {
+          fail InvalidZeroAmount
+        }
+
+        state.balances[$msg.sender] -= amount
+        state.token_info.total_supply -= amount //checked_sub
+
+        emit Burn(amount)
+      }
+        
+      send(contract: ICW20BaseReceiver, amount: Uint128, msg: Binary) {
+        if (amount == 0) {
+          fail InvalidZeroAmount
+        }
+
+        state.balances[$msg.sender] -= amount // checked_sub
+        state.balances[contract] += amount
+
+        let attributes = []
+
+        for (let i = 0; i < 10; i++) {
+          emit Attribute(i)
+        }
+
+        for (loop) {
+          call contract.receive()
+        }
+
+        for loop {
+          contract.receive()
+        }
+
+
+        response.emit Send($msg.sender, contract, amount)
+        // res
+        // .add_attribute("from", &info.sender)
+        // .add_attribute("to", &contract)
+        // .add_attribute("amount", amount)
+
+        response.append contract.receive($msg.sender, amount, msg)
+        
+        
+        for loop() {
+
+        } 
+
+        if ()
+        // res
+        //.add_message(
+        //    Cw20ReceiveMsg {
+        //        sender: info.sender.into(),
+        //        amount,
+        //        msg,
+        //    }
+        //    .into_cosmos_msg(contract)?,
+        //);
+        
+        execute response  
+
+        // return Ok(res);        
+      }
+    }
+  }
+
+  contract anchorMarketContract implements ICW20BaseReceiver {
+
+  }
+  
+}

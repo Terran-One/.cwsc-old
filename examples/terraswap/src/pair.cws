@@ -1,0 +1,62 @@
+// contracts/terraswap_pair/src/contract.rs
+interface Cw20 {
+  struct MinterResponse {
+    minter: Addr
+  }
+
+  instantiate(
+    name: String, 
+    symbol: String, 
+    decimals: u8, 
+    funds: Cw20Coin[], 
+    mint: MinterResponse
+  )
+}
+
+contract TSPair {
+
+  state {
+    asset_infos: AssetInfo[]
+  }
+
+  instantiate(
+    asset_infos: AssetInfo[],
+    token_code_id: u64
+  ) {
+    state.asset_infos = asset_infos
+
+    instantiate! {
+      code_id: token_code_id,
+      msg: #Cw20("terraswap liquidity token", "uLP", 6, [], {
+        minter: Env.Contract.Address
+      })
+    }
+    
+     
+  }
+
+  exec provide_liquidity(
+    assets: Asset[],
+    slippage_tolerance?: Decimal,
+    receiver?: String
+  ) {
+    for asset in assets {
+        asset.assert_sent_native_token_balance(&info)?;
+    }
+  }
+
+  exec swap(
+    offer_asset: Asset,
+    belief_price?: Decimal,
+    max_spread?: Decimal,
+    to?: String
+  ) {}
+
+  query pair() {}
+
+  query pool() {}
+
+  query simulation(offer_asset: Asset) {}
+
+  query reverse_simulation(ask_asset: Asset) {}
+}

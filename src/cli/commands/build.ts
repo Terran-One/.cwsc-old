@@ -9,7 +9,8 @@ command.description('Build a CWScript project');
 command.action(() => {
   let currentDir = process.cwd();
   let project = CWSProjectManager.readProject(currentDir);
-  console.log(project);
+  let sources = project.getSources();
+  console.log(sources);
 });
 
 export default command;
