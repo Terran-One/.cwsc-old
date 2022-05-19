@@ -1,4 +1,5 @@
 import { AST } from '../../src';
+import { Ident, IdentLHS, LetStmt } from '../../src/ast/nodes';
 import { ExecDefnBlockContext, ExprListContext, IdentContext, NormalFnBodyContext, StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
 import { Parser } from '../../src/parser'
 
@@ -390,6 +391,11 @@ describe('ast compiler', () => {
 
         // assert
         expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
-        expect(astAsList).toHaveLength(33);
+        expect(astAsList).toHaveLength(41);
+
+        const [letStmt] = (astAsList as LetStmt[]).slice(32);
+        expect(letStmt).toBeDefined();
+        expect((letStmt.lhs as IdentLHS).name.text).toBe('contract');
+        expect((letStmt.rhs as Ident).text).toBe('remote_contract');
     });
 });

@@ -255,7 +255,8 @@ expr:
     | expr OR expr                              # OrExpr
     | ifExpr_                                   # IfExpr
     | QUERY expr                                # QueryExpr
-    | val                                       # ValExpr;
+    | val                                       # ValExpr
+    | ident AT expr                             # ContrExpr;
 
 val: // Values
     LPAREN RPAREN                                   # UnitVal
