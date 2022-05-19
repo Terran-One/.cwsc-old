@@ -20,9 +20,6 @@ describe("ast compiler", () => {
             .filter((contract) => contract.name.text === 'CWTemplate');
 
         expect(cds).toHaveLength(1);
-<<<<<<< HEAD
-        const astAsList = result.descendants.map(desc => desc.toData());
-=======
     });
 
     it("has correct node structure", () => {
@@ -33,7 +30,6 @@ describe("ast compiler", () => {
         let parser = Parser.fromString(source);
         const ast = parser.buildAST();
         const astAsList = ast.descendants.map(desc => desc.toData());
->>>>>>> 9a3000a (ast compiler test update)
 
         // assert
         expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);

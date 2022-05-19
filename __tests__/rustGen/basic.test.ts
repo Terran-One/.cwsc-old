@@ -1,98 +1,180 @@
 import { Annotation, CodeGroup, Defn, Expr, FunctionArg, MatchPattern, Path, Rust, Type, Val } from '../../src/rust';
 import { cws } from '../../testHelpers/cws';
-import { CWScriptCodegen } from '../../src/codegen/codegen';
+import { CWScriptCodegen, Source } from '../../src/codegen/codegen';
+import { ContractDefn, Ident, InstantiateDefn, List, SourceFile } from '../../src/ast/nodes';
+
+expect.extend({
+    toContainRust(received: Rust[], prop: any, value: String) {
+        if (!received.find(x => x[prop] === value)) {
+            return {
+                pass: false,
+                message: () => `Node did not contain item with property ${prop} and value ${value}`
+            };
+        }
+        return {
+            pass: true,
+            message: () => `Node contains item with property ${prop} and value ${value}`
+        };
+    },
+    toContainUse(received, value) {
+        if (getItemsOfType(received.items, 'Use').find(x => x['path'] === value)) {
+            return {
+                pass: true,
+                message: () => `Found 'Use' with value ${value}`
+            };
+        }
+        return {
+            pass: false,
+            message: () => `Did not find 'Use' with value ${value}`
+        }
+    },
+    toContainAnnotation(received, value) {
+        if (getItemsOfType(received.annotations, 'Annotation').find(x => x['value'] === value)) {
+            return {
+                pass: true,
+                message: () => `Found 'Annotation' with value ${value}`
+            };
+        }
+        return {
+            pass: false,
+            message: () => `Did not find 'Annotation' with value ${value}`
+        }
+    }
+});
+
+function getItemsOfType(received: Rust[], type: string) {
+    return received.filter(x => x.constructor.name === type);
+}
+
+function findItem<T extends Rust>(items: Rust[], prop: string, value: string) {
+    return items.find(x => x[prop] === value) as T;
+}
 
 describe('ast compiler', () => {
     it('compiles an empty contract with empty instantiate', () => {
         // arrange
-        const ast = cws`
-            contract CWTemplate {
-                instantiate() {}
-            }`;
+        const ast = new SourceFile(
+            undefined,
+            undefined,
+            new List(
+                undefined,
+                [new ContractDefn(
+                    undefined,
+                    undefined,
+                    new Ident(undefined, 'CWTemplate'),
+                    new List(undefined, [new InstantiateDefn(undefined, undefined, new Ident(undefined, 'instantiate'), new List(undefined, []), undefined, new List(undefined, []))]),
+                    undefined,
+                    undefined
+                )]
+            )
+        );
+        const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
 
         // act
-        const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
         const rust = codegen.generateContract('CWTemplate', '/dev/null');
 
         // assert
+
+        /*
+        
+        {
+            "codeGroup": [{
+                name: "msg",
+                uses:[
+                    { path: "schemars::JsonSchema" },
+                    { path: "serde::{Serialize, Deserialize}'" }
+                ],
+                structs: [
+                    {
+                        name: "InstantiateMsg",
+                        annotations: [
+                            { value: "derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)"}
+                        ]
+                    }
+                ]
+            }]
+        }
+        
+        
+        */
+
+        console.log(rust.toRustString())
+
+
+        // // -- begin contract CWTemplate
+        // pub mod types {  use schemars::JsonSchema;
+        // use serde::{Serialize, Deserialize}; }
+        const types = findItem<CodeGroup>(rust.items, 'name', 'types');
+        expect(types).toContainUse('schemars::JsonSchema');
+        expect(types).toContainUse('serde::{Serialize, Deserialize}');
+
+        // pub mod error { #[derive(thiserror::Error, Debug)] pub enum ContractError { #[error("{0}")] Std(#[from] cosmwasm_std::StdError) } }
+        const error = findItem<CodeGroup>(rust.items, 'name', 'error');
+        expect(error.items).toHaveLength(1);
+
+        // pub mod state {  }
+        const state = findItem<CodeGroup>(rust.items, 'name', 'state');
+        expect(state.items).toHaveLength(0);
+
+        // pub mod msg {  use schemars::JsonSchema;
+        // use serde::{Serialize, Deserialize};
         const msg = findItem<CodeGroup>(rust.items, 'name', 'msg');
-        expect(msg).toBeDefined();
-        expect(msg.items).toHaveLength(5);
+        expect(msg).toContainUse('schemars::JsonSchema');
+        expect(msg).toContainUse('serde::{Serialize, Deserialize}');
 
-        const msg_use1 = findItem<Defn.Use>(msg.items, 'path', 'schemars::JsonSchema');
-        expect(msg_use1).toBeDefined();
-        expect(msg_use1.annotations).toHaveLength(0);
-
-        const msg_use2 = findItem<Defn.Use>(msg.items, 'path', 'serde::{Serialize, Deserialize}');
-        expect(msg_use2).toBeDefined();
-        expect(msg_use2.annotations).toHaveLength(0);
-
+        // #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+        // pub struct InstantiateMsg {  }
         const msg_struct = findItem<Defn.Struct>(msg.items, 'name', 'InstantiateMsg');
-        expect(msg_struct).toBeDefined();
-        expect(msg_struct.members).toHaveLength(0);
-        expect(msg_struct.annotations).toHaveLength(1);
-        expectToFind<Annotation>(msg_struct.annotations, 'value', 'derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
+        expect(msg_struct).toContainAnnotation('derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
 
         const msg_executeMsg = findItem<Defn.Enum>(msg.items, 'name', 'ExecuteMsg');
-        expect(msg_executeMsg).toBeDefined();
-        expect(msg_executeMsg.annotations).toHaveLength(2);
-        expectToFind<Annotation>(msg_executeMsg.annotations, 'value', 'derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
-        expectToFind<Annotation>(msg_executeMsg.annotations, 'value', 'serde(rename_all = "snake_case")');
-        expect(msg_executeMsg.variants).toHaveLength(0);
+        expect(msg_executeMsg).toContainAnnotation('derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
+        expect(msg_executeMsg).toContainAnnotation('serde(rename_all = "snake_case")');
+
+        const msg_queryMsg = findItem<Defn.Enum>(msg.items, 'name', 'ExecuteMsg');
+        expect(msg_queryMsg).toContainAnnotation('derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
+        expect(msg_queryMsg).toContainAnnotation('serde(rename_all = "snake_case")');
 
         const contract = findItem<CodeGroup>(rust.items, 'name', 'contract');
-        expect(contract).toBeDefined();
-        expect(contract.items).toHaveLength(7);
+        expect(contract).toContainUse('crate::error::ContractError');
+        expect(contract.items.length).toBeGreaterThanOrEqual(7);
 
-        const contract_use1 = findItem<Defn.Use>(contract.items, 'path', 'crate::error::ContractError');
-        expect(contract_use1).toBeDefined();
-        expect(contract_use1.annotations).toHaveLength(0);
 
         const contract_use2 = findItem<Defn.Use>(contract.items, 'path', 'cosmwasm_std::entry_point');
-        expect(contract_use2).toBeDefined();
-        expect(contract_use2.annotations).toHaveLength(1);
-        expectToFind<Annotation>(contract_use2.annotations, 'value', 'cfg(not(feature = "library"))');
+        expect(contract_use2).toContainAnnotation('cfg(not(feature = "library"))');
 
-        const contract_use3 = findItem<Defn.Use>(contract.items, 'path', 'cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult}');
-        expect(contract_use3).toBeDefined();
-        expect(contract_use3.annotations).toHaveLength(0);
+        expect(contract).toContainUse('cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult}');
 
         const contract_instantiate = findItem<Defn.Function>(contract.items, 'name', 'instantiate');
-        expect(contract_instantiate).toBeDefined();
-        expectToFind<Annotation>(contract_instantiate.annotations, 'value', `cfg_attr(not(feature = "library"), entry_point)`);
+        expect(contract_instantiate).toContainAnnotation(`cfg_attr(not(feature = "library"), entry_point)`);
         expect(contract_instantiate.body).toBeDefined();
         expect(contract_instantiate.args).toBeDefined();
         expect(contract_instantiate.args).toHaveLength(4);
 
         const contract_instantiate_depsArg = contract_instantiate.args.find((x: FunctionArg) => x.name === '__deps');
-        expect(contract_instantiate_depsArg).toBeDefined();
         expect(contract_instantiate_depsArg.type.path).toBe('cosmwasm_std::DepsMut');
 
         const contract_instantiate_envArg = contract_instantiate.args.find((x: FunctionArg) => x.name === '__env');
-        expect(contract_instantiate_envArg).toBeDefined();
         expect(contract_instantiate_envArg.type.path).toBe('cosmwasm_std::Env');
 
         const contract_instantiate_infoArg = contract_instantiate.args.find((x: FunctionArg) => x.name === '__info');
-        expect(contract_instantiate_infoArg).toBeDefined();
         expect(contract_instantiate_infoArg.type.path).toBe('cosmwasm_std::MessageInfo');
 
         const contract_instantiate_msgArg = contract_instantiate.args.find((x: FunctionArg) => x.name === '__msg');
-        expect(contract_instantiate_msgArg).toBeDefined();
         expect(contract_instantiate_msgArg.type.path).toBe('crate::msg::InstantiateMsg');
 
         const contract_Instantiate_ReturnType = contract_instantiate.returnType;
-        expect(contract_Instantiate_ReturnType).toBeDefined();
         expect(contract_Instantiate_ReturnType.path).toBe('::std::result::Result');
-        expectToFind<Type>(contract_Instantiate_ReturnType.typeParams, 'path', 'cosmwasm_std::Response');
-        expectToFind<Type>(contract_Instantiate_ReturnType.typeParams, 'path', 'crate::error::ContractError');
+        expect(contract_Instantiate_ReturnType.typeParams).toContainRust('path', 'cosmwasm_std::Response');
+        expect(contract_Instantiate_ReturnType.typeParams).toContainRust('path', 'crate::error::ContractError');
 
         const contract_instantiate_fnCall = findItem<Expr.FnCall>(contract_instantiate.body, 'path', 'instantiate_impl');
         expect(contract_instantiate_fnCall).toBeDefined();
         expect(contract_instantiate_fnCall.typeParams).toHaveLength(0);
         expect(contract_instantiate_fnCall.args).toHaveLength(3);
-        expectToFind<Path>(contract_instantiate_fnCall.args, 'path', '__deps');
-        expectToFind<Path>(contract_instantiate_fnCall.args, 'path', '__env');
-        expectToFind<Path>(contract_instantiate_fnCall.args, 'path', '__info');
+        expect(contract_instantiate_fnCall.args).toContainRust('path', '__deps');
+        expect(contract_instantiate_fnCall.args).toContainRust('path', '__env');
+        expect(contract_instantiate_fnCall.args).toContainRust('path', '__info');
 
         const contract_instantiateImpl = findItem<Defn.Function>(contract.items, 'name', 'instantiate_impl');
         expect(contract_instantiateImpl).toBeDefined();
@@ -111,10 +193,6 @@ describe('ast compiler', () => {
         const contract_instantiateImpl_infoArg = contract_instantiateImpl.args.find((x: FunctionArg) => x.name === '__info');
         expect(contract_instantiateImpl_infoArg).toBeDefined();
         expect(contract_instantiateImpl_infoArg.type.path).toBe('cosmwasm_std::MessageInfo');
-
-        // ToDo: rest of instantiate_impl stuff
-
-        // ToDo: execute, query
     });
 
     it('compiles a contract with an execute message', () => {
@@ -160,8 +238,8 @@ describe('ast compiler', () => {
         const msg_executeMsg_bazStruct_queryMsg = findItem<Defn.Enum>(msg.items, 'name', 'QueryMsg');
         expect(msg_executeMsg_bazStruct_queryMsg).toBeDefined();
         expect(msg_executeMsg_bazStruct_queryMsg.annotations).toHaveLength(2);
-        expectToFind<Annotation>(msg_executeMsg_bazStruct_queryMsg.annotations, 'value', 'derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
-        expectToFind<Annotation>(msg_executeMsg_bazStruct_queryMsg.annotations, 'value', 'serde(rename_all = "snake_case")');
+        expect(msg_executeMsg_bazStruct_queryMsg.annotations).toContainRust('value', 'derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
+        expect(msg_executeMsg_bazStruct_queryMsg.annotations).toContainRust('value', 'serde(rename_all = "snake_case")');
         expect(msg_executeMsg_bazStruct_queryMsg.variants).toHaveLength(0);
 
         const contract = findItem<CodeGroup>(rust.items, 'name', 'contract');
@@ -170,7 +248,7 @@ describe('ast compiler', () => {
 
         const contract_execute = findItem<Defn.Function>(contract.items, 'name', 'execute');
         expect(contract_execute).toBeDefined();
-        expectToFind<Annotation>(contract_execute.annotations, 'value', `cfg_attr(not(feature = "library"), entry_point)`);
+        expect(contract_execute.annotations).toContainRust('value', `cfg_attr(not(feature = "library"), entry_point)`);
         expect(contract_execute.body).toBeDefined();
         expect(contract_execute.body).toHaveLength(1);
         expect(contract_execute.args).toBeDefined();
@@ -195,8 +273,8 @@ describe('ast compiler', () => {
         const contract_execute_ReturnType = contract_execute.returnType;
         expect(contract_execute_ReturnType).toBeDefined();
         expect(contract_execute_ReturnType.path).toBe('::std::result::Result');
-        expectToFind<Type>(contract_execute_ReturnType.typeParams, 'path', 'cosmwasm_std::Response');
-        expectToFind<Type>(contract_execute_ReturnType.typeParams, 'path', 'crate::error::ContractError');
+        expect(contract_execute_ReturnType.typeParams).toContainRust('path', 'cosmwasm_std::Response');
+        expect(contract_execute_ReturnType.typeParams).toContainRust('path', 'crate::error::ContractError');
 
         const contract_execute_match = contract_execute.body[0] as Expr.Match;
         expect(contract_execute_match).toBeDefined();
@@ -215,10 +293,10 @@ describe('ast compiler', () => {
         expect(contract_execute_match_pattern_expr.typeParams).toHaveLength(0);
         expect(contract_execute_match_pattern_expr.path).toBe('exec_baz');
         expect(contract_execute_match_pattern_expr.args).toHaveLength(4);
-        expectToFind<Path>(contract_execute_match_pattern_expr.args, 'path', '__deps');
-        expectToFind<Path>(contract_execute_match_pattern_expr.args, 'path', '__env');
-        expectToFind<Path>(contract_execute_match_pattern_expr.args, 'path', '__info');
-        expectToFind<Path>(contract_execute_match_pattern_expr.args, 'path', 'remote_contract');
+        expect(contract_execute_match_pattern_expr.args).toContainRust('path', '__deps');
+        expect(contract_execute_match_pattern_expr.args).toContainRust('path', '__env');
+        expect(contract_execute_match_pattern_expr.args).toContainRust('path', '__info');
+        expect(contract_execute_match_pattern_expr.args).toContainRust('path', 'remote_contract');
 
         const contract_execBaz = findItem<Defn.Function>(contract.items, 'name', 'exec_baz');
         expect(contract_execBaz).toBeDefined();
@@ -247,8 +325,8 @@ describe('ast compiler', () => {
         const contract_execBaz_ReturnType = contract_execBaz.returnType;
         expect(contract_execBaz_ReturnType).toBeDefined();
         expect(contract_execBaz_ReturnType.path).toBe('::std::result::Result');
-        expectToFind<Type>(contract_execBaz_ReturnType.typeParams, 'path', 'cosmwasm_std::Response');
-        expectToFind<Type>(contract_execBaz_ReturnType.typeParams, 'path', 'crate::error::ContractError');
+        expect(contract_execBaz_ReturnType.typeParams).toContainRust('path', 'cosmwasm_std::Response');
+        expect(contract_execBaz_ReturnType.typeParams).toContainRust('path', 'crate::error::ContractError');
 
         const contract_execBaz_EventsLet = findItem<Defn.Let>(contract_execBaz.body, 'ident', '__events');
         expect(contract_execBaz_EventsLet).toBeDefined();
@@ -272,13 +350,7 @@ describe('ast compiler', () => {
         // ...
         // Temp log statements
         console.log(contract_execBaz);
-     });
+    });
 
-    function findItem<T extends Rust>(items: Rust[], prop: string, value: string) {
-        return items.find(x => x[prop] === value) as T;
-    }
 
-    function expectToFind<T extends Rust>(items: Rust[], prop: string, value: string) {
-        expect(findItem<T>(items, prop, value)).toBeDefined();
-    }
 });
