@@ -47,35 +47,8 @@ export class AST2Rust {
   }
 
   resolveType(ty: AST.TypeExpr): Rust.Type {
-    if (ty instanceof AST.TypePath || ty instanceof AST.ParamzdTypeExpr) {
-      let x = this.env.scope.resolve(
-        [Subspace.TYPE, Subspace.ERROR, Subspace.EVENT],
-        ty.toString()
-      );
-
-      if (x === undefined) {
-        // TODO: this only works if the parametrized type is interface (which is the only one implemented)
-        // once actual parameterized types exist, this needs to change
-        x = this.env.scope.resolve(
-          [Subspace.TYPE, Subspace.ERROR, Subspace.EVENT],
-          (ty as AST.ParamzdTypeExpr).type.toString()
-        );
-      }
-
-      if (x === undefined) {
-        throw new Error(`type ${ty} could not be resolved`);
-      }
-
-      if (x instanceof UnresolvedType) {
-        let resolved = this.resolveType(x.ref);
-        if (resolved === undefined) {
-          throw new Error(`type ${ty} could not be resolved`);
-        }
-        x.postResolve(resolved);
-        return resolved;
-      }
-
-      return x as Rust.Type;
+    if (ty instanceof AST.AddrExpr) {
+      return new Rust.Type('cosmwasm_std::Addr');
     }
 
     if (ty instanceof AST.ShortVecTypeExpr) {
@@ -93,7 +66,6 @@ export class AST2Rust {
     ) {
       return C_TYPES.join(ty.name.text).toType();
     }
-
 
     throw new Error(`type ${ty.constructor.name} could not be resolved`);
   }
@@ -569,7 +541,7 @@ export class AST2Rust {
     const contract = this.intermediate.contracts.get(astMsg.nearestAncestorOfType(ContractDefn)!.name.text)!;
     const exec = contract.execs.find(e => e.name === astMsg.nearestAncestorOfType(ExecDefn)!.name!.text)!;
     const addr = exec.args.find(a => a.name === klass.text || a.type.name === 'Addr')!;
-    const contractInterface = this.intermediate.interfaces.get(addr.type.types[0])!;
+    const contractInterface = this.intermediate.interfaces.get(addr.type.name)!;
     const argDefs = contractInterface.execs.find(e => e.name === method.text)!.args;
 
     for (let i = 0; i < args.elements.length; i++) {

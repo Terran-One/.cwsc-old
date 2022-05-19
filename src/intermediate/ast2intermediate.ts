@@ -41,8 +41,8 @@ export class AST2Intermediate {
         });
     }
 
-    translateParamzdTypeExpr(pte: AST.ParamzdTypeExpr) {
-        return { name: pte.type.toString(), types: pte.params.map(x => x.toString()) };
+    translateAddrExpr(addr: AST.AddrExpr) {
+        return { name: addr.type.toString() };
     }
 
     translate(ast: AST.AST) {

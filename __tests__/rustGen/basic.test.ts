@@ -95,8 +95,6 @@ describe('ast compiler', () => {
         }
         */
 
-        console.log(rust.toRustString())
-
         // // -- begin contract CWTemplate
         // pub mod types {  use schemars::JsonSchema;
         // use serde::{Serialize, Deserialize}; }
@@ -201,7 +199,7 @@ describe('ast compiler', () => {
             contract CWTemplate {
                 instantiate() {}
 
-                exec baz(remote_contract: Addr<CW20>) {
+                exec baz(remote_contract: @CW20) {
                     execute! #remote_contract.mint("20", "LUNA")
                 }
             }`;
@@ -209,6 +207,7 @@ describe('ast compiler', () => {
         // act
         const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
         const rust = codegen.generateContract('CWTemplate', '/dev/null');
+        console.log(rust.toRustString())
 
         // assert
         const msg = findItem<CodeGroup>(rust.items, 'name', 'msg');
