@@ -1,4 +1,4 @@
-import { Annotation, CodeGroup, Defn, Expr, FunctionArg, MatchPattern, Path, Rust, Type, Val } from '../../src/rust';
+import { CodeGroup, Defn, Expr, FunctionArg, MatchPattern, Path, Rust, Type, Val } from '../../src/rust';
 import { cws } from '../../testHelpers/cws';
 import { CWScriptCodegen, Source } from '../../src/codegen/codegen';
 import { ContractDefn, Ident, InstantiateDefn, List, SourceFile } from '../../src/ast/nodes';
@@ -76,7 +76,6 @@ describe('ast compiler', () => {
         // assert
 
         /*
-        
         {
             "codeGroup": [{
                 name: "msg",
@@ -94,12 +93,9 @@ describe('ast compiler', () => {
                 ]
             }]
         }
-        
-        
         */
 
         console.log(rust.toRustString())
-
 
         // // -- begin contract CWTemplate
         // pub mod types {  use schemars::JsonSchema;
@@ -351,6 +347,4 @@ describe('ast compiler', () => {
         // Temp log statements
         console.log(contract_execBaz);
     });
-
-
 });

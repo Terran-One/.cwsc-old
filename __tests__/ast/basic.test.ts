@@ -212,7 +212,7 @@ describe("ast compiler", () => {
         // arrange
         const source = `
             contract CWTemplate {
-                exec baz(remote_contract: Addr) {}
+                exec baz(remote_contract: @CW20) {}
             }`;
 
         // act
@@ -222,11 +222,12 @@ describe("ast compiler", () => {
 
         // assert
         expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
-        expect(astAsList).toHaveLength(13);
+        expect(astAsList).toHaveLength(14);
 
         const [
             arg,
             argIdent,
+            addrExpr,
             argTypePath,
             argTypePathList,
             argTypeIdent,
@@ -236,6 +237,7 @@ describe("ast compiler", () => {
         // exec baz() {}
         expect(arg['$type']).toBe("FnArg");
         expect(argIdent['$type']).toBe("Ident");
+        expect(addrExpr['$type']).toBe("AddrExpr");
         expect(argTypePath['$type']).toBe("TypePath");
         expect(argTypePathList['$type']).toBe("List");
         expect(argTypeIdent['$type']).toBe("Ident");

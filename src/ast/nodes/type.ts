@@ -15,6 +15,7 @@ export type TypeExpr =
   | TupleTypeExpr
   | ShortOptionTypeExpr
   | ShortVecTypeExpr
+  | AddrExpr
   | RefTypeExpr
   | ReflectiveTypeExpr
   | StructDefn
@@ -63,6 +64,13 @@ export class ShortOptionTypeExpr extends AST {
 }
 
 export class ShortVecTypeExpr extends AST {
+  constructor(public ctx: any, public type: TypeExpr) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+export class AddrExpr extends AST {
   constructor(public ctx: any, public type: TypeExpr) {
     super(ctx);
     this.setParentForChildren();

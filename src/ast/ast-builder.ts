@@ -102,11 +102,12 @@ import {
   ExecuteNowStmtContext,
   MsgContext,
   ExprListContext,
+  AddrExprContext,
 } from '../grammar/CWScriptParser';
 import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import * as _ from 'lodash';
-import { AST, ExecuteNowStmt, ExprList, ForInStmt, List, Msg } from './nodes';
+import { AddrExpr, AST, ExecuteNowStmt, ExprList, ForInStmt, List, Msg } from './nodes';
 
 import {
   Expr,
@@ -277,6 +278,10 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
 
   visitShortVecTypeExpr(ctx: ShortVecTypeExprContext): ShortVecTypeExpr {
     return new ShortVecTypeExpr(ctx, this.visit(ctx.typeExpr()) as TypeExpr);
+  }
+
+  visitAddrExpr(ctx: AddrExprContext): AddrExpr {
+    return new AddrExpr(ctx, this.visit(ctx.typeExpr()) as TypeExpr);
   }
 
   visitRefTypeExpr(ctx: RefTypeExprContext): RefTypeExpr {

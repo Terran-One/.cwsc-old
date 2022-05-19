@@ -56,6 +56,7 @@ import { TupleTypeExprContext } from "./CWScriptParser";
 import { ShortOptionTypeExprContext } from "./CWScriptParser";
 import { ShortVecTypeExprContext } from "./CWScriptParser";
 import { RefTypeExprContext } from "./CWScriptParser";
+import { AddrExprContext } from "./CWScriptParser";
 import { TypeDefnExprContext } from "./CWScriptParser";
 import { LetStmtContext } from "./CWScriptParser";
 import { AssignStmtContext } from "./CWScriptParser";
@@ -851,6 +852,19 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRefTypeExpr?: (ctx: RefTypeExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `AddrExpr`
+	 * labeled alternative in `CWScriptParser.typeExpr`.
+	 * @param ctx the parse tree
+	 */
+	enterAddrExpr?: (ctx: AddrExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `AddrExpr`
+	 * labeled alternative in `CWScriptParser.typeExpr`.
+	 * @param ctx the parse tree
+	 */
+	exitAddrExpr?: (ctx: AddrExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `TypeDefnExpr`

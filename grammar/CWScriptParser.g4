@@ -162,6 +162,7 @@ typeExpr:
     | typeExpr QUEST                                                    # ShortOptionTypeExpr
     | typeExpr LBRACK RBRACK                                            # ShortVecTypeExpr
     | AMP typeExpr                                                      # RefTypeExpr
+    | AT typeExpr                                                       # AddrExpr
     | typeDefn                                                          # TypeDefnExpr;
 
 typeParam: LT typeExpr (COMMA typeExpr)* GT;
