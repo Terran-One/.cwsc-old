@@ -1,5 +1,5 @@
 import { AST } from '../../src';
-import { Ident, IdentLHS, LetStmt } from '../../src/ast/nodes';
+import { ContrExpr, Ident, IdentLHS, LetStmt } from '../../src/ast/nodes';
 import { ExecDefnBlockContext, ExprListContext, IdentContext, NormalFnBodyContext, StateDefnBlockContext } from '../../src/grammar/CWScriptParser';
 import { Parser } from '../../src/parser'
 
@@ -321,7 +321,7 @@ describe('ast compiler', () => {
         // arrange
         const source = `
             contract CWTemplate {
-                exec baz(remote_contract: Contract<CW20>, amount: String, denom: String) {
+                exec baz(remote_contract: @CW20, amount: String, denom: String) {
                     execute! #remote_contract.mint(amount, denom)
                 }
             }`;
@@ -333,7 +333,7 @@ describe('ast compiler', () => {
 
         // assert
         expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
-        expect(astAsList).toHaveLength(33);
+        expect(astAsList).toHaveLength(29);
 
         // ToDo: update test to cover @CW20
         const [
@@ -342,7 +342,7 @@ describe('ast compiler', () => {
             klassStmt,
             methodStmt,
             exprList,
-        ] = astAsList.slice(28);
+        ] = astAsList.slice(24);
 
         // exec baz(...) { execute! #remote_contract.mint(amount) }
         expect(exeuteNowStmt['$type']).toBe('ExecuteNowStmt');
@@ -391,11 +391,11 @@ describe('ast compiler', () => {
 
         // assert
         expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
-        expect(astAsList).toHaveLength(41);
+        expect(astAsList).toHaveLength(43);
 
         const [letStmt] = (astAsList as LetStmt[]).slice(32);
         expect(letStmt).toBeDefined();
         expect((letStmt.lhs as IdentLHS).name.text).toBe('contract');
-        expect((letStmt.rhs as Ident).text).toBe('remote_contract');
+        expect((letStmt.rhs as ContrExpr).expr.text).toBe('remote_contract');
     });
 });

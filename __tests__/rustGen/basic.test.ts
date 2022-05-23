@@ -345,7 +345,7 @@ describe('ast compiler', () => {
         // Temp log statements
     });
 
-    it.only('compiles a contract with an extracted call', () => {
+    it('compiles a contract with an extracted call', () => {
         // arrange
         const ast = cws`
             interface CW20 {
