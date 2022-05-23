@@ -207,7 +207,6 @@ describe('ast compiler', () => {
         // act
         const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
         const rust = codegen.generateContract('CWTemplate', '/dev/null');
-        console.log(rust.toRustString())
 
         // assert
         const msg = findItem<CodeGroup>(rust.items, 'name', 'msg');
@@ -344,6 +343,31 @@ describe('ast compiler', () => {
         // ...
         // ...
         // Temp log statements
-        console.log(contract_execBaz);
+    });
+
+    it.only('compiles a contract with an extracted call', () => {
+        // arrange
+        const ast = cws`
+            interface CW20 {
+                exec mint(amount: String, denom: String)
+            }
+
+            contract CWTemplate {
+                instantiate() {}
+
+                exec baz(remote_contract: String) {
+                    let contract = CW20@remote_contract
+                    execute! #contract.mint("20", "LUNA")
+                }
+            }`;
+
+        // act
+        const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
+        const rust = codegen.generateContract('CWTemplate', '/dev/null');
+
+        // assert
+        const msg = findItem<CodeGroup>(rust.items, 'name', 'msg');
+        expect(msg).toBeDefined();
+        expect(msg.items).toHaveLength(5);
     });
 });

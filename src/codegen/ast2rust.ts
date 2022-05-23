@@ -1,18 +1,14 @@
 import { AST2Intermediate } from '../intermediate/ast2intermediate';
 import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
-import { CodeGroup, Defn, Expr, Type, Val } from '../rust';
+import { Defn, Expr, Type, Val } from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
 import { Subspace } from '../symbol-table/scope';
 import {
   CW_STD,
   C_TYPES,
-  C_CONTRACT,
-  C_ERROR,
-  C_MSG,
-  C_EVENT,
-  C_STATE,
+  C_ERROR
 } from './helpers';
 import {
   buildModTypes,
@@ -21,8 +17,9 @@ import {
   buildModError,
   buildModContract,
 } from './module-builders';
-import { ContractDefn, ExecDecl, ExecDefn, ParamzdTypeExpr, TypePath } from '../ast/nodes';
+import { ContractDefn, ExecDefn, TypePath } from '../ast/nodes';
 import { TypeConversion } from '../rust/typeConversion';
+import { CWSCRIPT_STD } from '../symbol-table/std';
 
 export class UnresolvedType {
   constructor(public ref: AST.TypeExpr, public postResolve: (x: any) => any) {}
@@ -65,6 +62,13 @@ export class AST2Rust {
       ty instanceof AST.TypeAliasDefn
     ) {
       return C_TYPES.join(ty.name.text).toType();
+    }
+
+    if (ty instanceof TypePath && ty.paths.elements.length === 1) {
+      const type = CWSCRIPT_STD.type[ty.paths.elements[0].text] as Type;
+      if (type) {
+        return type;
+      }
     }
 
     throw new Error(`type ${ty.constructor.name} could not be resolved`);
@@ -527,6 +531,13 @@ export class AST2Rust {
     return res;
   }
 
+  translateContrExpr(astContrExpr: AST.ContrExpr): Rust.CodeGroup {
+    let res = new Rust.CodeGroup(astContrExpr.ctx.text);
+    let { contr, expr } = astContrExpr;
+
+    return res;
+  }
+
   translateMsg(astMsg: AST.Msg): Rust.CodeGroup {
     let res = new Rust.CodeGroup(astMsg.ctx.text);
     let { klass, method, args } = astMsg;
@@ -538,10 +549,14 @@ export class AST2Rust {
     let __tmp3 = String::from(__tmp2);
     */
     // ToDo: validation/error-handling
+    // ToDo: test with/implement for more complex expressions, e.g. inlined stuff
     const contract = this.intermediate.contracts.get(astMsg.nearestAncestorOfType(ContractDefn)!.name.text)!;
     const exec = contract.execs.find(e => e.name === astMsg.nearestAncestorOfType(ExecDefn)!.name!.text)!;
-    const addr = exec.args.find(a => a.name === klass.text || a.type.name === 'Addr')!;
-    const contractInterface = this.intermediate.interfaces.get(addr.type.name)!;
+
+    const addr =
+      exec.args.find(a => a.name === klass.text)?.type?.name ||
+      exec.contrs.find(c => c.ident.text === klass.text)!.inter!;
+    const contractInterface = this.intermediate.interfaces.get(addr)!;
     const argDefs = contractInterface.execs.find(e => e.name === method.text)!.args;
 
     for (let i = 0; i < args.elements.length; i++) {
