@@ -6,21 +6,24 @@ describe("ast compiler", () => {
       const source = `
       contract CWTemplate {
           exec baz(remote_contract: Addr) {
-            CWBase.foo(remote_contract);
+            add_to_balance(remote_contract, 1);
+          }
+
+          fn add_to_balance(recipient: Addr, amount: Uint128) {
+            let balance = state.balances[recipient];
+            state.balances[recipient] = balance + amount;
           }
       };
-      contract CWBase {
-        fn foo(bar: Addr) {
-          let a = bar;
-        }
-      }
       `;
 
       // act
       let parser = Parser.fromString(source);
       const ast = parser.buildAST();
       const astAsList = ast.descendants.map(desc => desc.toData());
-
       console.log(astAsList);
+
+      // assert
+      expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+      expect(astAsList).toHaveLength(50);
   });
 });

@@ -7,8 +7,12 @@ describe("ast compiler", () => {
         contract CWTemplate {
           exec mint(recipient: Addr, amount: Uint128) {
             let config = state.token_info
-            if (config.mint == None) or (config.mint.minter != msg.sender) {
-                fail Unauthorized 
+            if (config.mint == None) {
+                fail Unauthorized;
+            } else if (config.mint == Some(Mint(msg.sender, 0))) {
+                let mint = Mint(msg.sender, amount);
+            } else {
+                let mint = config.mint.value;
             }
           }
         };
@@ -19,7 +23,21 @@ describe("ast compiler", () => {
       const ast = parser.buildAST();
       const astAsList = ast.descendants.map(desc => desc.toData());
 
-      console.log(astAsList);
+      // assert
+      expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+      expect(astAsList).toHaveLength(71);
+
+      const [
+        ifExpr,
+        ifClause,
+        CompOpExpr,
+      ] = astAsList.slice(23);
+
+      expect(ifExpr["$type"]).toBe("IfExpr");
+
+      expect(ifClause["$type"]).toBe("IfClause");
+
+      expect(CompOpExpr["$type"]).toBe("CompOpExpr");
   });
 
   it("parses a FOR loop", () => {
@@ -41,6 +59,17 @@ describe("ast compiler", () => {
     const ast = parser.buildAST();
     const astAsList = ast.descendants.map(desc => desc.toData());
 
-    console.log(astAsList);
-});
+    const [
+      forInStmt,
+      structUnpackLHS
+    ] = astAsList.slice(36);
+
+    // assert
+    expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);
+    expect(astAsList).toHaveLength(52);
+
+    expect(forInStmt["$type"]).toBe("ForInStmt");
+
+    expect(structUnpackLHS["$type"]).toBe("StructUnpackLHS");
+  });
 });
