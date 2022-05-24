@@ -20,7 +20,6 @@ describe("ast compiler", () => {
       let parser = Parser.fromString(source);
       const ast = parser.buildAST();
       const astAsList = ast.descendants.map(desc => desc.toData());
-      console.log(astAsList);
 
       // assert
       expect(parser.antlrParser.numberOfSyntaxErrors).toBe(0);

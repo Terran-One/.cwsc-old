@@ -52,18 +52,49 @@ function findItem<T extends Rust>(items: Rust[], prop: string, value: string) {
 
 describe('ast compiler', () => {
     it.only('compiles an addition contract with empty instantiate', () => {
-      const ast = cws`
+        const ast = cws`
         contract CWTemplate {
-          instantiate() {}
+            instantiate() {}
 
-          exec add(a: u32, b: u32) {
+            exec add(a: u32, b: u32) {
             let foo = a + b;
-          }
+            }
         }`;
 
-      // act
-      const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
-      const rust = codegen.generateContract('CWTemplate', '/dev/null');
-    //   console.log(rust.toRustString());
+        // act
+        const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
+        const rust = codegen.generateContract('CWTemplate', '/dev/null');
+        console.log(rust.toRustString());
+
+        const types = findItem<CodeGroup>(rust.items, 'name', 'types');
+        expect(types).toContainUse('schemars::JsonSchema');
+        expect(types).toContainUse('serde::{Serialize, Deserialize}');
+
+        // pub mod error { #[derive(thiserror::Error, Debug)] pub enum ContractError { #[error("{0}")] Std(#[from] cosmwasm_std::StdError) } }
+        const error = findItem<CodeGroup>(rust.items, 'name', 'error');
+        expect(error.items).toHaveLength(1);
+
+        // pub mod state {  }
+        const state = findItem<CodeGroup>(rust.items, 'name', 'state');
+        expect(state.items).toHaveLength(0);
+
+        // pub mod msg {  use schemars::JsonSchema;
+        // use serde::{Serialize, Deserialize};
+        const msg = findItem<CodeGroup>(rust.items, 'name', 'msg');
+        expect(msg).toContainUse('schemars::JsonSchema');
+        expect(msg).toContainUse('serde::{Serialize, Deserialize}');
+
+        // #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+        // pub struct InstantiateMsg {  }
+        const msg_struct = findItem<Defn.Struct>(msg.items, 'name', 'InstantiateMsg');
+        expect(msg_struct).toContainAnnotation('derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
+
+        const msg_executeMsg = findItem<Defn.Enum>(msg.items, 'name', 'ExecuteMsg');
+        expect(msg_executeMsg).toContainAnnotation('derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
+        expect(msg_executeMsg).toContainAnnotation('serde(rename_all = "snake_case")');
+
+        const msg_queryMsg = findItem<Defn.Enum>(msg.items, 'name', 'ExecuteMsg');
+        expect(msg_queryMsg).toContainAnnotation('derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)');
+        expect(msg_queryMsg).toContainAnnotation('serde(rename_all = "snake_case")');
     });
 });
