@@ -1,0 +1,1 @@
+{"version":3,"file":"tool.js","sourceRoot":"","sources":["../../../src/cli/commands/tool.ts"],"names":[],"mappings":";;;AAAA,yCAAoC;AAEvB,QAAA,OAAO,GAAG,IAAI,mBAAO,CAAC,MAAM,CAAC,CAAC;AAE3C,aAAa;AACb,eAAO,CAAC,KAAK,CAAC,GAAG,CAAC,CAAC;AACnB,eAAO,CAAC,WAAW,CAAC,wCAAwC,CAAC,CAAC;AAC9D,eAAO,CAAC,QAAQ,CAAC,QAAQ,EAAE,8BAA8B,CAAC,CAAC;AAE3D,kBAAe,eAAO,CAAC"}
