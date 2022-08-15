@@ -1,12 +1,15 @@
 import * as AST from '../ast/nodes';
-import { ExecDefn } from '../ast/nodes';
+import { ContrExpr, ExecDecl, ExecDefn, Ident } from '../ast/nodes';
 
-type Type = { name: string, types: string[] };
-type Arg = { name: string, type: Type };
-type Exec = { name: string, args: Arg[] };
+type Contr = { ident: Ident, addr: Ident, inter: string };
+type Addr = { name: string };
+type Type = Addr & {types: string[] };
+type Arg = { name: string, option: boolean, type: Type };
+type ExecDec = { name: string, args: Arg[] };
+type ExecDef = { name: string, args: Arg[], contrs: Contr[] };
 
-export type Interface = { name: string, execs: Exec[] };
-export type Contract = { name: string, execs: Exec[] };
+export type Interface = { name: string, execs: ExecDef[] };
+export type Contract = { name: string, execs: ExecDef[] };
 
 export class AST2Intermediate {
     public interfaces = new Map<string, Interface>();
@@ -15,34 +18,39 @@ export class AST2Intermediate {
     translateInterface(iface: AST.InterfaceDefn) {
         this.interfaces.set(iface.name.text as string, {
             name: iface.name.text,
-            execs: iface.body.elements.filter(x => x.constructor.name == 'ExecDecl').map(x => this.translate(x))
+            execs: iface.body.descendantsOfType(ExecDecl).map(x => this.translate(x))
         } as Interface);
-    }
-
-    translateExecDecl(exec: AST.ExecDecl): any {
-        return { name: exec.name!.text, args: exec.args.elements.map(x => this.translate(x)) };
-    }
-
-    translateExecDefn(exec: AST.ExecDefn): any {
-        return { name: exec.name!.text, args: exec.args.elements.map(x => this.translate(x)) };
-    }
-    
-    translateFnArg(arg: AST.FnArg): any {
-        return { name: arg.name.text, option: arg.option, type: this.translate(arg.type) };
-    }
-
-    translateTypePath(type: AST.TypePath) {
-        return { name: type.toString() }
     }
 
     translateContractDefn(contract: AST.ContractDefn) {
         this.contracts.set(contract.name.text, {
-            name: contract.name.text, execs: contract.body.descendantsOfType(ExecDefn).map(x => this.translate(x) as Exec)
+            name: contract.name.text, execs: contract.body.descendantsOfType(ExecDefn).map(x => this.translate(x))
         });
     }
 
-    translateParamzdTypeExpr(pte: AST.ParamzdTypeExpr) {
-        return { name: pte.type.toString(), types: pte.params.map(x => x.toString()) };
+    translateExecDecl(exec: AST.ExecDecl): ExecDec {
+        return { name: exec.name!.text, args: exec.args.elements.map(x => this.translate(x)) };
+    }
+
+    translateExecDefn(exec: AST.ExecDefn): ExecDef {
+        const lets = exec.body.elements.filter(e => e instanceof AST.LetStmt).filter(e => e.rhs instanceof ContrExpr);
+        return {
+          name: exec.name!.text,
+          args: exec.args.elements.map(x => this.translate(x)),
+          contrs: lets.map(l => ({ ident: l.lhs.name, addr: l.rhs.expr, inter: l.rhs.contr.text }))
+        };
+    }
+    
+    translateFnArg(arg: AST.FnArg): Arg {
+        return { name: arg.name.text, option: arg.option, type: this.translate(arg.type) };
+    }
+
+    translateTypePath(type: AST.TypePath): Type {
+        return { name: type.toString(), types: type.paths.map(p => p.text) }
+    }
+
+    translateAddrExpr(addr: AST.AddrExpr): Addr {
+        return { name: addr.type.toString() };
     }
 
     translate(ast: AST.AST) {

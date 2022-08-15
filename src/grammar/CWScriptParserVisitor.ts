@@ -50,12 +50,14 @@ import { OrExprContext } from "./CWScriptParser";
 import { IfExprContext } from "./CWScriptParser";
 import { QueryExprContext } from "./CWScriptParser";
 import { ValExprContext } from "./CWScriptParser";
+import { ContrExprContext } from "./CWScriptParser";
 import { TypePathExprContext } from "./CWScriptParser";
 import { ParamzdTypeExprContext } from "./CWScriptParser";
 import { TupleTypeExprContext } from "./CWScriptParser";
 import { ShortOptionTypeExprContext } from "./CWScriptParser";
 import { ShortVecTypeExprContext } from "./CWScriptParser";
 import { RefTypeExprContext } from "./CWScriptParser";
+import { AddrExprContext } from "./CWScriptParser";
 import { TypeDefnExprContext } from "./CWScriptParser";
 import { LetStmtContext } from "./CWScriptParser";
 import { AssignStmtContext } from "./CWScriptParser";
@@ -543,6 +545,14 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	visitValExpr?: (ctx: ValExprContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by the `ContrExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitContrExpr?: (ctx: ContrExprContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by the `TypePathExpr`
 	 * labeled alternative in `CWScriptParser.typeExpr`.
 	 * @param ctx the parse tree
@@ -589,6 +599,14 @@ export interface CWScriptParserVisitor<Result> extends ParseTreeVisitor<Result> 
 	 * @return the visitor result
 	 */
 	visitRefTypeExpr?: (ctx: RefTypeExprContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by the `AddrExpr`
+	 * labeled alternative in `CWScriptParser.typeExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAddrExpr?: (ctx: AddrExprContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by the `TypeDefnExpr`

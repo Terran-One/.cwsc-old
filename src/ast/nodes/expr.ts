@@ -4,6 +4,14 @@ import { AST, List, TypePath } from './';
 export type Expr = any;
 
 //@Node()
+export class ContrExpr extends AST {
+  constructor(public ctx: any, public contr: Ident, public expr: Expr) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
 export class Msg extends AST {
   constructor(public ctx: any, public klass: Ident, public method: Ident, public args: ExprList) {
     super(ctx);

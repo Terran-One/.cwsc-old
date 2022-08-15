@@ -1,4 +1,4 @@
-import { Annotation, CodeGroup, Defn, Expr, FunctionArg, MatchPattern, Path, Rust, Type, Val } from '../../src/rust';
+import { CodeGroup, Defn, Expr, FunctionArg, MatchPattern, Path, Rust, Type, Val } from '../../src/rust';
 import { cws } from '../../testHelpers/cws';
 import { CWScriptCodegen, Source } from '../../src/codegen/codegen';
 import { ContractDefn, Ident, InstantiateDefn, List, SourceFile } from '../../src/ast/nodes';
@@ -76,7 +76,6 @@ describe('ast compiler', () => {
         // assert
 
         /*
-        
         {
             "codeGroup": [{
                 name: "msg",
@@ -94,12 +93,7 @@ describe('ast compiler', () => {
                 ]
             }]
         }
-        
-        
         */
-
-        console.log(rust.toRustString())
-
 
         // // -- begin contract CWTemplate
         // pub mod types {  use schemars::JsonSchema;
@@ -205,7 +199,7 @@ describe('ast compiler', () => {
             contract CWTemplate {
                 instantiate() {}
 
-                exec baz(remote_contract: Addr<CW20>) {
+                exec baz(remote_contract: @CW20) {
                     execute! #remote_contract.mint("20", "LUNA")
                 }
             }`;
@@ -349,8 +343,31 @@ describe('ast compiler', () => {
         // ...
         // ...
         // Temp log statements
-        console.log(contract_execBaz);
     });
 
+    it('compiles a contract with an extracted call', () => {
+        // arrange
+        const ast = cws`
+            interface CW20 {
+                exec mint(amount: String, denom: String)
+            }
 
+            contract CWTemplate {
+                instantiate() {}
+
+                exec baz(remote_contract: String) {
+                    let contract = CW20@remote_contract
+                    execute! #contract.mint("20", "LUNA")
+                }
+            }`;
+
+        // act
+        const codegen = new CWScriptCodegen([{ file: '/dev/null', ast }]);
+        const rust = codegen.generateContract('CWTemplate', '/dev/null');
+
+        // assert
+        const msg = findItem<CodeGroup>(rust.items, 'name', 'msg');
+        expect(msg).toBeDefined();
+        expect(msg.items).toHaveLength(5);
+    });
 });
