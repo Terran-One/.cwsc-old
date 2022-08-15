@@ -12,6 +12,9 @@ npm install -g cwsc
 
 This installs the `cwsc` command line tool in your `$PATH`.
 
+## Run Tests
+`yarn test`
+
 ## Usage
 
 ## License

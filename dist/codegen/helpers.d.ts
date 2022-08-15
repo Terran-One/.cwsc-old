@@ -1,0 +1,10 @@
+import * as Rust from '../rust';
+export declare const CW_STD: Rust.Path;
+export declare const CW_STORAGE_PLUS: Rust.Path;
+export declare const CRATE: Rust.Path;
+export declare const C_STATE: Rust.Path;
+export declare const C_MSG: Rust.Path;
+export declare const C_ERROR: Rust.Path;
+export declare const C_EVENT: Rust.Path;
+export declare const C_CONTRACT: Rust.Path;
+export declare const C_TYPES: Rust.Path;
