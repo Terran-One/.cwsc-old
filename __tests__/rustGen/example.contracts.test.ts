@@ -6,6 +6,13 @@ describe('ast compiler', () => {
         // arrange
         const ast = cws`
             contract NoughtsAndCrosses {
+                state {
+                    owner: Addr,
+                    opponent: Option<Addr>,
+                    turn: Addr,
+                    board: String
+                }
+
                 exec {
                     register_player() {}
                     turn(x: u8, y: u8) {}
