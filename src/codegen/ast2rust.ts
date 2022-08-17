@@ -664,7 +664,12 @@ export class AST2Rust {
     this.env.enterScope(name);
 
     let contractScope = this.env.scope;
-    // first get all the type definitions
+
+    // add common usings
+    res.add(new Rust.Defn.Use([], 'schemars::JsonSchema'));
+    res.add(new Rust.Defn.Use([], 'serde::{Serialize, Deserialize}'));
+
+    // get all the type definitions
     let typedefns = [
       ...contract.descendantsOfType(AST.StructDefn),
       ...contract.descendantsOfType(AST.EnumDefn),

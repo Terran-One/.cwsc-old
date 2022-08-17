@@ -1,6 +1,6 @@
 import * as AST from '../../ast/nodes';
 import * as Rust from '../../rust';
-import { Annotation, Defn } from '../../rust';
+import { Annotation, Defn, DERIVE_ANNOTATION } from '../../rust';
 import { AST2Rust } from '../ast2rust';
 
 export function buildStructState(
@@ -11,7 +11,7 @@ export function buildStructState(
 
   let members: Defn.StructMember[] = [];
   let struct = new Rust.Defn.Struct(
-    [new Annotation('derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)')],
+    [DERIVE_ANNOTATION],
     Rust.STRUCT,
     'State',
     members
