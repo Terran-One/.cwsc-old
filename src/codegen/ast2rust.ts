@@ -17,7 +17,7 @@ import {
   buildModError,
   buildModContract,
 } from './module-builders';
-import { ContractDefn, ExecDefn, TypePath } from '../ast/nodes';
+import { ContractDefn, ExecDefn, ParamzdTypeExpr, TypePath } from '../ast/nodes';
 import { TypeConversion } from '../rust/typeConversion';
 import { CWSCRIPT_STD } from '../symbol-table/std';
 
@@ -68,6 +68,17 @@ export class AST2Rust {
       const type = CWSCRIPT_STD.type[ty.paths.elements[0].text] as Type;
       if (type) {
         return type;
+      }
+    }
+
+    if (ty instanceof ParamzdTypeExpr && ty.type instanceof TypePath && ty.params.elements[0] instanceof TypePath) {
+      const inner = CWSCRIPT_STD.type[ty.params.elements[0].paths.elements[0].text] as Type;
+      if (inner) {
+        switch (ty.type.paths.elements[0].text) {
+          case 'Option':
+            return new Rust.Type.Option(inner);
+          // ToDo: what else do we handle?
+        }
       }
     }
 
