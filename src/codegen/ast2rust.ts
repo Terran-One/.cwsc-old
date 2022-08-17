@@ -13,7 +13,7 @@ import {
 import {
   buildModTypes,
   buildModMsg,
-  buildStructState,
+  buildStateStruct,
   buildModError,
   buildModContract,
 } from './module-builders';
@@ -714,7 +714,12 @@ export class AST2Rust {
       contractScope.define(Subspace.STATE, s.key.text, s);
     });
 
-    res.add(buildStructState(this, state));
+    res.add(buildStateStruct(this, state));
+    res.add(new Rust.Defn.Const(
+      'STRUCT',
+      new Type.Item(new Type.State()),
+      new Type.Item().fnCall('new', [new Rust.Val.StrLiteral('"state"')])
+    ))
 
     let instantiate = contract.descendantsOfType(AST.InstantiateDefn)[0];
     let exec = contract.descendantsOfType(AST.ExecDefn);

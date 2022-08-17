@@ -44,10 +44,10 @@ export class Type implements Rust {
   fnCall(fnName: string, args: any, typeParams: Type[] = []): Expr.FnCall {
     let fn_tps = '';
     if (typeParams.length > 0) {
-      fn_tps = `::<${typeParams.map((x) => x.toRustString()).join(', ')}>`;
+      fn_tps = `::<${typeParams.map((x) => x.toRustString()).join(', ')}>`; // ToDo: is this the right syntax? Do we need the preceding '::'?
     }
     return new Expr.FnCall(
-      `<${this.toRustString()}>::${fnName}${fn_tps}`,
+      `${this.toRustString()}::${fnName}${fn_tps}`,
       args
     );
   }
@@ -85,6 +85,18 @@ export namespace Type {
   export class Option extends Type {
     constructor(public inner: Type) {
       super('::std::option::Option', [inner]);
+    }
+  }
+
+  export class Item extends Type {
+    constructor(public inner: Type|undefined = undefined) {
+      super('cw_storage_plus::Item', inner ? [inner] : []);
+    }
+  }
+
+  export class State extends Type {
+    constructor() {
+      super('State');
     }
   }
 

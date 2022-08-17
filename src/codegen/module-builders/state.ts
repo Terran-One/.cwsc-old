@@ -1,9 +1,9 @@
 import * as AST from '../../ast/nodes';
 import * as Rust from '../../rust';
-import { Annotation, Defn, DERIVE_ANNOTATION } from '../../rust';
+import { Defn, DERIVE_ANNOTATION } from '../../rust';
 import { AST2Rust } from '../ast2rust';
 
-export function buildStructState(
+export function buildStateStruct(
   ast2rust: AST2Rust,
   state: AST.StateDefn[]
 ): Rust.Defn.Struct {
