@@ -245,6 +245,7 @@ expr:
     | expr LBRACK expr COMMA RBRACK             # TableLookupExpr
     | expr LPAREN (exprList)? RPAREN            # PosArgsFnCallExpr
     | expr LPAREN (namedExprList)? RPAREN       # NamedArgsFnCallExpr
+    | ident LBRACE (namedExprList)? RBRACE      # StructExpr
     | op = (PLUS | MINUS | EXCLAM) expr         # UnaryExpr
     | expr POW expr                             # ExpExpr
     | expr op = (MUL | DIV | MOD) expr          # MultDivModExpr

@@ -6,6 +6,8 @@ describe('ast compiler', () => {
         // arrange
         const ast = cws`
             contract NoughtsAndCrosses {
+                instantiate() {}
+
                 state {
                     owner: Addr,
                     opponent: Option<Addr>,
@@ -21,11 +23,13 @@ describe('ast compiler', () => {
 
                 query {
                     get_game_state() -> struct GetGameStateResponse { owner: Addr, opponent: Option<Addr>, winner: Option<Addr>, board: String } {
-                        
+                        return GetGameStateResponse {
+                            owner: state.owner,
+                            opponent: state.opponent,
+                            board: state.board
+                        }
                     }
                 }
-
-                instantiate() {}
             }`;
 
         // act

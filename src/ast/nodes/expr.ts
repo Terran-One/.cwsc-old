@@ -75,6 +75,14 @@ export class PosArgsFnCallExpr extends AST {
 }
 
 //@Node()
+export class StructExpr extends AST {
+  constructor(public ctx: any, public struct: Ident, public args: List<NamedExpr>) {
+    super(ctx);
+    this.setParentForChildren();
+  }
+}
+
+//@Node()
 export class NamedArgsFnCallExpr extends AST {
   constructor(public ctx: any, public fn: Expr, public args: List<NamedExpr>) {
     super(ctx);

@@ -39,6 +39,7 @@ import { MemberAccessExprContext } from "./CWScriptParser";
 import { TableLookupExprContext } from "./CWScriptParser";
 import { PosArgsFnCallExprContext } from "./CWScriptParser";
 import { NamedArgsFnCallExprContext } from "./CWScriptParser";
+import { StructExprContext } from "./CWScriptParser";
 import { UnaryExprContext } from "./CWScriptParser";
 import { ExpExprContext } from "./CWScriptParser";
 import { MultDivModExprContext } from "./CWScriptParser";
@@ -632,6 +633,19 @@ export interface CWScriptParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitNamedArgsFnCallExpr?: (ctx: NamedArgsFnCallExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by the `StructExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 */
+	enterStructExpr?: (ctx: StructExprContext) => void;
+	/**
+	 * Exit a parse tree produced by the `StructExpr`
+	 * labeled alternative in `CWScriptParser.expr`.
+	 * @param ctx the parse tree
+	 */
+	exitStructExpr?: (ctx: StructExprContext) => void;
 
 	/**
 	 * Enter a parse tree produced by the `UnaryExpr`

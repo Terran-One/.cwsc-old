@@ -1,7 +1,7 @@
 import { AST2Intermediate } from '../intermediate/ast2intermediate';
 import * as AST from '../ast/nodes';
 import * as Rust from '../rust';
-import { Defn, Expr, Type, Val } from '../rust';
+import { Defn, Expr, Path, Type, Val } from '../rust';
 
 import { CWScriptEnv } from '../symbol-table/env';
 import { Subspace } from '../symbol-table/scope';
@@ -20,6 +20,7 @@ import {
 import { ContractDefn, ExecDefn, ParamzdTypeExpr, TypePath } from '../ast/nodes';
 import { TypeConversion } from '../rust/typeConversion';
 import { CWSCRIPT_STD } from '../symbol-table/std';
+import { CWScriptSymbol } from 'symbol-table/symbols';
 
 export class UnresolvedType {
   constructor(public ref: AST.TypeExpr, public postResolve: (x: any) => any) {}
@@ -81,7 +82,7 @@ export class AST2Rust {
         }
       }
     }
-
+console.log(ty)
     throw new Error(`type ${ty.constructor.name} could not be resolved`);
   }
 
@@ -405,15 +406,22 @@ export class AST2Rust {
   translateStateItemAccessExpr(x: AST.StateItemAccessExpr): Rust.CodeGroup {
     let { key } = x;
     let res = new Rust.CodeGroup(x.ctx.text);
-    let deps = new Rust.Expr.Path('__deps');
-    res.add(
-      this.letVar(
-        false,
-        new Rust.Expr.FnCall(`crate::state::${key.text.toUpperCase()}.load`, [
-          deps.dot('storage'),
-        ]).q()
-      )
-    );
+
+    let stateTmpVar = this.env.scope.resolve(null, 'state') as Expr.Path;
+    if (!stateTmpVar) {
+      let deps = new Rust.Expr.Path('__deps');
+      let stateExpr = new Rust.Expr.FnCall(`STATE.load`, [deps.dot('storage')]).q()
+      res.add(this.letVar(false, stateExpr));
+
+      let tmpVar = this.lastTmpVar();
+      this.env.scope.define(Subspace.LOCAL, 'state', tmpVar);
+
+      res.add(this.letVar(false, this.lastTmpVar().dot('clone()').dot(key.text)));
+    } else {
+      res.add(this.letVar(false, new Expr.Path(stateTmpVar.path).dot('clone()')));
+      res.add(this.letVar(false, this.lastTmpVar().dot(key.text)));
+    }
+
     return res;
   }
 
@@ -527,7 +535,7 @@ export class AST2Rust {
       true,
       responseVar1.toRustString(),
       undefined,
-      new Expr.InstantiateStruct("Response")));
+      new Expr.InstantiateStructWithCtor("Response")));
 
     const responseVar2 = this.getTmpVar();
     res.add(new Defn.Let(
@@ -546,6 +554,23 @@ export class AST2Rust {
     let res = new Rust.CodeGroup(astContrExpr.ctx.text);
     let { contr, expr } = astContrExpr;
 
+    return res;
+  }
+
+  translateStructExpr(astStructExpr: AST.StructExpr): Rust.CodeGroup {
+    let res = new Rust.CodeGroup(astStructExpr.ctx.text);
+
+    let tmpVars: [string, Expr.Path][] = []
+    for (let namedExpr of astStructExpr.args.elements) {
+      res.add(this.translate(namedExpr.value))
+      tmpVars.push([namedExpr.name.text, this.lastTmpVar()]);
+    }
+
+    let struct = new Expr.InstantiateStructWithArgsList(
+      astStructExpr.struct.text,
+      tmpVars.map(x => new Expr.NamedExpr(x[0], x[1])));
+
+    res.add(this.letVar(true, struct));
     return res;
   }
 
@@ -709,14 +734,10 @@ export class AST2Rust {
       ...contract.descendantsOfType(AST.MapDefn),
     ];
 
-    // TODO: register state
-    state.forEach(s => {
-      contractScope.define(Subspace.STATE, s.key.text, s);
-    });
-
+    // register state
     res.add(buildStateStruct(this, state));
     res.add(new Rust.Defn.Const(
-      'STRUCT',
+      'STATE',
       new Type.Item(new Type.State()),
       new Type.Item().fnCall('new', [new Rust.Val.StrLiteral('"state"')])
     ))

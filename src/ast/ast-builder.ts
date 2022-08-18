@@ -104,11 +104,12 @@ import {
   ExprListContext,
   AddrExprContext,
   ContrExprContext,
+  StructExprContext,
 } from '../grammar/CWScriptParser';
 import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import * as _ from 'lodash';
-import { AddrExpr, AST, ContrExpr, ExecuteNowStmt, ExprList, ForInStmt, List, Msg } from './nodes';
+import { AddrExpr, AST, ContrExpr, ExecuteNowStmt, ExprList, ForInStmt, List, Msg, StructExpr } from './nodes';
 
 import {
   Expr,
@@ -793,6 +794,13 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   visitUnaryExpr(ctx: UnaryExprContext): UnaryExpr {
     let expr = this.visit(ctx.expr());
     return new UnaryExpr(ctx, ctx._op.text as string, expr);
+  }
+
+  visitStructExpr(ctx: StructExprContext): StructExpr {
+    let ident = this.visitIdent(ctx.ident());
+    let exprs = ctx.namedExprList();
+    let args = exprs?.namedExpr() || [];
+    return new StructExpr(ctx, ident, new List(exprs, args.map(x => this.visitNamedExpr(x))));
   }
 
   visitPosArgsFnCallExpr(ctx: PosArgsFnCallExprContext): PosArgsFnCallExpr {

@@ -134,7 +134,7 @@ export namespace Expr {
     }
   }
 
-  export class InstantiateStruct extends Expr {
+  export class InstantiateStructWithCtor extends Expr {
     constructor(
       public path: string,
       public args: any[] = [],
@@ -145,6 +145,20 @@ export namespace Expr {
 
     toRustString(): string {
       return `${this.path}::new(${this.args.map(x => x.toRustString()).join(', ')})`;
+    }
+  }
+
+  export class InstantiateStructWithArgsList extends Expr {
+    constructor(
+      public path: string,
+      public args: NamedExpr[] = [],
+      public typeParams: Type[] = []
+    ) {
+      super();
+    }
+
+    toRustString(): string {
+      return `${this.path}{${this.args.map(x => x.toRustString()).join(', ')}}`;
     }
   }
 
@@ -172,6 +186,16 @@ export namespace Expr {
 
     toRustString(): string {
       return this.path;
+    }
+  }
+
+  export class NamedExpr extends Expr {
+    constructor(public name: string, public value: Expr) {
+      super();
+    }
+
+    toRustString(): string {
+      return `${this.name}: ${this.value.toRustString()}`;
     }
   }
 
