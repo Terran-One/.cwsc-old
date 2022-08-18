@@ -360,13 +360,29 @@ console.log(ty)
 
   translateLetStmt(stmt: AST.LetStmt): Rust.CodeGroup {
     let res = new Rust.CodeGroup(stmt.ctx.text);
-    let rhs = res.add(this.translate(stmt.rhs));
+
+    res.add(this.translate(stmt.rhs));
     let v_rhs = this.lastTmpVar();
 
     if (stmt.lhs instanceof AST.IdentLHS) {
       this.env.scope.define(Subspace.LOCAL, stmt.lhs.name.text, v_rhs);
     }
 
+    return res;
+  }
+
+  translatePosArgsFnCallExpr(astExpr: AST.PosArgsFnCallExpr): Rust.CodeGroup {
+    let res = new Rust.CodeGroup(astExpr.ctx.text);
+
+    let tmpVars: Expr.Path[] = [];
+    for (let element of astExpr.args.elements) {
+      res.add(this.translate(element));
+      tmpVars.push(this.lastTmpVar());
+    }
+
+    let fnCall = new Expr.FnCall(astExpr.fn.text, tmpVars);
+
+    res.add(this.letVar(false, fnCall));
     return res;
   }
 

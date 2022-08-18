@@ -804,7 +804,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   }
 
   visitPosArgsFnCallExpr(ctx: PosArgsFnCallExprContext): PosArgsFnCallExpr {
-    let fn = this.visit(ctx.expr());
+    let fn = this.visit(ctx.ident());
     let args = ctx.exprList()?.expr() || [];
     return new PosArgsFnCallExpr(
       ctx,

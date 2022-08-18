@@ -26,9 +26,14 @@ describe('ast compiler', () => {
                         return GetGameStateResponse {
                             owner: state.owner,
                             opponent: state.opponent,
-                            board: state.board
+                            board: state.board,
+                            winner: check_win()
                         }
                     }
+                }
+
+                fn check_win() -> Option<Addr> {
+                    
                 }
             }`;
 

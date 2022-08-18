@@ -243,7 +243,7 @@ expr:
     )* RBRACK                                   # StateMapAccessExpr
     | expr DOT ident                            # MemberAccessExpr
     | expr LBRACK expr COMMA RBRACK             # TableLookupExpr
-    | expr LPAREN (exprList)? RPAREN            # PosArgsFnCallExpr
+    | ident LPAREN (exprList)? RPAREN           # PosArgsFnCallExpr
     | expr LPAREN (namedExprList)? RPAREN       # NamedArgsFnCallExpr
     | ident LBRACE (namedExprList)? RBRACE      # StructExpr
     | op = (PLUS | MINUS | EXCLAM) expr         # UnaryExpr
