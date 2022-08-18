@@ -163,7 +163,7 @@ export namespace Defn {
       public annotations: Annotation[],
       public name: string,
       public args: FunctionArg[],
-      public returnType: Type,
+      public returnType?: Type,
       public body: Rust[] = []
     ) {
       super(annotations);
@@ -180,12 +180,13 @@ export namespace Defn {
     }
 
     toRustString(): string {
+      let returnType = this.returnType ? `-> ${this.returnType.toRustString()}` : '';
       return this.withAnnotations(
         `pub fn ${this.name}(${this.args
           .map(x => x.toRustString())
           .join(
             ', '
-          )}) -> ${this.returnType.toRustString()} { ${this.body
+          )}) ${returnType} { ${this.body
           .map(x => x.toRustString())
           .join('\n')} }`
       );

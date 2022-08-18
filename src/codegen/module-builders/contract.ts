@@ -8,7 +8,8 @@ export function buildModContract(
   ast2rust: AST2Rust,
   i: AST.InstantiateDefn,
   e: AST.ExecDefn[],
-  q: AST.QueryDefn[]
+  q: AST.QueryDefn[],
+  f: AST.FuncDefn[]
 ): Rust.Defn.Module {
   let module = new Rust.Defn.Module('contract');
   module.addItem(
@@ -128,6 +129,10 @@ export function buildModContract(
 
   q.forEach(x => {
     module.addItem(ast2rust.translateQueryDefn(x));
+  });
+
+  f.forEach(x => {
+    module.addItem(ast2rust.translateFuncDefn(x));
   });
 
   return module;

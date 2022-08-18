@@ -82,7 +82,7 @@ export class AST2Rust {
         }
       }
     }
-console.log(ty)
+
     throw new Error(`type ${ty.constructor.name} could not be resolved`);
   }
 
@@ -318,6 +318,42 @@ console.log(ty)
     this.env.exitScope();
 
     return query;
+  }
+
+  translateFuncDefn(fn: AST.FuncDefn): Rust.Defn.Function {
+    const fnScope = this.env.enterScope(`${fn.name!.text}`);
+    let func = new Rust.Defn.Function(
+      [],
+      `${fn.name!.text}`,
+      [
+        ...fn.args.map(
+          (a) =>
+            new Rust.FunctionArg(
+              [],
+              a.name.text,
+              a.option
+                ? this.resolveType(a.type).option()
+                : this.resolveType(a.type)
+            )
+        ),
+      ],
+      fn.returnType ? new Path(fn.returnType.toString()).toType() : undefined
+    );
+
+    fn.args.elements.forEach((a) => {
+      let { name } = a;
+      let arg = new Rust.Expr.Path(`${name.text}`);
+      fnScope.define(Subspace.LOCAL, name.text, arg);
+    });
+
+    // add body elements
+    fn.body.elements.forEach((stmt) => {
+      func.addBody(this.translate(stmt));
+    });
+
+    this.env.exitScope();
+
+    return func;
   }
 
   stateItemSet(key: string, value: Rust.Expr): Rust.CodeGroup {
@@ -761,9 +797,10 @@ console.log(ty)
     let instantiate = contract.descendantsOfType(AST.InstantiateDefn)[0];
     let exec = contract.descendantsOfType(AST.ExecDefn);
     let query = contract.descendantsOfType(AST.QueryDefn);
+    let func = contract.descendantsOfType(AST.FuncDefn);
 
     res.add(buildModMsg(this, instantiate, exec, query));
-    res.add(buildModContract(this, instantiate, exec, query));
+    res.add(buildModContract(this, instantiate, exec, query, func));
 
     this.env.exitScope();
     return res;

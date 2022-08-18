@@ -109,7 +109,7 @@ import {
 import { CWScriptParserVisitor } from '../grammar/CWScriptParserVisitor';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import * as _ from 'lodash';
-import { AddrExpr, AST, ContrExpr, ExecuteNowStmt, ExprList, ForInStmt, List, Msg, StructExpr } from './nodes';
+import { AddrExpr, AST, ContrExpr, ExecuteNowStmt, ExprList, ForInStmt, FuncDefn, List, Msg, StructExpr } from './nodes';
 
 import {
   Expr,
@@ -534,10 +534,10 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
       : new List<Stmt>(ctx.stmt(), []);
   }
 
-  visitFnDefn(ctx: FnDefnContext): FnDefn {
+  visitFnDefn(ctx: FnDefnContext): FuncDefn {
     let fn = ctx.namedFnDefn();
     let fnType = fn.fnType();
-    return new ExecDefn(
+    return new FuncDefn(
       ctx,
       ctx._spec ? this.visitCwspec(ctx._spec) : undefined,
       this.visitIdent(fn._fnName),
@@ -933,7 +933,7 @@ export class CWScriptASTVisitor extends AbstractParseTreeVisitor<AST>
   }
 
   visitMsg(ctx: MsgContext): Msg {
-    return new Msg(ctx, this.visit(ctx.expr()), this.visit(ctx.ident()) as Ident, this.visit(ctx.exprList()) as ExprList);
+    return new Msg(ctx, this.visit(ctx.expr().text), this.visit(ctx.ident()) as Ident, this.visit(ctx.exprList()) as ExprList);
   }
 
   visitExprList(ctx: ExprListContext): ExprList {

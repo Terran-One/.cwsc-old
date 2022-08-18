@@ -1,9 +1,10 @@
 import * as AST from '../ast/nodes';
-import { ContrExpr, ExecDecl, ExecDefn, Ident } from '../ast/nodes';
+import { ContrExpr, ExecDecl, ExecDefn, Ident, ShortVecTypeExpr, VecVal } from '../ast/nodes';
 
 type Contr = { ident: Ident, addr: Ident, inter: string };
 type Addr = { name: string };
 type Type = Addr & {types: string[] };
+type Vec = { type: string };
 type Arg = { name: string, option: boolean, type: Type };
 type ExecDec = { name: string, args: Arg[] };
 type ExecDef = { name: string, args: Arg[], contrs: Contr[] };
@@ -51,6 +52,10 @@ export class AST2Intermediate {
 
     translateAddrExpr(addr: AST.AddrExpr): Addr {
         return { name: addr.type.toString() };
+    }
+
+    translateShortVecTypeExpr(vec: AST.ShortVecTypeExpr): Vec {
+        return { type: vec.type.toString() };
     }
 
     translate(ast: AST.AST) {

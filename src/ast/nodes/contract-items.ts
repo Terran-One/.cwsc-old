@@ -57,6 +57,8 @@ export type ContractItem =
   | List<ExecDefn>
   | QueryDefn
   | List<QueryDefn>
+  | FuncDefn
+  | List<FuncDefn>
   | MigrateDefn;
 
 export class ErrorDefn extends StructDefn {}
@@ -118,6 +120,10 @@ export class ExecDefn extends FnDefn {}
 //@Node()
 export class QueryDefn extends FnDefn {}
 
+//@Node()
+export class FuncDefn extends FnDefn {}
+
+//@Node()
 export class MigrateDefn extends FnDefn {}
 
 export class FnDecl extends AST {

@@ -47,6 +47,10 @@ export class ParamzdTypeExpr extends AST {
     super(ctx);
     this.setParentForChildren();
   }
+
+  public toString(): string {
+    return `${this.type.toString()}<${this.params.map(p => p.toString()).join(',')}>`;
+  }
 }
 
 export class TupleTypeExpr extends AST {
@@ -90,6 +94,7 @@ export class ReflectiveTypeExpr extends AST {
     this.setParentForChildren();
   }
 }
+
 export class StructDefn extends AST {
   constructor(
     public ctx: any,
@@ -102,7 +107,7 @@ export class StructDefn extends AST {
   }
 
   public toString(): string {
-    return `${this.name.text}`;
+    return this.name.text;
   }
 
   // public toRust(env: CWScriptEnv, context?: CodegenCtx): Rust.Rust {
