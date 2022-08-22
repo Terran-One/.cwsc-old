@@ -1,3 +1,6 @@
+# [Obsolete]
+See https://github.com/Terran-One/cwsc.ts for the current version
+
 # `cwsc`: The CWScript Compiler
 
 This repository contains the source code for `cwsc`, the standard reference implementation compiler for CWScript. `cwsc` is written in TypeScript and requires Node.js v16 or later.
